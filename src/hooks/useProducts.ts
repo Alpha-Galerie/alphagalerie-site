@@ -21,7 +21,7 @@ async function fetchProducts(
   // Optimized query: removed FK join (not used), using estimated count for speed
   let query = supabase
     .from('produtos')
-    .select('id,nome,marca,preco,preco_pix,categoria_id,subcategoria,estoque,ativo,destaque,imagem_url,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em),categorias!produtos_categoria_id_fkey(*)', { count: 'estimated' })
+    .select('id,nome,marca,preco,preco_pix,categoria_id,subcategoria,estoque,ativo,destaque,imagem_url,descricao,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em),categorias!produtos_categoria_id_fkey(*)', { count: 'estimated' })
     .eq('ativo', true)
     .order('destaque', { ascending: false })
     .order('id')

@@ -80,6 +80,12 @@ const ProductCard: FC<ProductCardProps> = ({ produto, onAddToCart, onOpenVariaco
           </Link>
         </h3>
 
+        {produto.descricao && (
+          <p className={styles.productDescription}>
+            {produto.descricao}
+          </p>
+        )}
+
         <div className={styles.productPrice}>
           {produto.preco_pix ? (
             <>
