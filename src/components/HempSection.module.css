@@ -134,3 +134,8 @@
   .section { padding: 56px 16px; }
   .cta { width: 100%; justify-content: center; }
 }
+
+@media (min-width: 1200px) {
+  .section { padding: 44px 24px; }
+  .inner { max-width: 720px; }
+}

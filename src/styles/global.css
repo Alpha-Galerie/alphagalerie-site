@@ -147,7 +147,8 @@ button {
 }
 
 /* Very small phones: fall back to single column only on very narrow screens (<=320px) */
-@media (max-width: 320px) {
+/* Small phones: single column on narrow screens (<=480px) */
+@media (max-width: 480px) {
   .products-grid-responsive {
     grid-template-columns: repeat(1, 1fr) !important;
     gap: 10px !important;
@@ -163,8 +164,27 @@ button {
 
 @media (min-width: 768px) {
   .products-grid-responsive {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
     gap: 24px !important;
+  }
+}
+
+/* Large desktop: prefer wider cards */
+@media (min-width: 1200px) {
+  .products-grid-responsive {
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)) !important;
+    gap: 20px !important;
+  }
+}
+
+/* Products section padding control: default preserved, reduced on large screens */
+.products-section {
+  padding: 48px 24px 60px;
+}
+
+@media (min-width: 1200px) {
+  .products-section {
+    padding: 16px 24px 24px;
   }
 }
 

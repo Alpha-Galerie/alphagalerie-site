@@ -172,3 +172,9 @@
   .metaNum { font-size: 32px; }
   .metaLabel { font-size: 9px; }
 }
+
+@media (min-width: 1200px) {
+  .hero { padding: 24px 0 32px; }
+  .inner { padding: 0 16px; }
+  .lead { margin-bottom: 28px; }
+}
