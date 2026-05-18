@@ -169,10 +169,10 @@ button {
   }
 }
 
-/* Large desktop: prefer wider cards */
-@media (min-width: 1200px) {
+/* Large desktop: prefer four compact cards per row */
+@media (min-width: 860px) {
   .products-grid-responsive {
-    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     gap: 20px !important;
   }
 }
@@ -182,7 +182,7 @@ button {
   padding: 48px 24px 60px;
 }
 
-@media (min-width: 1200px) {
+@media (min-width: 860px) {
   .products-section {
     padding: 16px 24px 24px;
   }
