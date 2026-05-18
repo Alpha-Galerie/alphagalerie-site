@@ -1,6 +1,8 @@
 import type { FC } from 'react';
+import { Link } from 'react-router-dom';
 import type { Produto } from '../types';
 import { formatCurrency } from '../lib/format';
+import { buildProductPath } from '../lib/productPath';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
@@ -29,6 +31,7 @@ const PlaceholderIcon: FC = () => (
 const ProductCard: FC<ProductCardProps> = ({ produto, onAddToCart, onOpenVariacoes }) => {
   const esgotado = produto.estoque !== null && produto.estoque === 0;
   const temVariacoes = produto._variacoes && produto._variacoes.length > 0;
+  const productPath = buildProductPath(produto);
 
   const handleCta = () => {
     if (esgotado) return;
@@ -41,7 +44,8 @@ const ProductCard: FC<ProductCardProps> = ({ produto, onAddToCart, onOpenVariaco
 
   return (
     <article className={`${styles.product}${esgotado ? ` ${styles.esgotado}` : ''}`}>
-      <div className={styles.imageWrapper}>
+      <Link to={productPath} className={styles.imageLink} aria-label={`Ver detalhes de ${produto.nome}`}>
+        <div className={styles.imageWrapper}>
         {produto.imagem_url ? (
           <img
             src={produto.imagem_url}
@@ -65,11 +69,16 @@ const ProductCard: FC<ProductCardProps> = ({ produto, onAddToCart, onOpenVariaco
             <span className={`${styles.badge} ${styles.badgeEsgotado}`}>Esgotado</span>
           )}
         </div>
-      </div>
+        </div>
+      </Link>
 
       <div className={styles.productInfo}>
         <p className={styles.productMarca}>{produto.marca}</p>
-        <h3 className={styles.productName}>{produto.nome}</h3>
+        <h3 className={styles.productName}>
+          <Link to={productPath} className={styles.nameLink}>
+            {produto.nome}
+          </Link>
+        </h3>
 
         <div className={styles.productPrice}>
           {produto.preco_pix ? (

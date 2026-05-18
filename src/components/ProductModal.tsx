@@ -1,11 +1,11 @@
 // src/components/ProductModal.tsx
 import { useEffect, useRef, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../lib/supabase';
 import { useCartStore } from '../store/cart';
 import { useToastStore } from '../store/toast';
 import { formatCurrency } from '../lib/format';
 import type { Produto, Variacao } from '../types';
+import { useProduct } from '../hooks/useProduct';
+import { buildProductPath } from '../lib/productPath';
 import VariacoesModal from './VariacoesModal';
 
 interface ProductModalProps {
@@ -16,34 +16,13 @@ interface ProductModalProps {
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
-async function fetchProduto(id: number): Promise<Produto> {
-  const { data, error } = await supabase
-    .from('produtos')
-    .select('*, categorias(*), variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em)')
-    .eq('id', id)
-    .single();
-  if (error) throw error;
-
-  const variacoes = ((data as { variacoes?: Variacao[] }).variacoes ?? [])
-    .filter((variacao) => variacao.ativo)
-    .slice()
-    .sort((a, b) => a.ordem - b.ordem);
-
-  return { ...data, _variacoes: variacoes } as Produto;
-}
-
 export default function ProductModal({ produtoId, onClose }: ProductModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const [showVariacoes, setShowVariacoes] = useState(false);
   const addItem = useCartStore((s) => s.addItem);
   const showToast = useToastStore((s) => s.showToast);
 
-  const { data: produto, isLoading } = useQuery({
-    queryKey: ['produto', produtoId],
-    queryFn: () => fetchProduto(produtoId!),
-    enabled: !!produtoId,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data: produto, isLoading } = useProduct(produtoId);
 
   useEffect(() => {
     if (!produtoId) return;
@@ -77,7 +56,9 @@ export default function ProductModal({ produtoId, onClose }: ProductModalProps) 
 
   if (!produtoId) return null;
 
-  const shareUrl = `${window.location.origin}/?p=${produtoId}`;
+  const shareUrl = produto
+    ? `${globalThis.location.origin}${buildProductPath(produto)}`
+    : `${globalThis.location.origin}/?p=${produtoId}`;
 
   async function handleShare() {
     if (navigator.share && produto) {

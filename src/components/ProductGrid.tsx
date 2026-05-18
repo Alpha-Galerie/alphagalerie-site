@@ -139,7 +139,8 @@ export default function ProductGrid({
   return (
     <section
       id="produtos"
-      style={{ padding: '48px 24px 60px', maxWidth: 1320, margin: '0 auto' }}
+      className="products-section"
+      style={{ maxWidth: 1320, margin: '0 auto' }}
       aria-label="Produtos"
     >
       {/* Filtro de categorias */}
