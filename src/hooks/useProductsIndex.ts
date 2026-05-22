@@ -8,27 +8,20 @@ export interface ProductIndex {
   id: number;
   nome: string;
   marca: string | null;
-  preco: number;
-  preco_pix: number | null;
   categoria_id: number;
   subcategoria: string | null;
-  estoque: number | null;
-  imagem_url: string | null;
-  _variacoes: [];
   _categoria_nome?: string;
 }
 
 async function fetchProductsIndex(): Promise<ProductIndex[]> {
   const { data, error } = await supabase
     .from('produtos')
-    .select('id,nome,marca,preco,preco_pix,categoria_id,subcategoria,estoque,imagem_url')
+    .select('id,nome,marca,categoria_id,subcategoria')
     .eq('ativo', true)
-    .order('destaque', { ascending: false })
-    .order('id')
-    .limit(500);
+    .limit(1000);
 
   if (error) throw new Error(error.message);
-  return ((data ?? []) as unknown as ProductIndex[]).map((p) => ({ ...p, _variacoes: [] }));
+  return data ?? [];
 }
 
 export function useProductsIndex() {
