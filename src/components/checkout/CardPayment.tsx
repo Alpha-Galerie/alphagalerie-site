@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { supabase } from '../../lib/supabase';
 
 interface CardPaymentProps {
   amount: number;
@@ -24,7 +25,26 @@ export default function CardPayment({ mp, onTokenReceived, onError: _onError }: 
   const [holderName, setHolderName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [paymentMethodId, setPaymentMethodId] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
+
+  async function handleCardNumberChange(value: string) {
+    const masked = maskCardNumber(value);
+    setCardNumber(masked);
+    const digits = masked.replace(/\s/g, '');
+    if (digits.length >= 6) {
+      try {
+        const { data } = await supabase.functions.invoke('get-payment-method', {
+          body: { bin: digits.slice(0, 8) },
+        });
+        if (data?.payment_method_id) {
+          setPaymentMethodId(data.payment_method_id);
+        }
+      } catch {
+        // Silencia erro — fallback para credit_card
+      }
+    }
+  }
 
   const fieldStyle: React.CSSProperties = {
     width: '100%', padding: '10px 14px',
@@ -57,7 +77,7 @@ export default function CardPayment({ mp, onTokenReceived, onError: _onError }: 
         cardExpirationYear: '20' + expirationYear,
         securityCode: cvv,
       });
-      onTokenReceived(token.id, token.payment_method_id ?? '');
+      onTokenReceived(token.id, paymentMethodId || 'credit_card');
     } catch (err: unknown) {
       console.error('[MP] createCardToken error:', err);
       setError('Dados do cartão inválidos. Verifique e tente novamente.');
@@ -74,7 +94,7 @@ export default function CardPayment({ mp, onTokenReceived, onError: _onError }: 
           type="text" inputMode="numeric" autoComplete="cc-number"
           placeholder="0000 0000 0000 0000" required
           value={cardNumber}
-          onChange={(e) => setCardNumber(maskCardNumber(e.target.value))}
+          onChange={(e) => handleCardNumberChange(e.target.value)}
           style={fieldStyle}
         />
       </div>
