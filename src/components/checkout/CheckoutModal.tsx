@@ -11,6 +11,7 @@ import CardPayment from './CardPayment';
 import { formatCurrency as fmt } from '../../lib/format';
 import styles from './CheckoutModal.module.css';
 import { supabase } from '../../lib/supabase';
+import { checkoutProvider } from '../../lib/checkout';
 
 class CardErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -277,6 +278,30 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     if (pagamento === 'pix') {
       setStep('pix');
     } else if (pagamento === 'cartao') {
+      // Checkout PRO: redireciona para página do Mercado Pago
+      if (checkoutProvider.mode === 'pro') {
+        setCardProcessing(true);
+        const pedido_id = String(result.pedido?.id ?? pedidoId ?? '');
+        const checkoutResult = await checkoutProvider.startCheckout({
+          pedido_id,
+          items: items.map(i => ({
+            title: i.nome,
+            quantity: i.qtd,
+            unit_price: i.preco,
+          })),
+          total,
+          email: email || undefined,
+        });
+        setCardProcessing(false);
+
+        if (checkoutResult.error) {
+          setSubmitError(checkoutResult.error);
+        }
+        // Se sucesso, o redirect já aconteceu
+        return;
+      }
+
+      // Fluxo transparente (existente)
       try {
         const mp = await loadMercadoPago();
         setMpInstance(mp);
