@@ -9,4 +9,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.ts'],
   },
+  server: {
+    allowedHosts: ['palaeanthropic-mycelial-eugena.ngrok-free.dev'],
+  }
 })
