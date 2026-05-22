@@ -2,22 +2,22 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
 async function fetchSubcategories(categoryId: number | null): Promise<string[]> {
-  if (categoryId === null) return [];
-
-  const { data, error } = await supabase
+  let query = supabase
     .from('produtos')
     .select('subcategoria')
     .eq('ativo', true)
-    .eq('categoria_id', categoryId)
     .not('subcategoria', 'is', null);
 
+  if (categoryId !== null) {
+    query = query.eq('categoria_id', categoryId);
+  }
+
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
 
-  const unique = Array.from(
+  return Array.from(
     new Set((data ?? []).map((r) => r.subcategoria as string))
-  ).sort();
-
-  return unique;
+  ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
 
 export function useSubcategories(categoryId: number | null) {
@@ -25,6 +25,5 @@ export function useSubcategories(categoryId: number | null) {
     queryKey: ['subcategorias', categoryId],
     queryFn: () => fetchSubcategories(categoryId),
     staleTime: 10 * 60 * 1000,
-    enabled: categoryId !== null,
   });
 }
