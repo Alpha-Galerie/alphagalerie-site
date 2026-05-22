@@ -1,7 +1,10 @@
 // src/components/ProductGrid.tsx
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useCategories } from '../hooks/useCategories';
+import { useSubcategories } from '../hooks/useSubcategories';
 import { useProducts } from '../hooks/useProducts';
+import { useProductsFuse } from '../hooks/useProductsIndex';
+import type { ProductIndex } from '../hooks/useProductsIndex';
 import { useCartStore } from '../store/cart';
 import { useToastStore } from '../store/toast';
 import type { Produto, Variacao } from '../types';
@@ -57,40 +60,50 @@ export default function ProductGrid({
   const [activeSubcat, setActiveSubcat] = useState<string | null>(initialSubcat);
   const [page, setPage] = useState(0);
   const [variacoesTarget, setVariacoesTarget] = useState<Produto | null>(null);
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Reset page when filters change
-  useEffect(() => { setPage(0); setActiveSubcat(null); }, [categoryId]);
-  useEffect(() => { setPage(0); }, [search]);
+  useEffect(() => { setPage(0); setActiveSubcat(null); setSearchInput(''); setSearch(''); }, [categoryId]);
+  useEffect(() => { setPage(0); }, [search, activeSubcat]);
 
-  // Debounce search input → server-side search
+  const { data: categorias = [] } = useCategories();
+  const { data: subcategorias = [] } = useSubcategories(categoryId);
+  const fuse = useProductsFuse(categoryId);
+
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
     setSearchInput(val);
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    searchTimer.current = setTimeout(() => setSearch(val), 350);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    // Only go to server if Fuse has no results for this query
+    const fuseHits = val.trim() ? fuse.search(val.trim()) : [];
+    if (fuseHits.length === 0) {
+      debounceRef.current = setTimeout(() => setSearch(val), 400);
+    }
   }
 
-  const { data, isLoading, isFetching } = useProducts(categoryId, page, search);
-  const { data: categorias = [] } = useCategories();
+  const extraCategoryIds = useMemo(() =>
+    categoryId === null && search.trim().length > 0
+      ? categorias
+          .filter((c) => c.nome.toLowerCase().includes(search.trim().toLowerCase()))
+          .map((c) => c.id)
+      : []
+  , [categoryId, search, categorias]);
+
+  const { data, isLoading, isFetching } = useProducts(categoryId, page, search, activeSubcat, extraCategoryIds);
   const addItem = useCartStore((s) => s.addItem);
   const showToast = useToastStore((s) => s.showToast);
 
-  const produtos = data?.produtos ?? [];
+  const serverProdutos = data?.produtos ?? [];
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  // Client-side subcategory filter (within the current page)
-  const subcategorias = useMemo(() => {
-    const set = new Set<string>();
-    produtos.forEach((p) => { if (p.subcategoria) set.add(p.subcategoria); });
-    return Array.from(set).sort();
-  }, [produtos]);
-
-  const filtered = useMemo(() => {
-    if (!activeSubcat) return produtos;
-    return produtos.filter((p) => p.subcategoria === activeSubcat);
-  }, [produtos, activeSubcat]);
+  const produtos = useMemo((): Produto[] => {
+    const q = searchInput.trim();
+    if (!q) return serverProdutos;
+    const fuseHits = fuse.search(q).map((r) => r.item) as unknown as Produto[];
+    if (fuseHits.length > 0) return fuseHits;
+    // Fuse had no hits — fall back to server results
+    return serverProdutos;
+  }, [fuse, searchInput, serverProdutos]);
 
   function handleAddToCart(produto: Produto) {
     addItem(produto);
@@ -179,7 +192,7 @@ export default function ProductGrid({
         ))}
       </div>
 
-      {/* Filtro de subcategorias (client-side, apenas da página atual) */}
+      {/* Filtro de subcategorias (server-side, todas da categoria) */}
       {subcategorias.length > 0 && (
         <div
           className="filter-scroll"
@@ -219,7 +232,7 @@ export default function ProductGrid({
         </div>
       )}
 
-      {/* Campo de busca (server-side, debounced) */}
+      {/* Campo de busca (server-side, debounced) — inclui categoria no placeholder */}
       <div style={{ position: 'relative', marginBottom: 32, maxWidth: 400 }}>
         <svg
           style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#555', pointerEvents: 'none' }}
@@ -233,7 +246,7 @@ export default function ProductGrid({
         <input
           id="product-search"
           type="search"
-          placeholder="Buscar por nome ou marca..."
+          placeholder="Buscar por categoria, nome ou marca..."
           value={searchInput}
           onChange={handleSearchChange}
           style={{
@@ -268,7 +281,7 @@ export default function ProductGrid({
         >
           {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : produtos.length === 0 ? (
         <div role="status" style={{ gridColumn: '1/-1', textAlign: 'center', padding: '80px 24px', color: '#888', fontFamily: "'Cormorant Garamond', serif", fontStyle: 'italic', fontSize: 22 }}>
           Nenhum produto encontrado.
         </div>
@@ -282,7 +295,7 @@ export default function ProductGrid({
             transition: 'opacity 0.15s',
           }}
         >
-          {filtered.map((produto) => (
+          {produtos.map((produto) => (
             <ProductCard
               key={produto.id}
               produto={produto}
@@ -318,7 +331,6 @@ export default function ProductGrid({
           </button>
 
           {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
-            // Show first, last and pages around current
             const pageNum = totalPages <= 7 ? i : (
               i === 0 ? 0 :
               i === 6 ? totalPages - 1 :
