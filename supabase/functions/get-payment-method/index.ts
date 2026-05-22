@@ -1,5 +1,3 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -50,7 +48,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ payment_method_id }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
-  } catch (err) {
+  } catch {
     return new Response(
       JSON.stringify({ error: 'Erro interno.' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
