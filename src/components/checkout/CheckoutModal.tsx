@@ -10,6 +10,7 @@ import PixPayment from './PixPayment';
 import CardPayment from './CardPayment';
 import { formatCurrency as fmt } from '../../lib/format';
 import styles from './CheckoutModal.module.css';
+import { supabase } from '../../lib/supabase';
 
 class CardErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -30,10 +31,10 @@ class CardErrorBoundary extends Component<{ children: ReactNode }, { hasError: b
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function CardPaymentSafe(props: { amount: number; mp: any; onTokenReceived: () => void }) {
+function CardPaymentSafe(props: { amount: number; mp: any; onTokenReceived: (token: string, paymentMethodId: string) => void; onError?: (msg: string) => void }) {
   return (
     <CardErrorBoundary>
-      <CardPayment amount={props.amount} mp={props.mp} onTokenReceived={props.onTokenReceived} />
+      <CardPayment amount={props.amount} mp={props.mp} onTokenReceived={props.onTokenReceived} onError={props.onError} />
     </CardErrorBoundary>
   );
 }
@@ -72,6 +73,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
 
   const [step, setStep] = useState<Step>('form');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cardProcessing, setCardProcessing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [pedidoId, setPedidoId] = useState<number | null>(null);
   const [txid, setTxid] = useState('');
@@ -201,6 +203,18 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     }
   }
 
+  function getMpErrorMessage(reason: string): string {
+    const messages: Record<string, string> = {
+      cc_rejected_insufficient_amount: 'Saldo insuficiente no cartão.',
+      cc_rejected_bad_filled_card_number: 'Número do cartão inválido.',
+      cc_rejected_bad_filled_date: 'Data de validade inválida.',
+      cc_rejected_bad_filled_security_code: 'CVV inválido.',
+      cc_rejected_blacklist: 'Cartão não autorizado. Tente outro cartão.',
+      cc_rejected_call_for_authorize: 'Cartão requer autorização do banco. Entre em contato com seu banco.',
+    }
+    return messages[reason] ?? 'Pagamento recusado. Verifique os dados ou tente outro cartão.'
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSubmitError(null);
@@ -220,6 +234,11 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     }
     if (entrega === 'delivery' && !endereco.trim()) {
       setSubmitError('Por favor, informe o endereço de entrega.');
+      return;
+    }
+
+    if (pagamento === 'cartao' && !email.trim()) {
+      setSubmitError('Informe seu e-mail para pagamento por cartão.');
       return;
     }
 
@@ -528,7 +547,41 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
             <div className={styles.body}>
               <h3 className={styles.headTitle} style={{ marginBottom: 8 }}>Pagamento com <em>Cartão</em></h3>
               <p className={styles.headSub} style={{ marginBottom: 20 }}>Total: {fmt(displayTotal)}</p>
-              <CardPaymentSafe amount={displayTotal} mp={mpInstance} onTokenReceived={() => { setStep('success'); }} />
+              {submitError && (
+                <p style={{ color: '#ef4444', fontFamily: "'JetBrains Mono', monospace", fontSize: 11, marginBottom: 12 }}>
+                  {submitError}
+                </p>
+              )}
+              {cardProcessing ? (
+                <p style={{ textAlign: 'center', color: '#c9a961', fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: '0.1em', padding: '32px 0' }}>
+                  Processando pagamento...
+                </p>
+              ) : (
+                <CardPaymentSafe
+                  amount={displayTotal}
+                  mp={mpInstance}
+                  onTokenReceived={async (token: string, paymentMethodId: string) => {
+                    if (!pedidoId) return;
+                    setCardProcessing(true);
+                    setSubmitError(null);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('process-card-payment', {
+                        body: { token, pedido_id: pedidoId, payment_method_id: paymentMethodId },
+                      });
+                      if (error) throw error;
+                      if (data?.success) {
+                        setStep('success');
+                      } else {
+                        setSubmitError(getMpErrorMessage(data?.reason ?? ''));
+                      }
+                    } catch {
+                      setSubmitError('Erro ao processar pagamento. Tente novamente.');
+                    } finally {
+                      setCardProcessing(false);
+                    }
+                  }}
+                />
+              )}
             </div>
           </>
         )}

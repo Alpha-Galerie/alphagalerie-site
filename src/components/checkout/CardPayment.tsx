@@ -5,6 +5,7 @@ interface CardPaymentProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   mp: any;
   onTokenReceived: (token: string, paymentMethodId: string) => void;
+  onError?: (msg: string) => void;
 }
 
 function maskCardNumber(v: string) {
@@ -16,7 +17,7 @@ function maskExpiry(v: string) {
   return d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d;
 }
 
-export default function CardPayment({ mp, onTokenReceived }: CardPaymentProps) {
+export default function CardPayment({ mp, onTokenReceived, onError: _onError }: CardPaymentProps) {
   const [cardNumber, setCardNumber] = useState('');
   const [expiry, setExpiry] = useState('');
   const [cvv, setCvv] = useState('');
