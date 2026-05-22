@@ -66,7 +66,7 @@ export default function ProductGrid({
 
   const { data: categorias = [] } = useCategories();
   const { data: subcategorias = [] } = useSubcategories(categoryId);
-  const fuse = useProductsFuse(categoryId);
+  const fuse = useProductsFuse(categoryId, categorias);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;

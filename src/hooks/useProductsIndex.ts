@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import Fuse, { type IFuseOptions } from 'fuse.js';
 import { useMemo } from 'react';
 import { supabase } from '../lib/supabase';
+import type { Categoria } from '../types';
 
 export interface ProductIndex {
   id: number;
@@ -13,14 +14,15 @@ export interface ProductIndex {
   subcategoria: string | null;
   estoque: number | null;
   imagem_url: string | null;
-  categorias: { id: number; nome: string; slug: string; ordem: number; ativo: boolean } | null;
   _variacoes: [];
+  // enriched client-side — not from DB
+  _categoria_nome?: string;
 }
 
 async function fetchProductsIndex(): Promise<ProductIndex[]> {
   const { data, error } = await supabase
     .from('produtos')
-    .select('id,nome,marca,preco,preco_pix,categoria_id,subcategoria,estoque,imagem_url,categorias!produtos_categoria_id_fkey(id,nome,slug,ordem,ativo)')
+    .select('id,nome,marca,preco,preco_pix,categoria_id,subcategoria,estoque,imagem_url')
     .eq('ativo', true)
     .order('destaque', { ascending: false })
     .order('id')
@@ -43,7 +45,7 @@ const FUSE_OPTIONS: IFuseOptions<ProductIndex> = {
   keys: [
     { name: 'nome', weight: 2 },
     { name: 'marca', weight: 1.5 },
-    { name: 'categorias.nome', weight: 1 },
+    { name: '_categoria_nome', weight: 1 },
     { name: 'subcategoria', weight: 1 },
   ],
   threshold: 0.35,
@@ -52,13 +54,16 @@ const FUSE_OPTIONS: IFuseOptions<ProductIndex> = {
   includeScore: false,
 };
 
-export function useProductsFuse(categoryId: number | null) {
+export function useProductsFuse(categoryId: number | null, categorias: Categoria[]) {
   const { data: index = [] } = useProductsIndex();
 
-  const scopedIndex = useMemo(
-    () => categoryId === null ? index : index.filter((p) => p.categoria_id === categoryId),
-    [index, categoryId]
-  );
+  const scopedIndex = useMemo(() => {
+    const catMap = new Map(categorias.map((c) => [c.id, c.nome]));
+    const scoped = categoryId === null
+      ? index
+      : index.filter((p) => p.categoria_id === categoryId);
+    return scoped.map((p) => ({ ...p, _categoria_nome: catMap.get(p.categoria_id) }));
+  }, [index, categoryId, categorias]);
 
   return useMemo(() => new Fuse(scopedIndex, FUSE_OPTIONS), [scopedIndex]);
 }
