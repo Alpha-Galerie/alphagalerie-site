@@ -4,7 +4,6 @@ import { useCategories } from '../hooks/useCategories';
 import { useSubcategories } from '../hooks/useSubcategories';
 import { useProducts } from '../hooks/useProducts';
 import { useProductsFuse } from '../hooks/useProductsIndex';
-import type { ProductIndex } from '../hooks/useProductsIndex';
 import { useCartStore } from '../store/cart';
 import { useToastStore } from '../store/toast';
 import type { Produto, Variacao } from '../types';
