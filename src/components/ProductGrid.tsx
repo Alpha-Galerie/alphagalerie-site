@@ -1,9 +1,8 @@
 // src/components/ProductGrid.tsx
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useCategories } from '../hooks/useCategories';
 import { useSubcategories } from '../hooks/useSubcategories';
 import { useProducts } from '../hooks/useProducts';
-import { useProductsFuse } from '../hooks/useProductsIndex';
 import { useCartStore } from '../store/cart';
 import { useToastStore } from '../store/toast';
 import type { Produto, Variacao } from '../types';
@@ -66,17 +65,12 @@ export default function ProductGrid({
 
   const { data: categorias = [] } = useCategories();
   const { data: subcategorias = [] } = useSubcategories(categoryId);
-  const fuse = useProductsFuse(categoryId);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
     setSearchInput(val);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    // Only go to server if Fuse has no results for this query
-    const fuseHits = val.trim() ? fuse.search(val.trim()) : [];
-    if (fuseHits.length === 0) {
-      debounceRef.current = setTimeout(() => setSearch(val), 400);
-    }
+    debounceRef.current = setTimeout(() => setSearch(val), 600);
   }
 
   const extraCategoryIds = useMemo(() =>
@@ -95,14 +89,7 @@ export default function ProductGrid({
   const total = data?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  const produtos = useMemo((): Produto[] => {
-    const q = searchInput.trim();
-    if (!q) return serverProdutos;
-    const fuseHits = fuse.search(q).map((r) => r.item) as unknown as Produto[];
-    if (fuseHits.length > 0) return fuseHits;
-    // Fuse had no hits — fall back to server results
-    return serverProdutos;
-  }, [fuse, searchInput, serverProdutos]);
+  const produtos = serverProdutos;
 
   function handleAddToCart(produto: Produto) {
     addItem(produto);
