@@ -20,13 +20,7 @@ Deno.serve(async (req) => {
       )
     }
 
-    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-    if (!UUID_REGEX.test(String(pedido_id))) {
-      return new Response(
-        JSON.stringify({ error: 'ID de pedido inválido.' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    const pedidoId = String(pedido_id)
 
     const accessToken = Deno.env.get('MP_ACCESS_TOKEN')
     if (!accessToken) {
@@ -44,7 +38,7 @@ Deno.serve(async (req) => {
     const { data: pedido, error: pedidoError } = await supabase
       .from('pedidos')
       .select('id, status')
-      .eq('id', pedido_id)
+      .eq('id', pedidoId)
       .single()
 
     if (pedidoError || !pedido || pedido.status !== 'pendente') {
@@ -55,10 +49,10 @@ Deno.serve(async (req) => {
     }
 
     // Determinar URLs de callback
-    const origin = req.headers.get('origin') || 'https://alphagalerie.com.br'
-    const successUrl = `${origin}/checkout/sucesso?pedido_id=${pedido_id}`
-    const failureUrl = `${origin}/checkout/erro?pedido_id=${pedido_id}`
-    const pendingUrl = `${origin}/checkout/pendente?pedido_id=${pedido_id}`
+    const siteUrl = Deno.env.get('SITE_URL') || 'https://alphagalerie.com.br'
+    const successUrl = `${siteUrl}/checkout/sucesso?pedido_id=${pedidoId}`
+    const failureUrl = `${siteUrl}/checkout/erro?pedido_id=${pedidoId}`
+    const pendingUrl = `${siteUrl}/checkout/pendente?pedido_id=${pedidoId}`
     const notificationUrl = `${supabaseUrl}/functions/v1/mp-webhook`
 
     // Criar Preference no Mercado Pago
@@ -69,7 +63,7 @@ Deno.serve(async (req) => {
         unit_price: item.unit_price,
         currency_id: 'BRL',
       })),
-      external_reference: pedido_id,
+      external_reference: pedidoId,
       back_urls: {
         success: successUrl,
         failure: failureUrl,
@@ -104,7 +98,7 @@ Deno.serve(async (req) => {
     await supabase
       .from('pedidos')
       .update({ mp_preference_id: preference.id })
-      .eq('id', pedido_id)
+      .eq('id', pedidoId)
 
     return new Response(
       JSON.stringify({

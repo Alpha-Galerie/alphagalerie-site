@@ -273,9 +273,9 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     setPedidoId(result.pedido?.id ?? null);
     setTxid(`AG${Date.now()}`);
     setSubmittedTotal(total);
-    clearCart();
 
     if (pagamento === 'pix') {
+      clearCart();
       setStep('pix');
     } else if (pagamento === 'cartao') {
       // Checkout PRO: redireciona para página do Mercado Pago
@@ -296,12 +296,15 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
 
         if (checkoutResult.error) {
           setSubmitError(checkoutResult.error);
+          return;
         }
-        // Se sucesso, o redirect já aconteceu
+        // Se sucesso, o redirect já aconteceu — limpar carrinho
+        clearCart();
         return;
       }
 
       // Fluxo transparente (existente)
+      clearCart();
       try {
         const mp = await loadMercadoPago();
         setMpInstance(mp);
@@ -310,6 +313,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
         setSubmitError('Não foi possível carregar o módulo de pagamento. Tente novamente.');
       }
     } else {
+      clearCart();
       setStep('success');
     }
   }
