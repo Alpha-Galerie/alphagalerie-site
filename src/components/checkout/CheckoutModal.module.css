@@ -279,6 +279,15 @@
   color: #c9a961;
 }
 
+.freteCombinar {
+  border-color: #c9a961;
+  background: #1a1508;
+}
+
+.freteCombinar .freteLabel {
+  color: #c9a961;
+}
+
 /* ── Summary ── */
 .summary {
   background: #0a0a0a;

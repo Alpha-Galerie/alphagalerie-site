@@ -282,13 +282,22 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       if (checkoutProvider.mode === 'pro') {
         setCardProcessing(true);
         const pedido_id = String(result.pedido?.id ?? pedidoId ?? '');
-        const checkoutResult = await checkoutProvider.startCheckout({
-          pedido_id,
-          items: items.map(i => ({
+        const checkoutItems = items.map(i => ({
             title: i.nome,
             quantity: i.qtd,
             unit_price: i.preco,
-          })),
+          }));
+          // Incluir frete como item adicional no Mercado Pago
+          if (freteValor > 0) {
+            checkoutItems.push({
+              title: frete.label || 'Frete',
+              quantity: 1,
+              unit_price: freteValor,
+            });
+          }
+          const checkoutResult = await checkoutProvider.startCheckout({
+          pedido_id,
+          items: checkoutItems,
           total,
           email: email || undefined,
         });
@@ -397,10 +406,12 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                         </span>
                       )}
                     </div>
-                    {frete.valor > 0 && (
-                      <div className={styles.freteBox}>
-                        <span className={styles.freteLabel}>{frete.label || 'Frete'}</span>
-                        <span className={styles.freteValor}>{fmt(cupomAtivo?.tipo === 'frete' ? 0 : frete.valor)}</span>
+                    {entrega === 'delivery' && frete.label && (
+                      <div className={`${styles.freteBox} ${frete.valor === 0 ? styles.freteCombinar : ''}`}>
+                        <span className={styles.freteLabel}>{frete.label}</span>
+                        {frete.valor > 0 && (
+                          <span className={styles.freteValor}>{fmt(cupomAtivo?.tipo === 'frete' ? 0 : frete.valor)}</span>
+                        )}
                       </div>
                     )}
                     <div className={styles.field}>

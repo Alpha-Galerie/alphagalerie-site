@@ -24,10 +24,10 @@ export function calcularFrete(
   if (n >= 6400000 && n <= 6499999) {
     return { valor: 30, label: 'Motoboy · Região Barueri' };
   }
-  // Grande SP (CEPs 01000000 a 09999999)
-  if (n >= 1000000 && n <= 9999999) {
-    return { valor: 25, label: 'Sedex · Grande SP (estimativa)' };
+  // Cidades vizinhas (Osasco, Carapicuíba, Itapevi, Jandira, Cotia, Santana de Parnaíba)
+  if (n >= 6000000 && n <= 6999999) {
+    return { valor: 30, label: 'Motoboy · Região próxima' };
   }
-  // Nacional
-  return { valor: 35, label: 'Sedex · Envio nacional (estimativa)' };
+  // Outras regiões — a combinar
+  return { valor: 0, label: 'Frete a combinar · Consulte-nos' };
 }
