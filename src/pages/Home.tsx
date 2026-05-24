@@ -23,8 +23,11 @@ export default function Home() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [popupOpen, setPopupOpen] = useState(false);
-  const [initialSearch, setInitialSearch] = useState('');
-  const [initialSubcat, setInitialSubcat] = useState<string | null>(null);
+
+  // Parse URL params synchronously so they're available on first render
+  const urlParams = new URLSearchParams(globalThis.location.search);
+  const [initialSearch] = useState(() => urlParams.get('q') ?? '');
+  const [initialSubcat] = useState<string | null>(() => urlParams.get('sub'));
 
   useVisita();
 
@@ -57,15 +60,7 @@ export default function Home() {
   const { data: allCategorias = [] } = useAllCategories();
 
   useEffect(() => {
-    const params = new URLSearchParams(globalThis.location.search);
-    const q = params.get('q');
-    const sub = params.get('sub');
-    const cat = params.get('cat');
-
-    if (q) setInitialSearch(q);
-    if (sub) setInitialSubcat(sub);
-
-    if (cat || sub || q) {
+    if (initialSearch || initialSubcat || urlParams.get('cat')) {
       setTimeout(() => {
         document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' });
       }, 300);
