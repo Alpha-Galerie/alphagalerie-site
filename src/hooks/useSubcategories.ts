@@ -17,7 +17,9 @@ async function fetchSubcategories(categoryId: number | null): Promise<string[]> 
 
   return Array.from(
     new Set((data ?? []).map((r) => r.subcategoria as string))
-  ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  )
+    .filter((s) => s.toLowerCase() !== 'especial')
+    .sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
 
 export function useSubcategories(categoryId: number | null) {
