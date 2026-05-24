@@ -60,8 +60,18 @@ export default function ProductGrid({
   const [page, setPage] = useState(0);
   const [variacoesTarget, setVariacoesTarget] = useState<Produto | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cameFromUrl = useRef(initialSubcat !== null);
 
-  useEffect(() => { setPage(0); setActiveSubcat(null); setSearchInput(''); setSearch(''); }, [categoryId]);
+  useEffect(() => {
+    setPage(0);
+    setSearchInput('');
+    setSearch('');
+    // Só reseta subcategoria se NÃO veio da URL
+    if (!cameFromUrl.current) {
+      setActiveSubcat(null);
+    }
+    cameFromUrl.current = false;
+  }, [categoryId]);
   useEffect(() => { setPage(0); }, [search, activeSubcat]);
 
   const { data: categorias = [] } = useCategories();
