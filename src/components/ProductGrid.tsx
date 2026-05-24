@@ -76,7 +76,17 @@ export default function ProductGrid({
 
   const { data: categorias = [] } = useCategories();
   const { data: subcategoriasOcultas = [] } = useSubcategoriasOcultas();
-  const { data: subcategorias = [] } = useSubcategories(categoryId, subcategoriasOcultas);
+  const { data: rawSubcategorias = [] } = useSubcategories(categoryId, subcategoriasOcultas);
+
+  // When ?sub= is in the URL, ensure that subcategory is visible even if hidden
+  const subcategorias = useMemo(() => {
+    if (!initialSubcat) return rawSubcategorias;
+    const found = rawSubcategorias.some((s) => s.toLowerCase() === initialSubcat.toLowerCase());
+    if (found) return rawSubcategorias;
+    // Insert the URL subcategory in alphabetical order
+    const merged = [...rawSubcategorias, initialSubcat];
+    return merged.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }, [rawSubcategorias, initialSubcat]);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
