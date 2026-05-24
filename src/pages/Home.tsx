@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useVisita } from '../hooks/useVisita';
 import { useCartStore } from '../store/cart';
-import { useCategories } from '../hooks/useCategories';
+import { useAllCategories } from '../hooks/useAllCategories';
 import RecuperacaoPopup from '../components/RecuperacaoPopup';
 import AnnouncementBar from '../components/AnnouncementBar';
 import HeroSection from '../components/HeroSection';
@@ -54,7 +54,7 @@ export default function Home() {
     };
   }, [cartItems.length]);
 
-  const { data: categorias = [] } = useCategories();
+  const { data: allCategorias = [] } = useAllCategories();
 
   useEffect(() => {
     const params = new URLSearchParams(globalThis.location.search);
@@ -75,13 +75,13 @@ export default function Home() {
   useEffect(() => {
     const params = new URLSearchParams(globalThis.location.search);
     const catSlug = params.get('cat');
-    if (catSlug && categorias.length > 0) {
-      const match = categorias.find(
+    if (catSlug && allCategorias.length > 0) {
+      const match = allCategorias.find(
         (c) => c.slug === catSlug || c.nome.toLowerCase() === catSlug.toLowerCase()
       );
       if (match) setCategoryId(match.id);
     }
-  }, [categorias]);
+  }, [allCategorias]);
 
   const produtoIdParam = searchParams.get('p');
   const produtoId = produtoIdParam ? Number.parseInt(produtoIdParam, 10) : null;
