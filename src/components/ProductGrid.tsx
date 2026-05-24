@@ -61,8 +61,14 @@ export default function ProductGrid({
   const [variacoesTarget, setVariacoesTarget] = useState<Produto | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cameFromUrl = useRef(initialSubcat !== null);
+  const isFirstCatChange = useRef(true);
 
   useEffect(() => {
+    // Skip the first run (mount) — categoryId starts as null, cameFromUrl would be consumed too early
+    if (isFirstCatChange.current) {
+      isFirstCatChange.current = false;
+      return;
+    }
     setPage(0);
     setSearchInput('');
     setSearch('');
