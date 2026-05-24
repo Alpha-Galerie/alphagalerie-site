@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useCategories } from '../hooks/useCategories';
 import { useSubcategories } from '../hooks/useSubcategories';
+import { useSubcategoriasOcultas } from '../hooks/useSubcategoriasOcultas';
 import { useProducts } from '../hooks/useProducts';
 import { useCartStore } from '../store/cart';
 import { useToastStore } from '../store/toast';
@@ -64,7 +65,8 @@ export default function ProductGrid({
   useEffect(() => { setPage(0); }, [search, activeSubcat]);
 
   const { data: categorias = [] } = useCategories();
-  const { data: subcategorias = [] } = useSubcategories(categoryId);
+  const { data: subcategoriasOcultas = [] } = useSubcategoriasOcultas();
+  const { data: subcategorias = [] } = useSubcategories(categoryId, subcategoriasOcultas);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
