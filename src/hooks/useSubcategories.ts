@@ -1,7 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
-async function fetchSubcategories(categoryId: number | null): Promise<string[]> {
+async function fetchSubcategories(
+  categoryId: number | null,
+  ocultas: string[]
+): Promise<string[]> {
   let query = supabase
     .from('produtos')
     .select('subcategoria')
@@ -17,13 +20,18 @@ async function fetchSubcategories(categoryId: number | null): Promise<string[]> 
 
   return Array.from(
     new Set((data ?? []).map((r) => r.subcategoria as string))
-  ).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  )
+    .filter((s) => !ocultas.includes(s.toLowerCase()))
+    .sort((a, b) => a.localeCompare(b, 'pt-BR'));
 }
 
-export function useSubcategories(categoryId: number | null) {
+export function useSubcategories(
+  categoryId: number | null,
+  ocultas: string[] = []
+) {
   return useQuery<string[]>({
-    queryKey: ['subcategorias', categoryId],
-    queryFn: () => fetchSubcategories(categoryId),
+    queryKey: ['subcategorias', categoryId, ocultas],
+    queryFn: () => fetchSubcategories(categoryId, ocultas),
     staleTime: 10 * 60 * 1000,
   });
 }
