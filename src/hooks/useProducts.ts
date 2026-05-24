@@ -37,7 +37,7 @@ async function fetchProducts(
   }
 
   if (subcategoria) {
-    query = query.eq('subcategoria', subcategoria);
+    query = query.ilike('subcategoria', subcategoria);
   }
 
   if (search.trim()) {

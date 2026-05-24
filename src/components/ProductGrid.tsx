@@ -219,9 +219,9 @@ export default function ProductGrid({
               style={{
                 ...btnBase,
                 padding: '8px 16px',
-                border: `1px solid ${activeSubcat === s ? '#c9a961' : '#222'}`,
-                background: activeSubcat === s ? '#c9a961' : 'transparent',
-                color: activeSubcat === s ? '#000' : '#888',
+                border: `1px solid ${activeSubcat?.toLowerCase() === s.toLowerCase() ? '#c9a961' : '#222'}`,
+                background: activeSubcat?.toLowerCase() === s.toLowerCase() ? '#c9a961' : 'transparent',
+                color: activeSubcat?.toLowerCase() === s.toLowerCase() ? '#000' : '#888',
               }}
             >
               {s}

@@ -88,7 +88,7 @@ export default function Home() {
         .from('produtos')
         .select('categoria_id')
         .eq('ativo', true)
-        .eq('subcategoria', initialSubcat)
+        .ilike('subcategoria', initialSubcat)
         .limit(1)
         .maybeSingle();
       if (!cancelled && data?.categoria_id) {
