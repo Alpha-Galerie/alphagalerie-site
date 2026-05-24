@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 import { useVisita } from '../hooks/useVisita';
 import { useCartStore } from '../store/cart';
 import { useAllCategories } from '../hooks/useAllCategories';
@@ -77,6 +78,25 @@ export default function Home() {
       if (match) setCategoryId(match.id);
     }
   }, [allCategorias]);
+
+  // When ?sub= is present without ?cat=, auto-detect the category from the subcategory
+  useEffect(() => {
+    if (!initialSubcat || categoryId !== null) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('produtos')
+        .select('categoria_id')
+        .eq('ativo', true)
+        .ilike('subcategoria', initialSubcat)
+        .limit(1)
+        .maybeSingle();
+      if (!cancelled && data?.categoria_id) {
+        setCategoryId(data.categoria_id);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [initialSubcat, categoryId]);
 
   const produtoIdParam = searchParams.get('p');
   const produtoId = produtoIdParam ? Number.parseInt(produtoIdParam, 10) : null;
