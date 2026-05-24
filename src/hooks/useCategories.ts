@@ -7,6 +7,7 @@ async function fetchCategorias(): Promise<Categoria[]> {
     .from('categorias')
     .select('*')
     .eq('ativo', true)
+    .eq('oculto', false)
     .order('ordem');
 
   if (error) throw new Error(error.message);
