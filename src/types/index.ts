@@ -4,6 +4,7 @@ export interface Categoria {
   slug: string;
   ordem: number;
   ativo: boolean;
+  oculto: boolean;
 }
 
 export interface Variacao {
