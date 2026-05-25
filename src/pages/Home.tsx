@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useVisita } from '../hooks/useVisita';
@@ -79,10 +79,12 @@ export default function Home() {
     }
   }, [allCategorias]);
 
-  // When ?sub= is present without ?cat=, auto-detect the category from the subcategory
+  // When ?sub= is present without ?cat=, auto-detect the category from the subcategory (once only)
+  const subDetectedRef = useRef(false);
   useEffect(() => {
-    if (!initialSubcat || categoryId !== null) return;
+    if (!initialSubcat || categoryId !== null || subDetectedRef.current) return;
     let cancelled = false;
+    subDetectedRef.current = true;
     (async () => {
       const { data } = await supabase
         .from('produtos')
