@@ -79,12 +79,7 @@ export default function ProductGrid({
     setSearch('');
     // Só reseta subcategoria se NÃO veio da URL
     if (!cameFromUrl.current) {
-      // Restore subcat if user navigates back to the origin category
-      if (initialSubcat && subcatOriginCatRef.current !== null && categoryId === subcatOriginCatRef.current) {
-        setActiveSubcat(initialSubcat);
-      } else {
-        setActiveSubcat(null);
-      }
+      setActiveSubcat(null);
     }
     cameFromUrl.current = false;
   }, [categoryId]);
