@@ -62,11 +62,16 @@ export default function ProductGrid({
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cameFromUrl = useRef(initialSubcat !== null);
   const isFirstCatChange = useRef(true);
+  const subcatOriginCatRef = useRef<number | null>(null);
 
   useEffect(() => {
     // Skip the first run (mount) — categoryId starts as null, cameFromUrl would be consumed too early
     if (isFirstCatChange.current) {
       isFirstCatChange.current = false;
+      // Record which category the URL subcat belongs to (once categoryId resolves)
+      if (cameFromUrl.current && categoryId !== null) {
+        subcatOriginCatRef.current = categoryId;
+      }
       return;
     }
     setPage(0);
@@ -74,7 +79,12 @@ export default function ProductGrid({
     setSearch('');
     // Só reseta subcategoria se NÃO veio da URL
     if (!cameFromUrl.current) {
-      setActiveSubcat(null);
+      // Restore subcat if user navigates back to the origin category
+      if (initialSubcat && subcatOriginCatRef.current !== null && categoryId === subcatOriginCatRef.current) {
+        setActiveSubcat(initialSubcat);
+      } else {
+        setActiveSubcat(null);
+      }
     }
     cameFromUrl.current = false;
   }, [categoryId]);
@@ -85,14 +95,18 @@ export default function ProductGrid({
   const { data: rawSubcategorias = [] } = useSubcategories(categoryId, subcategoriasOcultas);
 
   // When ?sub= is in the URL, ensure that subcategory is visible even if hidden
+  // Only show it on the correct parent category (or during initial load via cameFromUrl)
   const subcategorias = useMemo(() => {
     if (!initialSubcat) return rawSubcategorias;
+    // Show the URL subcat on the origin category (or while cameFromUrl is still true)
+    const isOriginCat = subcatOriginCatRef.current !== null && categoryId === subcatOriginCatRef.current;
+    if (!cameFromUrl.current && !isOriginCat) return rawSubcategorias;
     const found = rawSubcategorias.some((s) => s.toLowerCase() === initialSubcat.toLowerCase());
     if (found) return rawSubcategorias;
     // Insert the URL subcategory in alphabetical order
     const merged = [...rawSubcategorias, initialSubcat];
     return merged.sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  }, [rawSubcategorias, initialSubcat]);
+  }, [rawSubcategorias, initialSubcat, categoryId]);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
