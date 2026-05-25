@@ -65,13 +65,13 @@ export default function ProductGrid({
   const subcatOriginCatRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Record which category the URL subcat belongs to (once categoryId resolves)
+    if (cameFromUrl.current && categoryId !== null && subcatOriginCatRef.current === null) {
+      subcatOriginCatRef.current = categoryId;
+    }
     // Skip the first run (mount) — categoryId starts as null, cameFromUrl would be consumed too early
     if (isFirstCatChange.current) {
       isFirstCatChange.current = false;
-      // Record which category the URL subcat belongs to (once categoryId resolves)
-      if (cameFromUrl.current && categoryId !== null) {
-        subcatOriginCatRef.current = categoryId;
-      }
       return;
     }
     setPage(0);
