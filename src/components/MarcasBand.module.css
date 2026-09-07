@@ -1,15 +1,15 @@
 .band {
   border-top: 1px solid #1a1a1a;
-  border-bottom: 1px solid #1a1a1a;
   background: #0d0d0d;
-  padding: 40px 0 44px;
+  padding: 48px 0 52px;
   overflow: hidden;
 }
 
 .head {
   max-width: 1320px;
-  margin: 0 auto 28px;
+  margin: 0 auto 30px;
   padding: 0 24px;
+  text-align: center;
 }
 
 .eyebrow {
@@ -35,61 +35,61 @@
   font-style: italic;
 }
 
+/* Poucas marcas: fila centralizada. Muitas: trilha rolando. */
 .viewport {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.viewportRolando {
+  max-width: none;
+  padding: 0;
   overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
 
-.track {
-  display: inline-flex;
-  animation: marcasMarquee 45s linear infinite;
+.trilha {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
 }
 
-.viewport:hover .track,
-.viewport:focus-within .track {
+.trilhaRolando {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0;
+  width: max-content;
+  animation: marcasMarquee 42s linear infinite;
+}
+
+.viewportRolando:hover .trilhaRolando {
   animation-play-state: paused;
 }
 
-.marca {
+.placa {
   flex: 0 0 auto;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 176px;
-  height: 66px;
-  margin-right: 14px;
-  padding: 0 26px;
+  width: 210px;
+  height: 112px;
+  padding: 14px;
+  background: #fff;
   border: 1px solid #1f1f1f;
-  background: linear-gradient(180deg, #151515 0%, #0f0f0f 100%);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: rgba(244, 244, 244, 0.78);
-  text-decoration: none;
-  transition: color 0.25s, border-color 0.25s, background 0.25s;
 }
 
-.marca:hover {
-  color: #c9a961;
-  border-color: rgba(201, 169, 97, 0.55);
-  background: linear-gradient(180deg, #1a1712 0%, #12100c 100%);
+.trilhaRolando .placa {
+  margin-right: 16px;
 }
 
-.marca:focus-visible {
-  outline: 2px solid #c9a961;
-  outline-offset: 2px;
-}
-
-.placeholder {
-  flex: 0 0 auto;
-  min-width: 176px;
-  height: 66px;
-  margin-right: 14px;
-  border: 1px solid #1a1a1a;
-  background: #131313;
+.logo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 @keyframes marcasMarquee {
@@ -98,14 +98,15 @@
 }
 
 @media (max-width: 640px) {
-  .band { padding: 32px 0 36px; }
-  .head { padding: 0 16px; margin-bottom: 22px; }
-  .marca,
-  .placeholder { min-width: 148px; height: 58px; }
-  .marca { font-size: 11px; padding: 0 20px; }
+  .band { padding: 36px 0 40px; }
+  .head { padding: 0 16px; margin-bottom: 24px; }
+  .viewport { padding: 0 16px; }
+  .trilha { gap: 12px; }
+  .placa { width: 152px; height: 88px; padding: 12px; }
+  .trilhaRolando .placa { margin-right: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .viewport { overflow-x: auto; }
-  .track { animation: none; }
+  .viewportRolando { overflow-x: auto; }
+  .trilhaRolando { animation: none; }
 }
