@@ -83,14 +83,13 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
-  const [entrega, setEntrega] = useState<'retirada' | 'delivery'>('retirada');
   const [cep, setCep] = useState('');
   const [endereco, setEndereco] = useState('');
   const [numero, setNumero] = useState('');
   const [complemento, setComplemento] = useState('');
   const [bairro, setBairro] = useState('');
   const [cidade, setCidade] = useState('');
-  const [pagamento, setPagamento] = useState<'pix' | 'cartao' | 'pagar_retirada'>('pix');
+  const [pagamento, setPagamento] = useState<'pix' | 'cartao'>('pix');
   const [observacoes, setObservacoes] = useState('');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [mpInstance, setMpInstance] = useState<any>(null);
@@ -158,8 +157,8 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   }, []);
 
   useEffect(() => {
-    setFrete(calcularFrete(entrega, cep));
-  }, [entrega, cep]);
+    setFrete(calcularFrete(cep));
+  }, [cep]);
 
   function handleCepChange(e: React.ChangeEvent<HTMLInputElement>) {
     let v = e.target.value.replace(/\D/g, '').slice(0, 8);
@@ -229,11 +228,11 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       setSubmitError('Por favor, informe um WhatsApp válido com DDD.');
       return;
     }
-    if (entrega === 'delivery' && cep.replace(/\D/g, '').length < 8) {
+    if (cep.replace(/\D/g, '').length < 8) {
       setSubmitError('Digite um CEP válido para calcular o frete.');
       return;
     }
-    if (entrega === 'delivery' && !endereco.trim()) {
+    if (!endereco.trim()) {
       setSubmitError('Por favor, informe o endereço de entrega.');
       return;
     }
@@ -245,9 +244,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
 
     setIsSubmitting(true);
 
-    const enderecoCompleto = entrega === 'retirada'
-      ? 'RETIRADA NO LOCAL · Alpha Galerie · Alphaville'
-      : [endereco, numero, complemento, bairro, cidade, cep].filter(Boolean).join(', ');
+    const enderecoCompleto = [endereco, numero, complemento, bairro, cidade, cep].filter(Boolean).join(', ');
 
     const dadosPedido: Pedido = {
       nome, telefone,
@@ -257,7 +254,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       bairro: bairro || undefined,
       cidade: cidade || undefined,
       complemento: complemento || undefined,
-      pagamento, entrega,
+      pagamento, entrega: 'delivery',
       observacoes: observacoes || undefined,
       total, status: 'pendente', itens: items,
     };
@@ -277,7 +274,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     if (pagamento === 'pix') {
       clearCart();
       setStep('pix');
-    } else if (pagamento === 'cartao') {
+    } else {
       // Checkout PRO: redireciona para página do Mercado Pago
       if (checkoutProvider.mode === 'pro') {
         setCardProcessing(true);
@@ -321,9 +318,6 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       } catch {
         setSubmitError('Não foi possível carregar o módulo de pagamento. Tente novamente.');
       }
-    } else {
-      clearCart();
-      setStep('success');
     }
   }
 
@@ -362,82 +356,46 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                   <input id="co_email" type="email" className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" autoComplete="email" />
                 </div>
 
-                {/* Entrega */}
+                {/* Campos de endereço */}
                 <div className={styles.field}>
-                  <label className={styles.label}>Como quer receber? *</label>
-                  <div className={styles.options}>
-                    <label className={styles.optLabel}>
-                      <input type="radio" name="tipoEntrega" value="delivery" required checked={entrega === 'delivery'} onChange={() => setEntrega('delivery')} />
-                      <span className={styles.optBox}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                          <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
-                        </svg>
-                        <span className={styles.optBoxText}>
-                          <strong>Entrega</strong>
-                          <small>Motoboy — frete calculado pelo CEP</small>
-                        </span>
-                      </span>
-                    </label>
-                    <label className={styles.optLabel}>
-                      <input type="radio" name="tipoEntrega" value="retirada" checked={entrega === 'retirada'} onChange={() => { setEntrega('retirada'); setCepStatus(null); }} />
-                      <span className={styles.optBox}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                          <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0116 0z"/><circle cx="12" cy="10" r="3"/>
-                        </svg>
-                        <span className={styles.optBoxText}>
-                          <strong>Retirada no local</strong>
-                          <small>Alpha Galerie · Alphaville · Frete grátis</small>
-                        </span>
-                        <span className={styles.badgeGreen}>GRÁTIS</span>
-                      </span>
-                    </label>
+                  <label className={styles.label} htmlFor="co_cep">CEP *</label>
+                  <input id="co_cep" type="text" className={styles.input} value={cep} onChange={handleCepChange} placeholder="00000-000" maxLength={9} autoComplete="postal-code" style={{ maxWidth: 180 }} />
+                  {cepStatus && (
+                    <span className={`${styles.cupomStatus} ${cepStatus.ok ? styles.cupomOk : styles.cupomErr}`}>
+                      {cepStatus.msg}
+                    </span>
+                  )}
+                </div>
+                {frete.label && (
+                  <div className={`${styles.freteBox} ${frete.valor === 0 ? styles.freteCombinar : ''}`}>
+                    <span className={styles.freteLabel}>{frete.label}</span>
+                    {frete.valor > 0 && (
+                      <span className={styles.freteValor}>{fmt(cupomAtivo?.tipo === 'frete' ? 0 : frete.valor)}</span>
+                    )}
+                  </div>
+                )}
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="co_rua">Rua / Avenida</label>
+                  <input id="co_rua" type="text" className={styles.input} value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Nome da rua ou avenida" required autoComplete="street-address" disabled={cepLoading} style={{ opacity: cepLoading ? 0.5 : 1 }} />
+                </div>
+                <div className={`${styles.field} ${styles.addressGrid}`}>
+                  <div>
+                    <label className={styles.label} htmlFor="co_numero">Número</label>
+                    <input ref={numeroRef} id="co_numero" type="text" className={styles.input} value={numero} onChange={(e) => setNumero(e.target.value)} placeholder="123" />
+                  </div>
+                  <div>
+                    <label className={styles.label} htmlFor="co_comp">Complemento</label>
+                    <input id="co_comp" type="text" className={styles.input} value={complemento} onChange={(e) => setComplemento(e.target.value)} placeholder="Apto, Bloco, Casa..." />
                   </div>
                 </div>
-
-                {/* Campos de endereço (delivery) */}
-                {entrega === 'delivery' && (
-                  <>
-                    <div className={styles.field}>
-                      <label className={styles.label} htmlFor="co_cep">CEP *</label>
-                      <input id="co_cep" type="text" className={styles.input} value={cep} onChange={handleCepChange} placeholder="00000-000" maxLength={9} autoComplete="postal-code" style={{ maxWidth: 180 }} />
-                      {cepStatus && (
-                        <span className={`${styles.cupomStatus} ${cepStatus.ok ? styles.cupomOk : styles.cupomErr}`}>
-                          {cepStatus.msg}
-                        </span>
-                      )}
-                    </div>
-                    {entrega === 'delivery' && frete.label && (
-                      <div className={`${styles.freteBox} ${frete.valor === 0 ? styles.freteCombinar : ''}`}>
-                        <span className={styles.freteLabel}>{frete.label}</span>
-                        {frete.valor > 0 && (
-                          <span className={styles.freteValor}>{fmt(cupomAtivo?.tipo === 'frete' ? 0 : frete.valor)}</span>
-                        )}
-                      </div>
-                    )}
-                    <div className={styles.field}>
-                      <label className={styles.label} htmlFor="co_rua">Rua / Avenida</label>
-                      <input id="co_rua" type="text" className={styles.input} value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Nome da rua ou avenida" required={entrega === 'delivery'} autoComplete="street-address" disabled={cepLoading} style={{ opacity: cepLoading ? 0.5 : 1 }} />
-                    </div>
-                    <div className={`${styles.field} ${styles.addressGrid}`}>
-                      <div>
-                        <label className={styles.label} htmlFor="co_numero">Número</label>
-                        <input ref={numeroRef} id="co_numero" type="text" className={styles.input} value={numero} onChange={(e) => setNumero(e.target.value)} placeholder="123" />
-                      </div>
-                      <div>
-                        <label className={styles.label} htmlFor="co_comp">Complemento</label>
-                        <input id="co_comp" type="text" className={styles.input} value={complemento} onChange={(e) => setComplemento(e.target.value)} placeholder="Apto, Bloco, Casa..." />
-                      </div>
-                    </div>
-                    <div className={styles.field}>
-                      <label className={styles.label} htmlFor="co_bairro">Bairro</label>
-                      <input id="co_bairro" type="text" className={styles.input} value={bairro} onChange={(e) => setBairro(e.target.value)} placeholder="Bairro" disabled={cepLoading} style={{ opacity: cepLoading ? 0.5 : 1 }} />
-                    </div>
-                    <div className={styles.field}>
-                      <label className={styles.label} htmlFor="co_cidade">Cidade</label>
-                      <input id="co_cidade" type="text" className={styles.input} value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" autoComplete="address-level2" disabled={cepLoading} style={{ opacity: cepLoading ? 0.5 : 1 }} />
-                    </div>
-                  </>
-                )}
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="co_bairro">Bairro</label>
+                  <input id="co_bairro" type="text" className={styles.input} value={bairro} onChange={(e) => setBairro(e.target.value)} placeholder="Bairro" disabled={cepLoading} style={{ opacity: cepLoading ? 0.5 : 1 }} />
+                </div>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="co_cidade">Cidade</label>
+                  <input id="co_cidade" type="text" className={styles.input} value={cidade} onChange={(e) => setCidade(e.target.value)} placeholder="Cidade" autoComplete="address-level2" disabled={cepLoading} style={{ opacity: cepLoading ? 0.5 : 1 }} />
+                </div>
 
                 {/* Observações */}
                 <div className={styles.field}>
@@ -493,20 +451,6 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                         </span>
                       </span>
                     </label>
-                    {entrega === 'retirada' && (
-                      <label className={styles.optLabel}>
-                        <input type="radio" name="pagamento" value="pagar_retirada" checked={pagamento === 'pagar_retirada'} onChange={() => setPagamento('pagar_retirada')} />
-                        <span className={styles.optBox}>
-                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                            <path d="M12 2C8 2 5 5 5 9c0 3 1.5 5.5 4 7l1 4h4l1-4c2.5-1.5 4-4 4-7 0-4-3-7-7-7z"/>
-                          </svg>
-                          <span className={styles.optBoxText}>
-                            <strong>Pagar na retirada</strong>
-                            <small>Pix ou maquininha no local</small>
-                          </span>
-                        </span>
-                      </label>
-                    )}
                   </div>
                 </div>
 
