@@ -16,6 +16,7 @@ import AddedToCartToast from '../components/AddedToCartToast';
 import Footer from '../components/Footer';
 import HempSection from '../components/HempSection';
 import MarcasBand from '../components/MarcasBand';
+import BannerRotativo from '../components/BannerRotativo';
 
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
 
@@ -119,7 +120,7 @@ export default function Home() {
 
       <HeroSection />
 
-      <MarcasBand />
+      <BannerRotativo />
 
       <main id="main-content">
         <div className="section-head">
@@ -143,6 +144,9 @@ export default function Home() {
           initialSubcat={initialSubcat}
         />
       </main>
+
+      <MarcasBand />
+
       <HempSection />
       <Footer />
 

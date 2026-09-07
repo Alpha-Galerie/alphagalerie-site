@@ -1,0 +1,272 @@
+.banner {
+  position: relative;
+  border-top: 1px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+  background: #0b0b0b;
+  overflow: hidden;
+}
+
+.palco {
+  display: grid;
+}
+
+/* Todos os slides ocupam a mesma célula: a altura é a do maior, sem posicionamento fixo */
+.slide {
+  grid-area: 1 / 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: clamp(260px, 30vw, 360px);
+  padding: 48px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s;
+}
+
+.ativo {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* Arte: brilho dourado + trama diagonal, feitos em CSS (sem imagem externa) */
+.slide::before,
+.slide::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.slide::after {
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(201, 169, 97, 0.05) 0px,
+    rgba(201, 169, 97, 0.05) 1px,
+    transparent 1px,
+    transparent 16px
+  );
+  -webkit-mask-image: linear-gradient(90deg, transparent 18%, #000 90%);
+  mask-image: linear-gradient(90deg, transparent 18%, #000 90%);
+}
+
+.temaMarcas::before {
+  background:
+    radial-gradient(700px 340px at 82% 30%, rgba(201, 169, 97, 0.22), transparent 70%),
+    linear-gradient(90deg, #0b0b0b 30%, #100e0a 100%);
+}
+
+.temaCuradoria::before {
+  background:
+    radial-gradient(620px 320px at 72% 78%, rgba(201, 169, 97, 0.18), transparent 70%),
+    linear-gradient(90deg, #0b0b0b 25%, #0f0e0c 100%);
+}
+
+.temaAtendimento::before {
+  background:
+    radial-gradient(560px 300px at 88% 50%, rgba(201, 169, 97, 0.2), transparent 72%),
+    linear-gradient(90deg, #0b0b0b 30%, #110f0b 100%);
+}
+
+/* Marca d'água com o próprio logo da casa — preenche o lado direito sem imagem externa */
+.selo {
+  position: absolute;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  width: clamp(190px, 21vw, 310px);
+  height: clamp(190px, 21vw, 310px);
+  background: url('/favicon.svg') no-repeat center;
+  background-size: contain;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+@media (min-width: 900px) {
+  .selo { display: block; }
+}
+
+.conteudo {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c9a961;
+  margin-bottom: 16px;
+}
+
+.eyebrow::before {
+  content: '';
+  width: 26px;
+  height: 1px;
+  background: #c9a961;
+}
+
+.titulo {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-size: clamp(30px, 4.2vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #f4f4f4;
+  margin: 0 0 16px;
+}
+
+.titulo em {
+  color: #c9a961;
+  font-style: italic;
+}
+
+.texto {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  color: rgba(244, 244, 244, 0.6);
+  max-width: 460px;
+  margin: 0 0 28px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #c9a961;
+  color: #c9a961;
+  padding: 14px 28px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.25s, color 0.25s, gap 0.25s;
+}
+
+.cta:hover {
+  background: #c9a961;
+  color: #000;
+  gap: 14px;
+}
+
+.cta:focus-visible {
+  outline: 2px solid #c9a961;
+  outline-offset: 3px;
+}
+
+.seta {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #242424;
+  background: rgba(10, 10, 10, 0.6);
+  color: rgba(244, 244, 244, 0.7);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.25s, color 0.25s;
+}
+
+.seta:hover {
+  border-color: #c9a961;
+  color: #c9a961;
+}
+
+.seta:focus-visible {
+  outline: 2px solid #c9a961;
+  outline-offset: 2px;
+}
+
+.setaAnterior { left: 16px; }
+.setaProximo { right: 16px; }
+
+.pontos {
+  position: absolute;
+  left: 24px;
+  bottom: 22px;
+  z-index: 2;
+  display: flex;
+  gap: 8px;
+}
+
+.ponto {
+  width: 26px;
+  height: 3px;
+  padding: 0;
+  border: 0;
+  background: rgba(244, 244, 244, 0.22);
+  cursor: pointer;
+  transition: background 0.25s, width 0.25s;
+}
+
+.ponto:hover {
+  background: rgba(201, 169, 97, 0.6);
+}
+
+.ponto:focus-visible {
+  outline: 2px solid #c9a961;
+  outline-offset: 4px;
+}
+
+.pontoAtivo {
+  width: 40px;
+  background: #c9a961;
+}
+
+@media (min-width: 1024px) {
+  .seta { display: inline-flex; }
+  .pontos { left: 50%; transform: translateX(-50%); }
+}
+
+@media (max-width: 640px) {
+  .slide {
+    min-height: 250px;
+    padding: 40px 0 52px;
+  }
+  /* Marca d'água com o próprio logo da casa — preenche o lado direito sem imagem externa */
+.selo {
+  position: absolute;
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  display: none;
+  width: clamp(190px, 21vw, 310px);
+  height: clamp(190px, 21vw, 310px);
+  background: url('/favicon.svg') no-repeat center;
+  background-size: contain;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+@media (min-width: 900px) {
+  .selo { display: block; }
+}
+
+.conteudo { padding: 0 16px; }
+  .texto { font-size: 14px; margin-bottom: 22px; }
+  .cta { padding: 13px 20px; font-size: 10px; }
+  .pontos { left: 16px; bottom: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide { transition: opacity 0.2s linear, visibility 0.2s linear; transform: none; }
+}
