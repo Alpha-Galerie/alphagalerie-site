@@ -3,26 +3,7 @@ import styles from './HeroSection.module.css';
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
 const WA_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20prazo%20de%20entrega.`;
 
-const ETAPAS = [
-  {
-    num: '01',
-    titulo: 'Por ordem de chegada',
-    texto:
-      'Seu pedido entra na fila no momento em que o pagamento é confirmado. Quem pede antes, recebe antes.',
-  },
-  {
-    num: '02',
-    titulo: 'Saídas em lote, com parceiro',
-    texto:
-      'As entregas são agrupadas e despachadas por motoboy parceiro, que tem janela própria de coleta. Não sai um motoboy por pedido.',
-  },
-  {
-    num: '03',
-    titulo: 'Todos os dias, em até 24h',
-    texto:
-      'Entregamos todos os dias. O prazo é de até 24h após a confirmação — na maioria das vezes chega bem antes.',
-  },
-];
+const PONTOS = ['Em até 24h', 'Todos os dias', 'Alphaville e região'];
 
 export default function HeroSection() {
   return (
@@ -71,36 +52,26 @@ export default function HeroSection() {
         </div>
 
         <aside className={styles.entrega} aria-labelledby="entrega-titulo">
-          <p className={styles.entregaEyebrow}>Entrega · Nova logística</p>
+          <p className={styles.entregaEyebrow}>Entrega</p>
 
           <h2 className={styles.entregaTitulo} id="entrega-titulo">
-            Antecipe seu <em>pedido</em>.
+            Peça com <em>antecedência</em>.
           </h2>
 
           <p className={styles.entregaLead}>
-            Não trabalhamos com entrega expressa. Cada pedido é separado,
-            conferido e despachado com cuidado — na ordem em que chega.
+            Não é entrega expressa. Cada pedido sai por ordem de chegada.
           </p>
 
-          <ol className={styles.entregaLista}>
-            {ETAPAS.map((etapa) => (
-              <li key={etapa.num} className={styles.entregaItem}>
-                <span className={styles.entregaNum} aria-hidden="true">{etapa.num}</span>
-                <div>
-                  <p className={styles.entregaItemTitulo}>{etapa.titulo}</p>
-                  <p className={styles.entregaItemTexto}>{etapa.texto}</p>
-                </div>
-              </li>
+          <ul className={styles.entregaPontos}>
+            {PONTOS.map((ponto) => (
+              <li key={ponto}>{ponto}</li>
             ))}
-          </ol>
+          </ul>
 
-          <p className={styles.entregaNota}>
-            Precisa para uma data específica?{' '}
-            <a href={WA_URL} target="_blank" rel="noopener noreferrer">
-              Fale com a gente antes de fechar o pedido
-            </a>
-            .
-          </p>
+          <a className={styles.entregaLink} href={WA_URL} target="_blank" rel="noopener noreferrer">
+            Precisa para uma data? Fale no WhatsApp
+            <span aria-hidden="true">→</span>
+          </a>
         </aside>
       </div>
     </section>
