@@ -15,6 +15,7 @@ import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import AddedToCartToast from '../components/AddedToCartToast';
 import Footer from '../components/Footer';
 import HempSection from '../components/HempSection';
+import MarcasBand from '../components/MarcasBand';
 
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
 
@@ -141,6 +142,9 @@ export default function Home() {
         />
       </main>
       <HempSection />
+
+      <MarcasBand />
+
       <Footer />
 
       <CartDrawer

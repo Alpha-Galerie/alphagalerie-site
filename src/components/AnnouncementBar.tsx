@@ -5,6 +5,7 @@ const ITEMS = [
   'Atendimento via WhatsApp',
   '+10 anos no mercado',
   'Headshop · Charutaria · Arguile · Lifestyle',
+  'Entregas por ordem de chegada · peça com antecedência',
 ];
 
 // Duplicar para que o marquee seja contínuo (sem gap visível no loop)

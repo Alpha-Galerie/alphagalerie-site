@@ -1,0 +1,65 @@
+.secao {
+  border-top: 1px solid #1a1a1a;
+  background: #0d0d0d;
+  padding: 46px 0 50px;
+}
+
+.head {
+  max-width: 1320px;
+  margin: 0 auto 30px;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c9a961;
+  margin-bottom: 10px;
+}
+
+.titulo {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 500;
+  font-size: clamp(26px, 3vw, 38px);
+  line-height: 1.1;
+  color: #f4f4f4;
+  margin: 0;
+}
+
+.titulo em {
+  color: #c9a961;
+  font-style: italic;
+}
+
+/* Logos direto no escuro, sem placa */
+.assinatura {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 56px;
+  padding: 0 24px;
+}
+
+.logo {
+  height: 58px;
+  width: auto;
+  max-width: 190px;
+  object-fit: contain;
+  opacity: 0.88;
+  transition: opacity 0.25s;
+}
+
+.logo:hover {
+  opacity: 1;
+}
+
+@media (max-width: 640px) {
+  .secao { padding: 34px 0 38px; }
+  .head { padding: 0 16px; margin-bottom: 24px; }
+  .assinatura { gap: 34px; padding: 0 16px; }
+  .logo { height: 44px; max-width: 145px; }
+}
