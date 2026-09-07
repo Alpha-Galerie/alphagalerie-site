@@ -1,3 +1,4 @@
+import heroArte from '../assets/banner-raw.jpg';
 import styles from './HeroSection.module.css';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
@@ -8,6 +9,15 @@ const PONTOS = ['Em até 24h', 'Todos os dias', 'Alphaville e região'];
 export default function HeroSection() {
   return (
     <section className={styles.hero} aria-label="Bem-vindo à Alpha Galerie">
+      <img
+        className={styles.arte}
+        src={heroArte}
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+      />
+      <div className={styles.veu} aria-hidden="true" />
+
       <div className={styles.inner}>
         <div className={styles.copy}>
           <p className={styles.eyebrow}>Alpha Galerie · Alphaville · Desde 2014</p>
