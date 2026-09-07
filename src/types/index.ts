@@ -60,8 +60,8 @@ export interface Pedido {
   cidade?: string;
   estado?: string;
   complemento?: string;
-  pagamento: 'pix' | 'cartao' | 'pagar_retirada';
-  entrega: 'retirada' | 'delivery';
+  pagamento: 'pix' | 'cartao';
+  entrega: 'delivery';
   observacoes?: string;
   total: number;
   status: string;

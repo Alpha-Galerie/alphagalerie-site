@@ -3,14 +3,7 @@ export interface FreteResult {
   label: string;
 }
 
-export function calcularFrete(
-  tipoEntrega: 'retirada' | 'delivery',
-  cep: string
-): FreteResult {
-  if (tipoEntrega === 'retirada') {
-    return { valor: 0, label: 'Retirada no local · Grátis' };
-  }
-
+export function calcularFrete(cep: string): FreteResult {
   const digits = cep.replace(/\D/g, '');
   if (digits.length < 7) return { valor: 0, label: '' };
 

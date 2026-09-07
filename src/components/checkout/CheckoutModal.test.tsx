@@ -59,17 +59,27 @@ afterEach(() => {
   useCartStore.setState({ items: [] });
 });
 
+function fillRequiredFields() {
+  fireEvent.change(screen.getByLabelText(/Nome completo/i), {
+    target: { value: 'Cliente Teste' },
+  });
+  fireEvent.change(screen.getByLabelText(/WhatsApp/i), {
+    target: { value: '(11) 99999-9999' },
+  });
+  fireEvent.change(screen.getByLabelText(/CEP/i), {
+    target: { value: '06454-700' },
+  });
+  fireEvent.change(screen.getByLabelText(/Rua \/ Avenida/i), {
+    target: { value: 'Rua Teste' },
+  });
+}
+
 describe('CheckoutModal', () => {
   it('creates order on submit and clears cart before PIX step', async () => {
     const onClose = vi.fn();
     render(<CheckoutModal onClose={onClose} />);
 
-    fireEvent.change(screen.getByLabelText(/Nome completo/i), {
-      target: { value: 'Cliente Teste' },
-    });
-    fireEvent.change(screen.getByLabelText(/WhatsApp/i), {
-      target: { value: '(11) 99999-9999' },
-    });
+    fillRequiredFields();
 
     fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
 
@@ -86,12 +96,7 @@ describe('CheckoutModal', () => {
     const onClose = vi.fn();
     render(<CheckoutModal onClose={onClose} />);
 
-    fireEvent.change(screen.getByLabelText(/Nome completo/i), {
-      target: { value: 'Cliente Teste' },
-    });
-    fireEvent.change(screen.getByLabelText(/WhatsApp/i), {
-      target: { value: '(11) 99999-9999' },
-    });
+    fillRequiredFields();
 
     fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
 
