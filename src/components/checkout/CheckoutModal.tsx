@@ -48,13 +48,35 @@ type Step = 'form' | 'pix' | 'card' | 'success';
 
 const FOCUSABLE = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
-const CUPONS: Record<string, { tipo: 'pct' | 'fixo' | 'frete'; valor: number; descricao: string }> = {
-  ALPHA10:     { tipo: 'pct',   valor: 10, descricao: '10% de desconto' },
-  ALPHA15:     { tipo: 'pct',   valor: 15, descricao: '15% de desconto' },
-  VIP20:       { tipo: 'pct',   valor: 20, descricao: '20% de desconto VIP' },
-  BEMVINDO:    { tipo: 'fixo',  valor: 15, descricao: 'R$ 15 de desconto' },
-  FRETEGRATIS: { tipo: 'frete', valor: 0,  descricao: 'Frete grátis' },
-};
+type CupomInfo = { tipo: 'pct' | 'fixo' | 'frete'; valor: number; descricao: string };
+type CupomAplicado = CupomInfo & { codigo: string };
+
+// Os cupons ficam na tabela `cupons` e são administrados pela retaguarda.
+// Antes esta lista era fixa aqui no código, então qualquer cupom criado na
+// retaguarda não existia para o cliente — ele digitava e recebia "inválido".
+//
+// A loja não lista a tabela: validar_cupom() é SECURITY DEFINER e devolve
+// apenas o código consultado, e só quando ele está ativo, dentro da validade,
+// do limite de usos e do valor mínimo. Assim ninguém descobre os códigos
+// existentes lendo a chave pública.
+async function buscarCupom(codigo: string, subtotal: number): Promise<CupomAplicado | null> {
+  const { data, error } = await supabase.rpc('validar_cupom', {
+    p_codigo: codigo,
+    p_subtotal: subtotal,
+  });
+  if (error) {
+    console.error('[CheckoutModal] erro ao validar cupom:', error);
+    return null;
+  }
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return null;
+  return {
+    codigo: row.codigo,
+    tipo: row.tipo as CupomInfo['tipo'],
+    valor: Number(row.valor) || 0,
+    descricao: row.descricao || '',
+  };
+}
 
 function maskTelefone(value: string): string {
   const digits = value.replace(/\D/g, '').slice(0, 11);
@@ -95,8 +117,9 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const [mpInstance, setMpInstance] = useState<any>(null);
 
   const [cupomInput, setCupomInput] = useState('');
-  const [cupomAtivo, setCupomAtivo] = useState<(typeof CUPONS)[string] & { codigo: string } | null>(null);
+  const [cupomAtivo, setCupomAtivo] = useState<CupomAplicado | null>(null);
   const [cupomStatus, setCupomStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [cupomLoading, setCupomLoading] = useState(false);
   const [frete, setFrete] = useState<FreteResult>({ valor: 0, label: '' });
   const [cepStatus, setCepStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [cepLoading, setCepLoading] = useState(false);
@@ -142,18 +165,24 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     };
   }, [onClose]);
 
+  // Subtotal em ref para o cupom automático poder validar valor mínimo sem
+  // reexecutar o efeito a cada mudança do carrinho.
+  const subtotalRef = useRef(subtotal);
+  useEffect(() => { subtotalRef.current = subtotal; }, [subtotal]);
+
   useEffect(() => {
     const auto = sessionStorage.getItem('ag_cupom_auto');
-    if (auto) {
-      sessionStorage.removeItem('ag_cupom_auto');
-      const codigo = auto.trim().toUpperCase();
-      const cupom = CUPONS[codigo];
-      if (cupom) {
-        setCupomInput(codigo);
-        setCupomAtivo({ ...cupom, codigo });
-        setCupomStatus({ ok: true, msg: `✓ ${cupom.descricao} aplicado!` });
-      }
-    }
+    if (!auto) return;
+    sessionStorage.removeItem('ag_cupom_auto');
+    const codigo = auto.trim().toUpperCase();
+    let cancelado = false;
+    buscarCupom(codigo, subtotalRef.current).then((cupom) => {
+      if (cancelado || !cupom) return;
+      setCupomInput(codigo);
+      setCupomAtivo(cupom);
+      setCupomStatus({ ok: true, msg: `✓ ${cupom.descricao} aplicado!` });
+    });
+    return () => { cancelado = true; };
   }, []);
 
   useEffect(() => {
@@ -190,15 +219,21 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     }
   }
 
-  function handleAplicarCupom() {
+  async function handleAplicarCupom() {
     const codigo = cupomInput.trim().toUpperCase();
     if (!codigo) { setCupomAtivo(null); setCupomStatus(null); return; }
-    const cupom = CUPONS[codigo];
+    if (cupomLoading) return;
+
+    setCupomLoading(true);
+    setCupomStatus({ ok: true, msg: 'Verificando...' });
+    const cupom = await buscarCupom(codigo, subtotal);
+    setCupomLoading(false);
+
     if (!cupom) {
       setCupomAtivo(null);
       setCupomStatus({ ok: false, msg: '✗ Cupom inválido ou expirado' });
     } else {
-      setCupomAtivo({ ...cupom, codigo });
+      setCupomAtivo(cupom);
       setCupomStatus({ ok: true, msg: `✓ ${cupom.descricao} aplicado!` });
     }
   }
@@ -416,7 +451,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                       placeholder="Digite o código"
                       style={{ textTransform: 'uppercase' }}
                     />
-                    <button type="button" className={styles.cupomBtn} onClick={handleAplicarCupom}>APLICAR</button>
+                    <button type="button" className={styles.cupomBtn} onClick={handleAplicarCupom} disabled={cupomLoading}>{cupomLoading ? '...' : 'APLICAR'}</button>
                   </div>
                   {cupomStatus && (
                     <span className={`${styles.cupomStatus} ${cupomStatus.ok ? styles.cupomOk : styles.cupomErr}`}>
