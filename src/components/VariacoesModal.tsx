@@ -1,6 +1,7 @@
 // src/components/VariacoesModal.tsx
 import { useEffect, useRef } from 'react';
 import { formatCurrency as fmt } from '../lib/format';
+import { getPrecoInfo } from '../lib/preco';
 import type { Produto, Variacao } from '../types';
 
 interface VariacoesModalProps {
@@ -110,7 +111,7 @@ export default function VariacoesModal({ produto, onClose, onSelect }: Variacoes
           ) : (
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }} role="list">
               {variacoes.map((v) => {
-                const preco = v.preco ?? produto.preco_pix ?? produto.preco;
+                const preco = getPrecoInfo(produto, v).precoFinal;
                 const esgotado = typeof v.estoque === 'number' && v.estoque <= 0;
                 const ultimas = typeof v.estoque === 'number' && v.estoque > 0 && v.estoque <= 3;
 

@@ -8,6 +8,7 @@ import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import AddedToCartToast from '../components/AddedToCartToast';
 import { useProduct } from '../hooks/useProduct';
 import { formatCurrency } from '../lib/format';
+import { getPrecoInfo } from '../lib/preco';
 import { buildProductPath, extractProductIdFromParam } from '../lib/productPath';
 import { useCartStore } from '../store/cart';
 import { useToastStore } from '../store/toast';
@@ -158,7 +159,7 @@ export default function ProductPage() {
       nome: produto.nome,
       marca: produto.marca,
       categoria: produto.categorias?.nome ?? '',
-      preco: produto.preco_pix ?? produto.preco,
+      preco: getPrecoInfo(produto).precoFinal,
       imagem: produto.imagem_url,
       estoque: produto.estoque,
       qtd: 1,
@@ -175,7 +176,7 @@ export default function ProductPage() {
       variacao: variacao.nome,
       marca: produtoSelecionado.marca,
       categoria: produtoSelecionado.categorias?.nome ?? '',
-      preco: variacao.preco ?? produtoSelecionado.preco_pix ?? produtoSelecionado.preco,
+      preco: getPrecoInfo(produtoSelecionado, variacao).precoFinal,
       imagem: produtoSelecionado.imagem_url,
       estoque: variacao.estoque,
       qtd: 1,
@@ -230,17 +231,31 @@ export default function ProductPage() {
               {produto.descricao && <p className={styles.description}>{produto.descricao}</p>}
 
               <div className={styles.priceContainer}>
-                {produto.preco_pix && (
-                  <p className={styles.priceValue}>
-                    {formatCurrency(produto.preco_pix)}
-                    <span className={styles.priceLabel}>PIX</span>
-                  </p>
-                )}
+                {(() => {
+                  const preco = getPrecoInfo(produto);
+                  return (
+                    <>
+                      {preco.emPromocao && (
+                        <p className={styles.priceOld}>
+                          De {formatCurrency(preco.precoDe as number)}
+                          <span className={styles.priceDiscount}>-{preco.desconto}%</span>
+                        </p>
+                      )}
 
-                <p className={produto.preco_pix ? styles.priceSecondary : styles.priceSecondary + ' ' + styles.noPrimaryPrice}>
-                  {formatCurrency(produto.preco)}
-                  <span className={styles.priceLabel}>CARTAO</span>
-                </p>
+                      {preco.precoPix !== null && (
+                        <p className={styles.priceValue}>
+                          {formatCurrency(preco.precoPix)}
+                          <span className={styles.priceLabel}>PIX</span>
+                        </p>
+                      )}
+
+                      <p className={preco.precoPix !== null ? styles.priceSecondary : styles.priceSecondary + ' ' + styles.noPrimaryPrice}>
+                        {formatCurrency(preco.precoVenda)}
+                        <span className={styles.priceLabel}>CARTAO</span>
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
 
               <div className={styles.actions}>

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Produto, Variacao, ItemCarrinho } from '../types';
+import { getPrecoInfo } from '../lib/preco';
 
 function makeCartKey(prodId: number, variacaoId?: number): string {
   return variacaoId !== undefined ? `${prodId}::${variacaoId}` : `${prodId}`;
@@ -46,7 +47,7 @@ export const useCartStore = create<CartState>()(
             };
           }
 
-          const preco = variacao?.preco ?? produto.preco_pix ?? produto.preco;
+          const preco = getPrecoInfo(produto, variacao).precoFinal;
           const novoItem: ItemCarrinho = {
             id: produto.id,
             cartKey,

@@ -9,6 +9,7 @@ import AnnouncementBar from '../components/AnnouncementBar';
 import HeroSection from '../components/HeroSection';
 import Header from '../components/Header';
 import ProductGrid from '../components/ProductGrid';
+import DestaquesSection from '../components/DestaquesSection';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
@@ -119,11 +120,13 @@ export default function Home() {
 
       <HeroSection />
 
+      <DestaquesSection />
+
       <main id="main-content">
         <div className="section-head">
           <div>
             <div className="section-eyebrow">
-              <span className="num">01</span> Vitrine
+              <span className="num">02</span> Vitrine
             </div>
             <h2 className="section-title">
               A vitrine, <em>refinada</em>.

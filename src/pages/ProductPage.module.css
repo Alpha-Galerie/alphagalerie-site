@@ -84,6 +84,28 @@
   margin-top: 0.5rem;
 }
 
+.priceOld {
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(244, 244, 244, 0.45);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  text-decoration: line-through;
+}
+
+.priceDiscount {
+  background: #b3361f;
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 4px 8px;
+  text-decoration: none;
+}
+
 .priceValue {
   margin: 0;
   color: #f4f4f4;
