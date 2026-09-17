@@ -93,6 +93,13 @@
   color: #000;
 }
 
+.badgePromo {
+  background-color: #b3361f;
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+}
+
 .badgeEsgotado {
   background-color: #444;
   color: #aaa;
@@ -163,6 +170,27 @@
   gap: 8px;
   margin-bottom: 18px;
   flex-wrap: wrap;
+}
+
+.priceOld {
+  flex-basis: 100%;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #777;
+  text-decoration: line-through;
+  line-height: 1;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .priceValue {

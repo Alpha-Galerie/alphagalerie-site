@@ -8,6 +8,7 @@ const mockProduto: Produto = {
   marca: 'Marca',
   preco: 100,
   preco_pix: 95,
+  preco_promocional: null,
   categoria_id: 1,
   subcategoria: null,
   estoque: 10,

@@ -4,8 +4,7 @@ import { useCategories } from '../hooks/useCategories';
 import { useSubcategories } from '../hooks/useSubcategories';
 import { useSubcategoriasOcultas } from '../hooks/useSubcategoriasOcultas';
 import { useProducts } from '../hooks/useProducts';
-import { useCartStore } from '../store/cart';
-import { useToastStore } from '../store/toast';
+import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
 import type { Produto, Variacao } from '../types';
 import ProductCard from './ProductCard';
 import VariacoesModal from './VariacoesModal';
@@ -119,8 +118,7 @@ export default function ProductGrid({
   , [categoryId, search, categorias]);
 
   const { data, isLoading, isFetching } = useProducts(categoryId, page, search, activeSubcat, extraCategoryIds);
-  const addItem = useCartStore((s) => s.addItem);
-  const showToast = useToastStore((s) => s.showToast);
+  const { adicionar, adicionarVariacao } = useCarrinhoActions();
 
   const serverProdutos = data?.produtos ?? [];
   const total = data?.total ?? 0;
@@ -128,36 +126,8 @@ export default function ProductGrid({
 
   const produtos = serverProdutos;
 
-  function handleAddToCart(produto: Produto) {
-    addItem(produto);
-    showToast({
-      id: produto.id,
-      cartKey: String(produto.id),
-      nome: produto.nome,
-      marca: produto.marca,
-      categoria: produto.categorias?.nome ?? '',
-      preco: produto.preco_pix ?? produto.preco,
-      imagem: produto.imagem_url,
-      estoque: produto.estoque,
-      qtd: 1,
-    });
-  }
-
   function handleSelectVariacao(produto: Produto, variacao: Variacao) {
-    addItem(produto, variacao);
-    showToast({
-      id: produto.id,
-      cartKey: `${produto.id}::${variacao.id}`,
-      variacaoId: variacao.id,
-      nome: produto.nome,
-      variacao: variacao.nome,
-      marca: produto.marca,
-      categoria: produto.categorias?.nome ?? '',
-      preco: variacao.preco ?? produto.preco_pix ?? produto.preco,
-      imagem: produto.imagem_url,
-      estoque: variacao.estoque,
-      qtd: 1,
-    });
+    adicionarVariacao(produto, variacao);
     setVariacoesTarget(null);
   }
 
@@ -322,7 +292,7 @@ export default function ProductGrid({
             <ProductCard
               key={produto.id}
               produto={produto}
-              onAddToCart={handleAddToCart}
+              onAddToCart={adicionar}
               onOpenVariacoes={setVariacoesTarget}
             />
           ))}

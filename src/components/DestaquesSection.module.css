@@ -1,0 +1,106 @@
+.section {
+  padding: 72px 0 8px;
+  border-bottom: 1px solid #141414;
+}
+
+.inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px 64px;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+/* No celular vira carrossel: a vitrine principal continua logo abaixo,
+   sem oito cards em coluna empurrando o catálogo para baixo. */
+@media (max-width: 767px) {
+  .grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .grid > * {
+    flex: 0 0 66vw;
+    max-width: 280px;
+    scroll-snap-align: start;
+  }
+}
+
+.verTudo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 36px;
+  padding: 12px 24px;
+  border: 1px solid rgba(201, 169, 97, 0.45);
+  color: #c9a961;
+  background: transparent;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 999px;
+  transition: all 0.25s ease;
+}
+
+.verTudo:hover {
+  background: #c9a961;
+  color: #0a0a0a;
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding-top: 48px;
+  }
+
+  .inner {
+    padding: 0 16px 48px;
+  }
+
+  .grid {
+  display: grid;
+  gap: 12px;
+}
+
+/* No celular vira carrossel: a vitrine principal continua logo abaixo,
+   sem oito cards em coluna empurrando o catálogo para baixo. */
+@media (max-width: 767px) {
+  .grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .grid > * {
+    flex: 0 0 66vw;
+    max-width: 280px;
+    scroll-snap-align: start;
+  }
+}
+
+.verTudo {
+    width: 100%;
+    justify-content: center;
+  }
+}

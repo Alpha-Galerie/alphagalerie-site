@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useCartStore } from '../store/cart';
 import { useToastStore } from '../store/toast';
 import { formatCurrency } from '../lib/format';
+import { getPrecoInfo } from '../lib/preco';
 import type { Produto, Variacao } from '../types';
 import { useProduct } from '../hooks/useProduct';
 import { buildProductPath } from '../lib/productPath';
@@ -83,7 +84,7 @@ export default function ProductModal({ produtoId, onClose }: ProductModalProps) 
       nome: produto.nome,
       marca: produto.marca,
       categoria: produto.categorias?.nome ?? '',
-      preco: produto.preco_pix ?? produto.preco,
+      preco: getPrecoInfo(produto).precoFinal,
       imagem: produto.imagem_url,
       estoque: produto.estoque,
       qtd: 1,
@@ -101,7 +102,7 @@ export default function ProductModal({ produtoId, onClose }: ProductModalProps) 
       variacao: variacao.nome,
       marca: produtoSelecionado.marca,
       categoria: produtoSelecionado.categorias?.nome ?? '',
-      preco: variacao.preco ?? produtoSelecionado.preco_pix ?? produtoSelecionado.preco,
+      preco: getPrecoInfo(produtoSelecionado, variacao).precoFinal,
       imagem: produtoSelecionado.imagem_url,
       estoque: variacao.estoque,
       qtd: 1,
@@ -184,22 +185,37 @@ export default function ProductModal({ produtoId, onClose }: ProductModalProps) 
                 </p>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                {produto.preco_pix && (
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.25rem', fontWeight: 700, color: '#f4f4f4' }}>
-                      {formatCurrency(produto.preco_pix)}
-                    </span>
-                    <small style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.7rem', color: 'rgba(244,244,244,0.4)', letterSpacing: '0.08em' }}>PIX</small>
+              {(() => {
+                const preco = getPrecoInfo(produto);
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    {preco.emPromocao && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.8rem', color: 'rgba(244,244,244,0.45)', textDecoration: 'line-through' }}>
+                          {formatCurrency(preco.precoDe as number)}
+                        </span>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', background: '#b3361f', color: '#fff', padding: '0.2rem 0.4rem' }}>
+                          -{preco.desconto}%
+                        </span>
+                      </div>
+                    )}
+                    {preco.precoPix !== null && (
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '1.25rem', fontWeight: 700, color: '#f4f4f4' }}>
+                          {formatCurrency(preco.precoPix)}
+                        </span>
+                        <small style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.7rem', color: 'rgba(244,244,244,0.4)', letterSpacing: '0.08em' }}>PIX</small>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: preco.precoPix !== null ? '0.9rem' : '1.25rem', fontWeight: preco.precoPix !== null ? 400 : 700, color: preco.precoPix !== null ? 'rgba(244,244,244,0.45)' : '#f4f4f4' }}>
+                        {formatCurrency(preco.precoVenda)}
+                      </span>
+                      <small style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.7rem', color: 'rgba(244,244,244,0.4)', letterSpacing: '0.08em' }}>cartao</small>
+                    </div>
                   </div>
-                )}
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: produto.preco_pix ? '0.9rem' : '1.25rem', fontWeight: produto.preco_pix ? 400 : 700, color: produto.preco_pix ? 'rgba(244,244,244,0.45)' : '#f4f4f4' }}>
-                    {formatCurrency(produto.preco)}
-                  </span>
-                  <small style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.7rem', color: 'rgba(244,244,244,0.4)', letterSpacing: '0.08em' }}>cartao</small>
-                </div>
-              </div>
+                );
+              })()}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: 'auto' }}>
                 <button

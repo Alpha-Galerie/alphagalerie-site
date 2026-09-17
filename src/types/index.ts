@@ -23,11 +23,15 @@ export interface Produto {
   marca: string;
   preco: number;
   preco_pix: number | null;
+  /** Preço promocional ("por"). Quando menor que `preco`, o produto entra em promoção. */
+  preco_promocional: number | null;
   categoria_id: number;
   subcategoria: string | null;
   estoque: number | null;
   ativo: boolean;
   destaque: boolean;
+  /** Ordem manual na vitrine de destaques (menor primeiro). */
+  destaque_ordem?: number | null;
   imagem_url: string | null;
   descricao?: string;
   categorias?: Categoria;

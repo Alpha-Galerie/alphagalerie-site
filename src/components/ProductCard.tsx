@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { Link } from 'react-router-dom';
 import type { Produto } from '../types';
 import { formatCurrency } from '../lib/format';
+import { getPrecoInfo } from '../lib/preco';
 import { buildProductPath } from '../lib/productPath';
 import styles from './ProductCard.module.css';
 
@@ -9,6 +10,8 @@ interface ProductCardProps {
   produto: Produto;
   onAddToCart: (produto: Produto) => void;
   onOpenVariacoes: (produto: Produto) => void;
+  /** Na vitrine de destaques o selo "Destaque" é redundante. */
+  hideDestaqueBadge?: boolean;
 }
 
 const PlaceholderIcon: FC = () => (
@@ -28,10 +31,16 @@ const PlaceholderIcon: FC = () => (
   </svg>
 );
 
-const ProductCard: FC<ProductCardProps> = ({ produto, onAddToCart, onOpenVariacoes }) => {
+const ProductCard: FC<ProductCardProps> = ({
+  produto,
+  onAddToCart,
+  onOpenVariacoes,
+  hideDestaqueBadge = false,
+}) => {
   const esgotado = produto.estoque !== null && produto.estoque === 0;
   const temVariacoes = produto._variacoes && produto._variacoes.length > 0;
   const productPath = buildProductPath(produto);
+  const preco = getPrecoInfo(produto);
 
   const handleCta = () => {
     if (esgotado) return;
@@ -62,7 +71,10 @@ const ProductCard: FC<ProductCardProps> = ({ produto, onAddToCart, onOpenVariaco
           </div>
         )}
         <div className={styles.badgesWrapper}>
-          {produto.destaque && (
+          {preco.emPromocao && (
+            <span className={`${styles.badge} ${styles.badgePromo}`}>-{preco.desconto}%</span>
+          )}
+          {produto.destaque && !hideDestaqueBadge && !preco.emPromocao && (
             <span className={`${styles.badge} ${styles.badgeDestaque}`}>Destaque</span>
           )}
           {esgotado && (
@@ -87,14 +99,16 @@ const ProductCard: FC<ProductCardProps> = ({ produto, onAddToCart, onOpenVariaco
         )}
 
         <div className={styles.productPrice}>
-          {produto.preco_pix ? (
-            <>
-              <span className={styles.priceValue}>{formatCurrency(produto.preco_pix)}</span>
-              <span className={styles.priceLabel}>no pix</span>
-            </>
-          ) : (
-            <span className={styles.priceValue}>{formatCurrency(produto.preco)}</span>
+          {preco.precoDe !== null && (
+            <span className={styles.priceOld}>
+              <span className={styles.srOnly}>De </span>
+              {formatCurrency(preco.precoDe)}
+            </span>
           )}
+          <span className={styles.priceValue}>
+            {formatCurrency(preco.precoPix ?? preco.precoVenda)}
+          </span>
+          {preco.precoPix !== null && <span className={styles.priceLabel}>no pix</span>}
         </div>
 
         <button
