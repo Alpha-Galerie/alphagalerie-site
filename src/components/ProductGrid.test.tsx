@@ -78,7 +78,7 @@ describe('barra de subcategorias', () => {
     // "Todas" + 8 subcategorias + o botão de expandir
     expect(nomes[0]).toMatch(/Todas/);
     expect(nomes).toHaveLength(10);
-    expect(nomes.at(-1)).toMatch(/\+ 3 mais/);
+    expect(nomes[nomes.length - 1]).toMatch(/\+ 3 mais/);
   });
 
   it('respeita a ordem do banco: quem tem mais estoque vem primeiro', () => {
