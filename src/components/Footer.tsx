@@ -13,7 +13,7 @@ import styles from './Footer.module.css';
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
 
 const CURRENT_YEAR = new Date().getFullYear();
-const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? new Date().toISOString().slice(0, 10);
+const APP_VERSION = __BUILD_ID__;
 
 const Footer: FC = () => {
   // Endereço, telefone, horário e Instagram vêm da retaguarda. Precisam bater
