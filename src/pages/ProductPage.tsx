@@ -54,6 +54,30 @@ function trimDescription(text: string): string {
   return `${cleaned.slice(0, 157)}...`;
 }
 
+/** Preço que a pessoa realmente vai pagar: o promocional quando ele existe
+ *  e é menor, senão o preço cheio. Anunciar preço diferente do praticado faz
+ *  o Google reprovar o resultado — e gera reclamação de cliente. */
+function precoVigente(p: Produto): number {
+  const cheio = Number(p.preco ?? 0);
+  const promo = p.preco_promocional != null ? Number(p.preco_promocional) : null;
+  return promo != null && promo > 0 && promo < cheio ? promo : cheio;
+}
+
+/**
+ * Publica o JSON-LD de Produto na página. É o que permite ao Google mostrar
+ * preço e disponibilidade direto no resultado da busca, em vez de só um link.
+ */
+function upsertProdutoJsonLd(dados: Record<string, unknown> | null) {
+  const ID = 'ld-produto';
+  document.getElementById(ID)?.remove();
+  if (!dados) return;
+  const el = document.createElement('script');
+  el.id = ID;
+  el.type = 'application/ld+json';
+  el.textContent = JSON.stringify(dados);
+  document.head.appendChild(el);
+}
+
 export default function ProductPage() {
   const { productSlug } = useParams();
   const produtoId = extractProductIdFromParam(productSlug);
@@ -88,6 +112,28 @@ export default function ProductPage() {
       upsertMeta('name', 'twitter:title', title);
       upsertMeta('name', 'twitter:description', description);
       upsertMeta('name', 'twitter:image', imageUrl);
+
+      const emEstoque = (produto.estoque ?? 0) > 0;
+      upsertProdutoJsonLd({
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name: produto.nome,
+        description,
+        image: imageUrl,
+        sku: String(produto.id),
+        ...(produto.marca ? { brand: { '@type': 'Brand', name: produto.marca } } : {}),
+        ...(produto.categorias?.nome ? { category: produto.categorias.nome } : {}),
+        offers: {
+          '@type': 'Offer',
+          url: pageUrl,
+          priceCurrency: 'BRL',
+          price: precoVigente(produto).toFixed(2),
+          availability: emEstoque
+            ? 'https://schema.org/InStock'
+            : 'https://schema.org/OutOfStock',
+          seller: { '@type': 'Store', name: 'Alpha Galerie', '@id': 'https://alphagalerie.com/#loja' },
+        },
+      });
       return;
     }
 
@@ -103,6 +149,10 @@ export default function ProductPage() {
 
     document.title = DEFAULT_TITLE;
   }, [produto, isLoading, isError]);
+
+  // Sem isto o JSON-LD do último produto continuaria na home depois de
+  // navegar para trás, descrevendo a página errada para o buscador.
+  useEffect(() => () => upsertProdutoJsonLd(null), []);
 
   useEffect(() => {
     return () => {

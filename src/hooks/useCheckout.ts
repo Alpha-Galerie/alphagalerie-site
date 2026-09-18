@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { marcarQueJaComprou } from './useOfertaSaida';
 import type { Pedido, ItemCarrinho } from '../types';
 
 interface SubmitResult {
@@ -60,6 +61,7 @@ async function fallbackInsertPedido(
       await supabase.from('pedido_itens').insert(itemsWithPedidoId);
     }
 
+    marcarQueJaComprou();
     return { success: true, pedido: data };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Erro ao registrar pedido.';
@@ -106,6 +108,7 @@ export function useCheckout() {
         });
 
         if (error) throw error;
+        marcarQueJaComprou();
         return { success: true, pedido: data };
       } catch (rpcError: unknown) {
         // Fallback to old method if RPC not available
