@@ -184,3 +184,22 @@
     gap: 8px;
   }
 }
+
+/* Endereço do rodapé: herda o estilo dos links de contato e evita o itálico
+   que o navegador aplica por padrão em <address>. */
+.endereco {
+  font-style: normal;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--text-dim, #888);
+}
+
+.endereco a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.endereco a:hover {
+  color: var(--gold, #c9a961);
+}
