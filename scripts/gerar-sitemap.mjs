@@ -33,6 +33,54 @@ function escapar(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+
+/**
+ * Aplica no index.html os textos de SEO que o dono edita na retaguarda.
+ *
+ * Roda no build e grava direto no HTML. Injetar por JavaScript depois que a
+ * página carrega é menos confiável para o buscador — o que pesa é o que já
+ * vem no HTML da resposta.
+ *
+ * Se a consulta falhar, o HTML fica como está: é melhor publicar com o texto
+ * anterior do que sem título e sem descrição.
+ */
+async function aplicarTextosSeo(sb) {
+  const HTML = resolve(RAIZ, 'index.html');
+  const { data, error } = await sb
+    .from('configuracoes').select('chave,valor')
+    .in('chave', ['seo_titulo', 'seo_descricao', 'seo_palavras', 'seo_frase_loja']);
+
+  if (error) { console.warn('[seo] configurações:', error.message, '— HTML mantido.'); return; }
+  if (!data || data.length === 0) { console.warn('[seo] nada configurado — HTML mantido.'); return; }
+
+  const cfg = Object.fromEntries(data.map((r) => [r.chave, (r.valor || '').trim()]));
+  let html = readFileSync(HTML, 'utf8');
+
+  const escAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const escTexto = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  const trocarMeta = (attr, nome, valor) => {
+    if (!valor) return;
+    const re = new RegExp(`(<meta\\s+${attr}="${nome}"\\s+content=")[^"]*(")`);
+    if (re.test(html)) html = html.replace(re, `$1${escAttr(valor)}$2`);
+    else console.warn(`[seo] meta ${nome} não encontrada no HTML.`);
+  };
+
+  if (cfg.seo_titulo) {
+    html = html.replace(/<title>[^<]*<\/title>/, `<title>${escTexto(cfg.seo_titulo)}</title>`);
+    trocarMeta('property', 'og:title', cfg.seo_titulo);
+  }
+  if (cfg.seo_descricao) {
+    trocarMeta('name', 'description', cfg.seo_descricao);
+    trocarMeta('property', 'og:description', cfg.seo_frase_loja || cfg.seo_descricao);
+  }
+  trocarMeta('name', 'keywords', cfg.seo_palavras);
+
+  writeFileSync(HTML, html, 'utf8');
+  console.log('[seo] título e descrição aplicados a partir da retaguarda.');
+}
+
 async function main() {
   if (!url || !key) {
     console.warn('[sitemap] VITE_SUPABASE_URL/ANON_KEY ausentes — mantendo o sitemap atual.');
@@ -41,6 +89,7 @@ async function main() {
   }
 
   const sb = createClient(url, key);
+  await aplicarTextosSeo(sb);
   const hoje = new Date().toISOString().slice(0, 10);
   const urls = [
     { loc: `${SITE}/`, changefreq: 'daily', priority: '1.0', lastmod: hoje },
