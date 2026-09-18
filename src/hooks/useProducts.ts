@@ -10,12 +10,20 @@ export interface ProductsPage {
   page: number;
 }
 
+/** `ilike` trata % e _ como curinga. Nenhuma marca tem esses caracteres
+ *  hoje, mas uma cadastrada amanhã como "MR_LUCKY" casaria com "MR.LUCKY"
+ *  e traria produto de outra marca para a lista. */
+function escaparCuringa(valor: string): string {
+  return valor.replace(/[\\%_]/g, (ch) => '\\' + ch);
+}
+
 async function fetchProducts(
   categoryId: number | null,
   page: number,
   search: string,
   subcategoria: string | null,
-  extraCategoryIds: number[]
+  extraCategoryIds: number[],
+  marca: string | null
 ): Promise<ProductsPage> {
   const from = page * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -43,6 +51,10 @@ async function fetchProducts(
 
   if (subcategoria) {
     query = query.ilike('subcategoria', subcategoria);
+  }
+
+  if (marca) {
+    query = query.ilike('marca', escaparCuringa(marca));
   }
 
   if (search.trim()) {
@@ -80,11 +92,12 @@ export function useProducts(
   page = 0,
   search = '',
   subcategoria: string | null = null,
-  extraCategoryIds: number[] = []
+  extraCategoryIds: number[] = [],
+  marca: string | null = null
 ) {
   return useQuery<ProductsPage>({
-    queryKey: ['produtos', categoryId, page, search, subcategoria, extraCategoryIds],
-    queryFn: () => fetchProducts(categoryId, page, search, subcategoria, extraCategoryIds),
+    queryKey: ['produtos', categoryId, page, search, subcategoria, extraCategoryIds, marca],
+    queryFn: () => fetchProducts(categoryId, page, search, subcategoria, extraCategoryIds, marca),
     staleTime: 5 * 60 * 1000,
     placeholderData: (prev) => prev,
   });

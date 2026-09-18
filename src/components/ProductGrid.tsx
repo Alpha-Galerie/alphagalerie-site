@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useCategories } from '../hooks/useCategories';
 import { useSubcategories, type Subcategoria } from '../hooks/useSubcategories';
+import { useMarcas, type Marca } from '../hooks/useMarcas';
 import { useSubcategoriasOcultas } from '../hooks/useSubcategoriasOcultas';
 import { useProducts } from '../hooks/useProducts';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
@@ -22,6 +23,10 @@ const PAGE_SIZE = 24;
 // Headshop sozinha tem 28: despejar todas de uma vez é o que fazia o
 // cliente se perder em vez de achar o produto.
 const SUBCATS_VISIVEIS = 8;
+
+// Mesma regra para as marcas. O normal dentro de uma subcategoria são 2 a 8,
+// mas Headshop > Headshop chega a 37 — essas ficam atrás do "ver mais".
+const MARCAS_VISIVEIS = 8;
 
 function SkeletonCard() {
   return (
@@ -63,6 +68,8 @@ export default function ProductGrid({
   const [activeSubcat, setActiveSubcat] = useState<string | null>(initialSubcat);
   const [page, setPage] = useState(0);
   const [verTodasSubcats, setVerTodasSubcats] = useState(false);
+  const [activeMarca, setActiveMarca] = useState<string | null>(null);
+  const [verTodasMarcas, setVerTodasMarcas] = useState(false);
   const [variacoesTarget, setVariacoesTarget] = useState<Produto | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cameFromUrl = useRef(initialSubcat !== null);
@@ -83,17 +90,26 @@ export default function ProductGrid({
     setSearchInput('');
     setSearch('');
     setVerTodasSubcats(false);
+    setActiveMarca(null);
+    setVerTodasMarcas(false);
     // Só reseta subcategoria se NÃO veio da URL
     if (!cameFromUrl.current) {
       setActiveSubcat(null);
     }
     cameFromUrl.current = false;
   }, [categoryId]);
-  useEffect(() => { setPage(0); }, [search, activeSubcat]);
+  useEffect(() => { setPage(0); }, [search, activeSubcat, activeMarca]);
+  useEffect(() => {
+    // Trocar de subcategoria muda o conjunto de marcas. Manter a marca
+    // anterior deixaria o cliente numa lista vazia sem entender por quê.
+    setActiveMarca(null);
+    setVerTodasMarcas(false);
+  }, [activeSubcat]);
 
   const { data: categorias = [] } = useCategories();
   const { data: subcategoriasOcultas = [] } = useSubcategoriasOcultas();
   const { data: rawSubcategorias = [] } = useSubcategories(categoryId, subcategoriasOcultas);
+  const { data: marcas = [] } = useMarcas(categoryId, activeSubcat);
 
   // When ?sub= is in the URL, ensure that subcategory is visible even if hidden
   // Only show it on the correct parent category (or during initial load via cameFromUrl)
@@ -121,6 +137,16 @@ export default function ProductGrid({
     return visiveis;
   }, [subcategorias, verTodasSubcats, activeSubcat]);
 
+  const marcasVisiveis = useMemo<Marca[]>(() => {
+    if (verTodasMarcas) return marcas;
+    const visiveis = marcas.slice(0, MARCAS_VISIVEIS);
+    if (activeMarca && !visiveis.some((m) => m.nome.toLowerCase() === activeMarca.toLowerCase())) {
+      const ativa = marcas.find((m) => m.nome.toLowerCase() === activeMarca.toLowerCase());
+      if (ativa) return [...visiveis, ativa];
+    }
+    return visiveis;
+  }, [marcas, verTodasMarcas, activeMarca]);
+
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
     setSearchInput(val);
@@ -136,7 +162,7 @@ export default function ProductGrid({
       : []
   , [categoryId, search, categorias]);
 
-  const { data, isLoading, isFetching } = useProducts(categoryId, page, search, activeSubcat, extraCategoryIds);
+  const { data, isLoading, isFetching } = useProducts(categoryId, page, search, activeSubcat, extraCategoryIds, activeMarca);
   const { adicionar, adicionarVariacao } = useCarrinhoActions();
 
   const serverProdutos = data?.produtos ?? [];
@@ -289,6 +315,82 @@ export default function ProductGrid({
                 color: '#888',
                 whiteSpace: 'nowrap',
               }}
+            >
+              ver menos
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Filtro de marca — só aparece com 2 marcas ou mais, senão é um botão
+          que não filtra nada. Segue o recorte atual: dentro de Essências
+          mostra ADALYA, ZIGGY, NAY e as demais daquela subcategoria. */}
+      {marcas.length > 1 && (
+        <div
+          className="filter-scroll"
+          style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24, alignItems: 'center', overflowX: 'auto', WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'], scrollbarWidth: 'none' as React.CSSProperties['scrollbarWidth'] }}
+          role="group"
+          aria-label="Filtrar por marca"
+        >
+          <button
+            type="button"
+            onClick={() => setActiveMarca(null)}
+            style={{
+              ...btnBase,
+              padding: '8px 16px',
+              border: `1px solid ${activeMarca === null ? '#c9a961' : '#222'}`,
+              background: activeMarca === null ? '#c9a961' : 'transparent',
+              color: activeMarca === null ? '#000' : '#888',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Todas as marcas
+          </button>
+
+          {marcasVisiveis.map((m) => {
+            const ativa = activeMarca?.toLowerCase() === m.nome.toLowerCase();
+            const esgotada = !ativa && m.comEstoque === 0;
+            return (
+              <button
+                key={m.nome}
+                type="button"
+                onClick={() => setActiveMarca(ativa ? null : m.nome)}
+                title={esgotada ? `${m.nome} — nada disponível no momento` : undefined}
+                style={{
+                  ...btnBase,
+                  padding: '8px 16px',
+                  border: `1px solid ${ativa ? '#c9a961' : '#222'}`,
+                  background: ativa ? '#c9a961' : 'transparent',
+                  color: ativa ? '#000' : esgotada ? '#4a4a4a' : '#888',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {m.nome}
+                <span style={{ fontSize: 10, opacity: ativa ? 0.65 : 0.7 }}>
+                  {esgotada ? 'esgotado' : m.comEstoque}
+                </span>
+              </button>
+            );
+          })}
+
+          {!verTodasMarcas && marcas.length > marcasVisiveis.length && (
+            <button
+              type="button"
+              onClick={() => setVerTodasMarcas(true)}
+              style={{ ...btnBase, padding: '8px 16px', border: '1px dashed #333', background: 'transparent', color: '#888', whiteSpace: 'nowrap' }}
+            >
+              + {marcas.length - marcasVisiveis.length} marcas
+            </button>
+          )}
+
+          {verTodasMarcas && marcas.length > MARCAS_VISIVEIS && (
+            <button
+              type="button"
+              onClick={() => setVerTodasMarcas(false)}
+              style={{ ...btnBase, padding: '8px 16px', border: '1px dashed #333', background: 'transparent', color: '#888', whiteSpace: 'nowrap' }}
             >
               ver menos
             </button>
