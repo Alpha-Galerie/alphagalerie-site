@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import ProductGrid from './ProductGrid';
 import type { Subcategoria } from '../hooks/useSubcategories';
+import type { Marca } from '../hooks/useMarcas';
 
 // A barra de subcategorias é o que o cliente enfrenta ao entrar na loja.
 // Estes testes cobrem as duas queixas: 68 botões de uma vez em "Todos", e
@@ -30,6 +31,20 @@ const SUBCATS_HEADSHOP: Subcategoria[] = [
 let subcatsDoHook: Subcategoria[] = [];
 let categoryIdVisto: number | null = null;
 
+// Marcas reais de Arguile > Essências, na ordem que o banco devolve.
+const MARCAS_ESSENCIAS: Marca[] = [
+  { nome: 'ADALYA', total: 20, comEstoque: 20 },
+  { nome: 'ZIGGY', total: 20, comEstoque: 19 },
+  { nome: 'NAY', total: 13, comEstoque: 13 },
+  { nome: 'DEBAJ', total: 2, comEstoque: 2 },
+  { nome: 'MR. LUCKY', total: 2, comEstoque: 2 },
+  { nome: 'FUSION', total: 1, comEstoque: 1 },
+  { nome: 'OFF MINT', total: 1, comEstoque: 0 },
+];
+let marcasDoHook: Marca[] = [];
+let subcatVistaPelasMarcas: string | null | undefined;
+let marcaFiltrada: string | null | undefined;
+
 vi.mock('../hooks/useCategories', () => ({
   useCategories: () => ({ data: CATEGORIAS }),
 }));
@@ -43,8 +58,20 @@ vi.mock('../hooks/useSubcategories', () => ({
     return { data: categoryId === null ? [] : subcatsDoHook };
   },
 }));
+vi.mock('../hooks/useMarcas', () => ({
+  useMarcas: (categoryId: number | null, subcategoria: string | null) => {
+    subcatVistaPelasMarcas = subcategoria;
+    return { data: categoryId === null ? [] : marcasDoHook };
+  },
+}));
 vi.mock('../hooks/useProducts', () => ({
-  useProducts: () => ({ data: { produtos: [], total: 0, page: 0 }, isLoading: false, isFetching: false }),
+  useProducts: (
+    _cat: number | null, _page: number, _busca: string,
+    _sub: string | null, _extra: number[], marca: string | null
+  ) => {
+    marcaFiltrada = marca;
+    return { data: { produtos: [], total: 0, page: 0 }, isLoading: false, isFetching: false };
+  },
 }));
 vi.mock('../hooks/useCarrinhoActions', () => ({
   useCarrinhoActions: () => ({ adicionar: vi.fn(), adicionarVariacao: vi.fn() }),
@@ -63,7 +90,14 @@ function nomesNaBarra() {
 beforeEach(() => {
   subcatsDoHook = SUBCATS_HEADSHOP;
   categoryIdVisto = null;
+  marcasDoHook = [];
+  subcatVistaPelasMarcas = undefined;
+  marcaFiltrada = undefined;
 });
+
+function barraMarcas() {
+  return screen.queryByRole('group', { name: /Filtrar por marca/i });
+}
 
 describe('barra de subcategorias', () => {
   it('não aparece em "Todos" — era o que despejava as 68 de uma vez', () => {
@@ -122,5 +156,83 @@ describe('barra de subcategorias', () => {
     render(<ProductGrid categoryId={1} onCategoryChange={vi.fn()} />);
     expect(screen.queryByRole('button', { name: /mais$/ })).toBeNull();
     expect(nomesNaBarra()).toHaveLength(5);
+  });
+});
+
+describe('barra de marcas', () => {
+  it('não aparece em "Todos"', () => {
+    marcasDoHook = MARCAS_ESSENCIAS;
+    render(<ProductGrid categoryId={null} onCategoryChange={vi.fn()} />);
+    expect(barraMarcas()).toBeNull();
+  });
+
+  it('não aparece com uma marca só — seria um botão que não filtra nada', () => {
+    marcasDoHook = [MARCAS_ESSENCIAS[0]];
+    render(<ProductGrid categoryId={3} onCategoryChange={vi.fn()} />);
+    expect(barraMarcas()).toBeNull();
+  });
+
+  it('lista as marcas na ordem do banco, com o disponível de cada uma', () => {
+    marcasDoHook = MARCAS_ESSENCIAS;
+    render(<ProductGrid categoryId={3} onCategoryChange={vi.fn()} />);
+    const nomes = within(barraMarcas()!).getAllByRole('button').map((b) => b.textContent ?? '');
+    expect(nomes[0]).toMatch(/Todas as marcas/i);
+    expect(nomes[1]).toMatch(/^ADALYA/);
+    expect(nomes[1]).toContain('20');
+    expect(nomes[2]).toMatch(/^ZIGGY/);
+  });
+
+  it('marca esgotada fica marcada em vez de mostrar zero', () => {
+    marcasDoHook = MARCAS_ESSENCIAS;
+    render(<ProductGrid categoryId={3} onCategoryChange={vi.fn()} />);
+    const off = within(barraMarcas()!).getByRole('button', { name: /^OFF MINT/ });
+    expect(off.textContent).toContain('esgotado');
+  });
+
+  it('clicar numa marca filtra os produtos por ela', () => {
+    marcasDoHook = MARCAS_ESSENCIAS;
+    render(<ProductGrid categoryId={3} onCategoryChange={vi.fn()} />);
+    expect(marcaFiltrada).toBeNull();
+    fireEvent.click(within(barraMarcas()!).getByRole('button', { name: /^ADALYA/ }));
+    expect(marcaFiltrada).toBe('ADALYA');
+  });
+
+  it('clicar de novo na mesma marca desliga o filtro', () => {
+    marcasDoHook = MARCAS_ESSENCIAS;
+    render(<ProductGrid categoryId={3} onCategoryChange={vi.fn()} />);
+    const alvo = () => within(barraMarcas()!).getByRole('button', { name: /^ADALYA/ });
+    fireEvent.click(alvo());
+    expect(marcaFiltrada).toBe('ADALYA');
+    fireEvent.click(alvo());
+    expect(marcaFiltrada).toBeNull();
+  });
+
+  it('as marcas seguem a subcategoria escolhida', () => {
+    marcasDoHook = MARCAS_ESSENCIAS;
+    subcatsDoHook = SUBCATS_HEADSHOP;
+    render(<ProductGrid categoryId={1} onCategoryChange={vi.fn()} />);
+    expect(subcatVistaPelasMarcas).toBeNull();
+    fireEvent.click(within(barra()!).getByRole('button', { name: /^Seda/ }));
+    expect(subcatVistaPelasMarcas).toBe('Seda');
+  });
+
+  it('trocar de subcategoria limpa a marca — senão a lista viria vazia', () => {
+    marcasDoHook = MARCAS_ESSENCIAS;
+    subcatsDoHook = SUBCATS_HEADSHOP;
+    render(<ProductGrid categoryId={1} onCategoryChange={vi.fn()} />);
+    fireEvent.click(within(barraMarcas()!).getByRole('button', { name: /^ADALYA/ }));
+    expect(marcaFiltrada).toBe('ADALYA');
+    fireEvent.click(within(barra()!).getByRole('button', { name: /^Seda/ }));
+    expect(marcaFiltrada).toBeNull();
+  });
+
+  it('com muitas marcas, recolhe a cauda', () => {
+    marcasDoHook = Array.from({ length: 37 }, (_, i) => ({
+      nome: `MARCA ${i + 1}`, total: 3, comEstoque: 3,
+    }));
+    render(<ProductGrid categoryId={1} onCategoryChange={vi.fn()} />);
+    const nomes = within(barraMarcas()!).getAllByRole('button').map((b) => b.textContent ?? '');
+    expect(nomes).toHaveLength(10);
+    expect(nomes[nomes.length - 1]).toMatch(/\+ 29 marcas/);
   });
 });
