@@ -24,6 +24,11 @@ async function fetchProducts(
     .from('produtos')
     .select('id,nome,marca,preco,preco_pix,preco_promocional,categoria_id,subcategoria,estoque,ativo,destaque,imagem_url,descricao,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em),categorias!produtos_categoria_id_fkey(*)', { count: 'estimated' })
     .eq('ativo', true)
+    // Esgotado por último. Tem que ser aqui e não no navegador: a vitrine é
+    // paginada de 24 em 24 no servidor, então ordenar depois de receber só
+    // reorganizaria a página atual — os zerados da página 1 continuariam
+    // ocupando a página 1, que é justamente onde o cliente olha.
+    .order('sem_estoque', { ascending: true })
     .order('destaque', { ascending: false })
     .order('id')
     .range(from, to);

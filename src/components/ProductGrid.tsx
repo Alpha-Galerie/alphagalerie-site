@@ -1,7 +1,7 @@
 // src/components/ProductGrid.tsx
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { useCategories } from '../hooks/useCategories';
-import { useSubcategories } from '../hooks/useSubcategories';
+import { useSubcategories, type Subcategoria } from '../hooks/useSubcategories';
 import { useSubcategoriasOcultas } from '../hooks/useSubcategoriasOcultas';
 import { useProducts } from '../hooks/useProducts';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
@@ -17,6 +17,11 @@ interface ProductGridProps {
 }
 
 const PAGE_SIZE = 24;
+
+// Quantas subcategorias a barra mostra antes de oferecer "ver mais".
+// Headshop sozinha tem 28: despejar todas de uma vez é o que fazia o
+// cliente se perder em vez de achar o produto.
+const SUBCATS_VISIVEIS = 8;
 
 function SkeletonCard() {
   return (
@@ -57,6 +62,7 @@ export default function ProductGrid({
   const [search, setSearch] = useState(initialSearch);
   const [activeSubcat, setActiveSubcat] = useState<string | null>(initialSubcat);
   const [page, setPage] = useState(0);
+  const [verTodasSubcats, setVerTodasSubcats] = useState(false);
   const [variacoesTarget, setVariacoesTarget] = useState<Produto | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cameFromUrl = useRef(initialSubcat !== null);
@@ -76,6 +82,7 @@ export default function ProductGrid({
     setPage(0);
     setSearchInput('');
     setSearch('');
+    setVerTodasSubcats(false);
     // Só reseta subcategoria se NÃO veio da URL
     if (!cameFromUrl.current) {
       setActiveSubcat(null);
@@ -90,17 +97,29 @@ export default function ProductGrid({
 
   // When ?sub= is in the URL, ensure that subcategory is visible even if hidden
   // Only show it on the correct parent category (or during initial load via cameFromUrl)
-  const subcategorias = useMemo(() => {
+  const subcategorias = useMemo<Subcategoria[]>(() => {
     if (!initialSubcat) return rawSubcategorias;
     // Show the URL subcat on the origin category (or while cameFromUrl is still true)
     const isOriginCat = subcatOriginCatRef.current !== null && categoryId === subcatOriginCatRef.current;
     if (!cameFromUrl.current && !isOriginCat) return rawSubcategorias;
-    const found = rawSubcategorias.some((s) => s.toLowerCase() === initialSubcat.toLowerCase());
+    const found = rawSubcategorias.some((s) => s.nome.toLowerCase() === initialSubcat.toLowerCase());
     if (found) return rawSubcategorias;
-    // Insert the URL subcategory in alphabetical order
-    const merged = [...rawSubcategorias, initialSubcat];
-    return merged.sort((a, b) => a.localeCompare(b, 'pt-BR'));
+    // Subcategoria oculta que veio pela URL: entra no fim da barra para o
+    // link continuar funcionando, sem furar a ordem de quem tem estoque.
+    return [...rawSubcategorias, { nome: initialSubcat, total: 0, comEstoque: 0 }];
   }, [rawSubcategorias, initialSubcat, categoryId]);
+
+  const subcatsVisiveis = useMemo<Subcategoria[]>(() => {
+    if (verTodasSubcats) return subcategorias;
+    const visiveis = subcategorias.slice(0, SUBCATS_VISIVEIS);
+    // A subcategoria selecionada nunca pode sumir da barra, mesmo estando na
+    // cauda: o cliente perderia a referência de onde está navegando.
+    if (activeSubcat && !visiveis.some((s) => s.nome.toLowerCase() === activeSubcat.toLowerCase())) {
+      const ativa = subcategorias.find((s) => s.nome.toLowerCase() === activeSubcat.toLowerCase());
+      if (ativa) return [...visiveis, ativa];
+    }
+    return visiveis;
+  }, [subcategorias, verTodasSubcats, activeSubcat]);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
@@ -185,7 +204,9 @@ export default function ProductGrid({
         ))}
       </div>
 
-      {/* Filtro de subcategorias (server-side, todas da categoria) */}
+      {/* Filtro de subcategorias — só dentro de uma categoria, ordenado pelo
+          que tem estoque, com a cauda recolhida atrás de "+ N mais". Em
+          "Todos" o hook devolve vazio e esta barra nem aparece. */}
       {subcategorias.length > 0 && (
         <div
           className="filter-scroll"
@@ -206,22 +227,72 @@ export default function ProductGrid({
           >
             Todas
           </button>
-          {subcategorias.map((s) => (
+          {subcatsVisiveis.map((s) => {
+            const ativa = activeSubcat?.toLowerCase() === s.nome.toLowerCase();
+            const esgotada = !ativa && s.comEstoque === 0;
+            return (
+              <button
+                key={s.nome}
+                type="button"
+                onClick={() => setActiveSubcat(s.nome)}
+                title={esgotada ? `${s.nome} — nada disponível no momento` : undefined}
+                style={{
+                  ...btnBase,
+                  padding: '8px 16px',
+                  border: `1px solid ${ativa ? '#c9a961' : '#222'}`,
+                  background: ativa ? '#c9a961' : 'transparent',
+                  color: ativa ? '#000' : esgotada ? '#4a4a4a' : '#888',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 7,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {s.nome}
+                {/* A contagem é do que está disponível, não do catálogo: o
+                    cliente quer saber o que dá para comprar agora. */}
+                {s.total > 0 && (
+                  <span style={{ fontSize: 10, opacity: ativa ? 0.65 : 0.7 }}>
+                    {esgotada ? 'esgotado' : s.comEstoque}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+
+          {!verTodasSubcats && subcategorias.length > subcatsVisiveis.length && (
             <button
-              key={s}
               type="button"
-              onClick={() => setActiveSubcat(s)}
+              onClick={() => setVerTodasSubcats(true)}
               style={{
                 ...btnBase,
                 padding: '8px 16px',
-                border: `1px solid ${activeSubcat?.toLowerCase() === s.toLowerCase() ? '#c9a961' : '#222'}`,
-                background: activeSubcat?.toLowerCase() === s.toLowerCase() ? '#c9a961' : 'transparent',
-                color: activeSubcat?.toLowerCase() === s.toLowerCase() ? '#000' : '#888',
+                border: '1px dashed #333',
+                background: 'transparent',
+                color: '#888',
+                whiteSpace: 'nowrap',
               }}
             >
-              {s}
+              + {subcategorias.length - subcatsVisiveis.length} mais
             </button>
-          ))}
+          )}
+
+          {verTodasSubcats && subcategorias.length > SUBCATS_VISIVEIS && (
+            <button
+              type="button"
+              onClick={() => setVerTodasSubcats(false)}
+              style={{
+                ...btnBase,
+                padding: '8px 16px',
+                border: '1px dashed #333',
+                background: 'transparent',
+                color: '#888',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              ver menos
+            </button>
+          )}
         </div>
       )}
 
