@@ -11,6 +11,10 @@ const ENDERECO = 'Calçada Flôr de Lótus, 15 — Alphaville, Barueri/SP · 064
 const LOCAL = 'Centro Comercial Alphaville';
 const TELEFONE_EXIBIDO = '(11) 94292-0076';
 const TELEFONE_LINK = '+5511942920076';
+/** O site não linkava o Instagram em lugar nenhum. Além de ser o canal que
+ *  mais traz gente, o link de ida reforça para o Google que o perfil e a
+ *  loja são o mesmo negócio — é o par do `sameAs` no schema. */
+const INSTAGRAM = 'https://www.instagram.com/alpha.galerie';
 const MAPA = 'https://www.google.com/maps/search/?api=1&query=' +
   encodeURIComponent('Alpha Galerie, Calçada Flôr de Lótus, 15, Alphaville, Barueri, SP, 06453-000');
 const CURRENT_YEAR = new Date().getFullYear();
@@ -50,6 +54,11 @@ const Footer: FC = () => {
             <li>
               <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer">
                 WhatsApp
+              </a>
+            </li>
+            <li>
+              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer">
+                Instagram @alpha.galerie
               </a>
             </li>
             <li>
