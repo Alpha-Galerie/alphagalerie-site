@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useVisita } from '../hooks/useVisita';
-import { useCartStore } from '../store/cart';
+import { useOfertaSaida } from '../hooks/useOfertaSaida';
 import { useAllCategories } from '../hooks/useAllCategories';
 import RecuperacaoPopup from '../components/RecuperacaoPopup';
 import AnnouncementBar from '../components/AnnouncementBar';
@@ -25,7 +25,6 @@ export default function Home() {
   const [categoryId, setCategoryId] = useState<number | null>(null);
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [popupOpen, setPopupOpen] = useState(false);
 
   // Parse URL params synchronously so they're available on first render
   const urlParams = new URLSearchParams(globalThis.location.search);
@@ -34,31 +33,9 @@ export default function Home() {
 
   useVisita();
 
-  const cartItems = useCartStore((s) => s.items);
+  const [popupOpen, fecharPopup] = useOfertaSaida();
 
-  useEffect(() => {
-    const popupShown = sessionStorage.getItem('ag_popup_shown');
-    if (popupShown) return;
 
-    function maybeShow() {
-      if (cartItems.length > 0) return;
-      if (sessionStorage.getItem('ag_popup_shown')) return;
-      sessionStorage.setItem('ag_popup_shown', '1');
-      setPopupOpen(true);
-    }
-
-    const timer = setTimeout(maybeShow, 90_000);
-
-    function handleExitIntent(e: MouseEvent) {
-      if (e.clientY <= 0) maybeShow();
-    }
-    document.addEventListener('mouseleave', handleExitIntent);
-
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('mouseleave', handleExitIntent);
-    };
-  }, [cartItems.length]);
 
   const { data: allCategorias = [] } = useAllCategories();
 
@@ -171,7 +148,7 @@ export default function Home() {
       <AddedToCartToast onOpenCart={() => setCartOpen(true)} />
 
       {popupOpen && (
-        <RecuperacaoPopup onClose={() => setPopupOpen(false)} />
+        <RecuperacaoPopup onClose={fecharPopup} />
       )}
     </>
   );

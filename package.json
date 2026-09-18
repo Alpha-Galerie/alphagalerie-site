@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "sitemap": "node scripts/gerar-sitemap.mjs",
+    "prebuild": "node scripts/gerar-sitemap.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",

@@ -43,21 +43,21 @@ export default function RecuperacaoPopup({ onClose }: RecuperacaoPopupProps) {
           ×
         </button>
 
-        <p className={styles.eyebrow}>Antes de ir embora...</p>
+        <p className={styles.eyebrow}>Espera! Antes de ir embora...</p>
 
         <h2 className={styles.headline}>
-          <em>10% OFF</em> pra você
-          <br />agora mesmo.
+          <em>10% OFF</em> na sua
+          <br />primeira compra.
         </h2>
 
         <p className={styles.desc}>
-          Encontrou algo que gostou? Use o cupom abaixo e garanta com desconto:
+          Use o cupom abaixo antes de sair e garanta o desconto:
         </p>
 
         <div className={styles.cupomBox}>
           <p className={styles.cupomLabel}>Seu cupom exclusivo</p>
           <p className={styles.cupomCode}>ALPHA10</p>
-          <p className={styles.cupomValidity}>válido por 24 horas</p>
+          <p className={styles.cupomValidity}>válido na primeira compra</p>
         </div>
 
         <button type="button" className={styles.ctaBtn} onClick={handleUsarCupom}>
