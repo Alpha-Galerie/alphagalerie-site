@@ -1,26 +1,29 @@
 import type { FC } from 'react';
+import InstagramIcon from './InstagramIcon';
+import {
+  useLoja,
+  enderecoLinha,
+  telefoneLink,
+  instagramUrl,
+  mapaUrl,
+  horarios,
+} from '../hooks/useLoja';
 import styles from './Footer.module.css';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
 
-/** Endereço, telefone e horário publicados no site precisam bater exatamente
- *  com o perfil do Google. É esse cruzamento (NAP) que sustenta a busca
- *  local — antes o rodapé dizia "São Paulo — SP", contradizendo o perfil,
- *  que informa Barueri. */
-const ENDERECO = 'Calçada Flôr de Lótus, 15 — Alphaville, Barueri/SP · 06453-000';
-const LOCAL = 'Centro Comercial Alphaville';
-const TELEFONE_EXIBIDO = '(11) 94292-0076';
-const TELEFONE_LINK = '+5511942920076';
-/** O site não linkava o Instagram em lugar nenhum. Além de ser o canal que
- *  mais traz gente, o link de ida reforça para o Google que o perfil e a
- *  loja são o mesmo negócio — é o par do `sameAs` no schema. */
-const INSTAGRAM = 'https://www.instagram.com/alpha.galerie';
-const MAPA = 'https://www.google.com/maps/search/?api=1&query=' +
-  encodeURIComponent('Alpha Galerie, Calçada Flôr de Lótus, 15, Alphaville, Barueri, SP, 06453-000');
 const CURRENT_YEAR = new Date().getFullYear();
 const APP_VERSION = import.meta.env.VITE_APP_VERSION ?? new Date().toISOString().slice(0, 10);
 
 const Footer: FC = () => {
+  // Endereço, telefone, horário e Instagram vêm da retaguarda. Precisam bater
+  // exatamente com o perfil do Google: é esse cruzamento (NAP) que sustenta a
+  // busca local, e antes o rodapé dizia "São Paulo — SP" enquanto o perfil
+  // dizia Barueri.
+  const loja = useLoja();
+  const instagram = instagramUrl(loja.instagram);
+  const telLink = telefoneLink(loja.telefone);
+
   return (
     <footer className={styles.footer}>
       <div className={styles.grid}>
@@ -33,6 +36,24 @@ const Footer: FC = () => {
             Curadoria de produtos exclusivos com identidade única. Arte,
             moda e lifestyle em um só lugar.
           </p>
+
+          {instagram && (
+            <a
+              className={styles.instaCard}
+              href={instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <span className={styles.instaGlyph} aria-hidden="true">
+                <InstagramIcon size={22} />
+              </span>
+              <span className={styles.instaTexto}>
+                <span className={styles.instaCta}>Siga a gente no Instagram</span>
+                <span className={styles.instaArroba}>@{loja.instagram}</span>
+              </span>
+              <span className={styles.instaSeta} aria-hidden="true">→</span>
+            </a>
+          )}
         </div>
 
         <nav aria-label="Links do rodapé">
@@ -56,35 +77,45 @@ const Footer: FC = () => {
                 WhatsApp
               </a>
             </li>
-            <li>
-              <a href={INSTAGRAM} target="_blank" rel="noopener noreferrer">
-                Instagram @alpha.galerie
-              </a>
-            </li>
-            <li>
-              <a href={`tel:${TELEFONE_LINK}`}>{TELEFONE_EXIBIDO}</a>
-            </li>
-            <li>
-              <a href="mailto:contato@alphagalerie.com.br">
-                contato@alphagalerie.com.br
-              </a>
-            </li>
+            {instagram && (
+              <li>
+                <a className={styles.instaInline} href={instagram} target="_blank" rel="noopener noreferrer">
+                  <InstagramIcon size={15} />
+                  <span>@{loja.instagram}</span>
+                </a>
+              </li>
+            )}
+            {loja.telefone && (
+              <li>
+                {telLink ? <a href={`tel:${telLink}`}>{loja.telefone}</a> : loja.telefone}
+              </li>
+            )}
+            {loja.email && (
+              <li>
+                <a href={`mailto:${loja.email}`}>{loja.email}</a>
+              </li>
+            )}
           </ul>
         </div>
 
         <div>
           <p className={styles.colTitle}>Onde estamos</p>
           <address className={styles.endereco}>
-            <a href={MAPA} target="_blank" rel="noopener noreferrer">
-              {LOCAL}
-              <br />
-              {ENDERECO}
+            <a href={mapaUrl(loja)} target="_blank" rel="noopener noreferrer">
+              {loja.complemento && (
+                <>
+                  {loja.complemento}
+                  <br />
+                </>
+              )}
+              {enderecoLinha(loja)}
             </a>
           </address>
           <p className={styles.colTitle} style={{ marginTop: '1.25rem' }}>Horário</p>
           <ul className={styles.contactList}>
-            <li>Segunda a sábado · 11h às 21h</li>
-            <li>Domingo · 14h às 19h</li>
+            {horarios(loja).map((h) => (
+              <li key={h.dias}>{h.dias} · {h.horas}</li>
+            ))}
           </ul>
         </div>
       </div>

@@ -16,7 +16,15 @@
 
 @media (min-width: 700px) {
   .grid {
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Quatro colunas de conteúdo, mas a regra acima declarava três: a coluna
+   "Onde estamos" caía sozinha numa segunda linha, longe das outras. */
+@media (min-width: 1000px) {
+  .grid {
+    grid-template-columns: 1.6fr 0.8fr 1fr 1.2fr;
   }
 }
 
@@ -202,4 +210,79 @@
 
 .endereco a:hover {
   color: var(--gold, #c9a961);
+}
+
+/* Cartão de convite para o Instagram.
+   O perfil é o canal que mais traz gente para a loja, e o site só o citava
+   como mais um item da lista de contatos — sem símbolo e sem chamada. */
+.instaCard {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 24px;
+  padding: 12px 16px;
+  border: 1px solid #262626;
+  border-radius: 10px;
+  text-decoration: none;
+  background: linear-gradient(135deg, rgba(201, 169, 97, 0.07), rgba(201, 169, 97, 0));
+  transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.instaCard:hover,
+.instaCard:focus-visible {
+  border-color: var(--gold, #c9a961);
+  background: linear-gradient(135deg, rgba(201, 169, 97, 0.14), rgba(201, 169, 97, 0.02));
+  transform: translateY(-1px);
+}
+
+.instaGlyph {
+  display: inline-flex;
+  color: var(--gold, #c9a961);
+  flex-shrink: 0;
+}
+
+.instaTexto {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.instaCta {
+  font-size: 13px;
+  color: #f4f4f4;
+  line-height: 1.3;
+}
+
+.instaArroba {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--gold, #c9a961);
+}
+
+.instaSeta {
+  color: #555;
+  font-size: 15px;
+  margin-left: 4px;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.instaCard:hover .instaSeta {
+  color: var(--gold, #c9a961);
+  transform: translateX(3px);
+}
+
+/* Mesma marca, em miniatura, na lista de contatos. */
+.instaInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+@media (max-width: 640px) {
+  .instaCard {
+    display: flex;
+    margin-top: 20px;
+  }
 }

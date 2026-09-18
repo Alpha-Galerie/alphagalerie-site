@@ -1,5 +1,7 @@
 import type { FC } from 'react';
 import { useCartStore } from '../store/cart';
+import InstagramIcon from './InstagramIcon';
+import { useLoja, instagramUrl } from '../hooks/useLoja';
 import styles from './Header.module.css';
 import footerStyles from './Footer.module.css';
 
@@ -26,6 +28,8 @@ const CartIcon: FC = () => (
 
 const Header: FC<HeaderProps> = ({ onOpenCart }) => {
   const itemCount = useCartStore((state) => state.selectItemCount());
+  const loja = useLoja();
+  const instagram = instagramUrl(loja.instagram);
 
   return (
     <header>
@@ -49,20 +53,36 @@ const Header: FC<HeaderProps> = ({ onOpenCart }) => {
             </li>
           </ul>
 
-          <button
-            type="button"
-            className={styles.cartBtn}
-            onClick={onOpenCart}
-            aria-label="Abrir carrinho"
-          >
-            <CartIcon />
-            <span>Carrinho</span>
-            {itemCount > 0 && (
-              <span className={styles.cartCount} aria-live="polite">
-                {itemCount}
-              </span>
+          <div className={styles.acoes}>
+            {instagram && (
+              <a
+                className={styles.instaBtn}
+                href={instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={`Siga @${loja.instagram} no Instagram`}
+                aria-label={`Siga @${loja.instagram} no Instagram`}
+              >
+                <InstagramIcon size={19} />
+                <span className={styles.instaArroba}>@{loja.instagram}</span>
+              </a>
             )}
-          </button>
+
+            <button
+              type="button"
+              className={styles.cartBtn}
+              onClick={onOpenCart}
+              aria-label="Abrir carrinho"
+            >
+              <CartIcon />
+              <span>Carrinho</span>
+              {itemCount > 0 && (
+                <span className={styles.cartCount} aria-live="polite">
+                  {itemCount}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
       </nav>
     </header>

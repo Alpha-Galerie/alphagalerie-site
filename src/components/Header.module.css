@@ -92,6 +92,40 @@
   color: #c9a961;
 }
 
+/* Instagram e carrinho andam juntos na direita. Sem este agrupamento o
+   `space-between` do .navInner espalharia os dois como itens soltos. */
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Mesmo desenho do botão do carrinho: o perfil do Instagram é um destino
+   tão frequente quanto o carrinho e merece o mesmo peso visual. */
+.instaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #222;
+  border-radius: 999px;
+  color: #f4f4f4;
+  text-decoration: none;
+  padding: 8px 14px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.instaBtn:hover,
+.instaBtn:focus-visible {
+  border-color: #c9a961;
+  color: #c9a961;
+}
+
+.instaArroba {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
 .cartBtn {
   display: flex;
   align-items: center;
@@ -144,6 +178,20 @@
 @media (max-width: 640px) {
   .navInner {
     padding: 14px 16px;
+  }
+
+  /* No celular o cabeçalho não comporta a arroba escrita: fica só a marca,
+     que já é reconhecível, e o texto continua no aria-label. */
+  .instaArroba {
+    display: none;
+  }
+
+  .instaBtn {
+    padding: 10px;
+  }
+
+  .acoes {
+    gap: 8px;
   }
 
   .logoImg {

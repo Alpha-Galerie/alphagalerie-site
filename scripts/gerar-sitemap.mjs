@@ -81,6 +81,96 @@ async function aplicarTextosSeo(sb) {
   console.log('[seo] título e descrição aplicados a partir da retaguarda.');
 }
 
+/**
+ * Reescreve o schema JSON-LD da loja com o endereço, telefone e horário que
+ * o dono edita na retaguarda.
+ *
+ * É esse bloco que o Google lê para saber onde a loja fica. Ele estava
+ * escrito à mão no HTML, então divergir do rodapé (ou do perfil do Google)
+ * era só questão de tempo — e endereço divergente derruba a busca local.
+ *
+ * O bloco é reescrito por JSON.parse/stringify, não por substituição de
+ * texto: mexer em JSON com expressão regular quebra no primeiro acento ou
+ * vírgula fora do lugar.
+ */
+async function aplicarDadosDaLoja(sb) {
+  const HTML = resolve(RAIZ, 'index.html');
+  const chaves = [
+    'loja_endereco', 'loja_complemento', 'loja_bairro', 'loja_cidade', 'loja_uf',
+    'loja_cep', 'loja_telefone', 'loja_instagram',
+    'loja_hora_semana_abre', 'loja_hora_semana_fecha',
+    'loja_hora_domingo_abre', 'loja_hora_domingo_fecha',
+  ];
+
+  const { data, error } = await sb.from('configuracoes').select('chave,valor').in('chave', chaves);
+  if (error) { console.warn('[loja] configurações:', error.message, '— schema mantido.'); return; }
+  if (!data || data.length === 0) { console.warn('[loja] nada configurado — schema mantido.'); return; }
+
+  const cfg = Object.fromEntries(data.map((r) => [r.chave, String(r.valor ?? '').trim()]));
+  let html = readFileSync(HTML, 'utf8');
+
+  // Acha o bloco ld+json que descreve a loja, sem depender da ordem deles.
+  const blocos = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  const alvo = blocos.find((m) => m[1].includes('"@type": "Store"') || m[1].includes('"@type":"Store"'));
+  if (!alvo) { console.warn('[loja] bloco Store não encontrado — schema mantido.'); return; }
+
+  let loja;
+  try {
+    loja = JSON.parse(alvo[1]);
+  } catch (e) {
+    console.warn('[loja] schema atual não é JSON válido:', e.message, '— mantido.');
+    return;
+  }
+
+  if (!loja.address || typeof loja.address !== 'object') {
+    loja.address = { '@type': 'PostalAddress', addressCountry: 'BR' };
+  }
+
+  const rua = [cfg.loja_endereco, cfg.loja_complemento].filter(Boolean).join(' — ');
+  if (rua) loja.address.streetAddress = rua;
+  if (cfg.loja_cidade) loja.address.addressLocality = cfg.loja_cidade;
+  if (cfg.loja_uf) loja.address.addressRegion = cfg.loja_uf;
+  if (cfg.loja_cep) loja.address.postalCode = cfg.loja_cep;
+
+  // O schema exige E.164; o dono digita "(11) 94292-0076".
+  const digitos = (cfg.loja_telefone || '').replace(/\D/g, '');
+  if (digitos) loja.telephone = digitos.startsWith('55') ? `+${digitos}` : `+55${digitos}`;
+
+  if (cfg.loja_instagram) {
+    loja.sameAs = [`https://www.instagram.com/${cfg.loja_instagram.replace(/^@/, '')}`];
+  }
+
+  const busca = ['Alpha Galerie', cfg.loja_endereco, cfg.loja_bairro, cfg.loja_cidade, cfg.loja_uf, cfg.loja_cep]
+    .filter(Boolean).join(', ');
+  if (busca) loja.hasMap = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(busca)}`;
+
+  // Horário vazio quer dizer fechado, e dia fechado simplesmente não entra —
+  // declarar "opens" sem "closes" produz schema inválido.
+  const faixa = (dias, abre, fecha) =>
+    /^\d{1,2}:\d{2}$/.test(abre || '') && /^\d{1,2}:\d{2}$/.test(fecha || '')
+      ? [{ '@type': 'OpeningHoursSpecification', dayOfWeek: dias, opens: abre, closes: fecha }]
+      : [];
+
+  const horarios = [
+    ...faixa(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      cfg.loja_hora_semana_abre, cfg.loja_hora_semana_fecha),
+    ...faixa('Sunday', cfg.loja_hora_domingo_abre, cfg.loja_hora_domingo_fecha),
+  ];
+  // Sem nenhum horário válido, é melhor manter o que já estava do que publicar
+  // uma loja que, para o Google, não abre nunca.
+  if (horarios.length > 0) loja.openingHoursSpecification = horarios;
+
+  // "</script>" dentro de um valor encerraria a tag antes da hora. Escapar o
+  // "<" resolve e o JSON continua equivalente.
+  const serializado = JSON.stringify(loja, null, 2).replace(/</g, '\\u003c');
+  html = html.slice(0, alvo.index) +
+    `<script type="application/ld+json">\n${serializado}\n  </script>` +
+    html.slice(alvo.index + alvo[0].length);
+
+  writeFileSync(HTML, html, 'utf8');
+  console.log('[loja] endereço, telefone e horário aplicados a partir da retaguarda.');
+}
+
 async function main() {
   if (!url || !key) {
     console.warn('[sitemap] VITE_SUPABASE_URL/ANON_KEY ausentes — mantendo o sitemap atual.');
@@ -90,6 +180,7 @@ async function main() {
 
   const sb = createClient(url, key);
   await aplicarTextosSeo(sb);
+  await aplicarDadosDaLoja(sb);
   const hoje = new Date().toISOString().slice(0, 10);
   const urls = [
     { loc: `${SITE}/`, changefreq: 'daily', priority: '1.0', lastmod: hoje },
