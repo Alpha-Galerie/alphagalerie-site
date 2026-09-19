@@ -1,0 +1,131 @@
+﻿Categoria;Item;Descrição;Preço (R$);Código;Foto (URL)
+Bebidas;ÁGUA MINERAL;Bebida gelada;12,00;408;https://images.tcdn.com.br/img/img_prod/1211384/agua_c_e_s_gas_1163_1_fc4cdc3610fd9c1ac1f03a7c16898f1d.png
+Bebidas;CERVEJAS;Bebida gelada;24,00;406;https://images.tcdn.com.br/img/img_prod/1211384/cervejas_1159_1_1145572eba3a551efddceb39974a62c6.png
+Bebidas;CHÁ LEÃO;Bebida gelada;14,00;407;https://images.tcdn.com.br/img/img_prod/1211384/cha_leao_1161_1_89bbf519e0cde5fb751a3d53b4f238e4.png
+Bebidas;COCA COLA LATA;Bebida gelada;12,00;409;https://images.tcdn.com.br/img/img_prod/1211384/coca_cola_lata_1165_1_91893630a61e5a185b55f18a9d615b58.png
+Bebidas;ENERGETICO MISTER HEMP  LATA 473 ML;Bebida gelada;23,00;494;https://images.tcdn.com.br/img/img_prod/1211384/energetico_mister_hemp_lata_473_ml_1_20260325210721_5494d33df443.png
+Bebidas;RED BULL´S;Bebida gelada;24,00;410;https://images.tcdn.com.br/img/img_prod/1211384/red_bulls_1167_1_4bed20d0d2d5bd81d25ba8c518beca2f.png
+Bebidas;SMIRNOFF ICE / SKOL BEATS;Bebida gelada;22,00;411;https://images.tcdn.com.br/img/img_prod/1211384/smirnoff_ice_skol_beats_1169_1_14b050029dca838de6f0e3d65aa28d11.png
+Destilados e vinhos;GARRAFA AUSTERO VINHO;Garrafa;425,00;414;https://images.tcdn.com.br/img/img_prod/1211384/austero_vinho_1175_1_28f32cc913cd73be846cad69b2076d90.png
+Destilados e vinhos;GARRAFA MAKERS MARK;Garrafa;480,00;416;https://images.tcdn.com.br/img/img_prod/1211384/makers_mark_1179_1_7f9ac8734d3ebdcb94b8b0a429c742c0.png
+Destilados e vinhos;GARRAFA NEGRONE BOULEVARDIER;Garrafa;270,00;417;https://images.tcdn.com.br/img/img_prod/1211384/negrone_boulevardier_1181_1_298059f0fb48cd425ccb6ae6f77b22e9.png
+Tabacos;ACREMA BLEND 20G;Tabaco;35,00;252;https://images.tcdn.com.br/img/img_prod/1211384/acrema_blend_743_1_3b97d1e64a84ec44548c6802fbfa4891.jpeg
+Tabacos;AMERICAN SPIRIT 30G;Tabaco;96,00;71;https://images.tcdn.com.br/img/img_prod/1211384/american_spirit_30g_219_1_1e5bec6ebae0eeb049f9c02f3d60815e.jpg
+Tabacos;AMSTERDAM 25g;Tabaco;32,00;72;https://images.tcdn.com.br/img/img_prod/1211384/amsterdam_25g_221_1_2c0421cb1307cdf2c16dfa96b4bb6aca.jpeg
+Tabacos;BOMBACO BAUNILHA;Tabaco;45,00;502;
+Tabacos;BOMBACO CAFÉ CREMA;Tabaco;45,00;501;
+Tabacos;BOMBACO TRADICIONAL;Tabaco;45,00;398;https://images.tcdn.com.br/img/img_prod/1211384/bombaco_1141_1_6c5e07b5a198caaa33301d0f2ff6cc57.png
+Tabacos;DORA GRAPE  20G;Tabaco D'ORA;37,63;499;
+Tabacos;DORA ICE 20G;Tabaco D'ORA;37,63;394;
+Tabacos;DORA VANILHA;Tabaco D'ORA;37,63;564;
+Tabacos;DRUM ORIGINAL 30G;Tabaco;85,00;73;https://images.tcdn.com.br/img/img_prod/1211384/drum_original_30g_223_1_3aff8041032d29004aa4db5386d1af92.jpeg
+Tabacos;HASH 25G;Tabaco;34,00;74;https://images.tcdn.com.br/img/img_prod/1211384/hash_25g_225_1_1f6a4cc2816d06be3a3b547232013397.jpeg
+Tabacos;Hi GOLDEN VIRGINIA 35G;Tabaco;48,50;75;https://images.tcdn.com.br/img/img_prod/1211384/hi_35g_227_1_b9bb429e54628953c537e16152def628.jpeg
+Tabacos;KIT BOMBACO ESPECIAL;Tabaco;189,90;451;https://images.tcdn.com.br/img/img_prod/1211384/kit_bombaco_especial_1_20251111172424_b538413c0979.jpg
+Tabacos;LA REVOLUCION BOLADO;Tabaco NATURE;43,00;490;https://images.tcdn.com.br/img/img_prod/1211384/la_revolucion_bolado_1_20260312171143_be23e67a92d6.jpeg
+Tabacos;MAC BAREN GUARANA #30;Tabaco;85,00;500;
+Tabacos;RAINBOW ORGANICO 25G;Tabaco;48,00;78;https://images.tcdn.com.br/img/img_prod/1211384/rainbow_organico_25g_237_1_7afa491667783a4b14b56eb77ac2d856.jpg
+Tabacos;RAINBOW SILVVER  25G;Tabaco;37,00;77;https://images.tcdn.com.br/img/img_prod/1211384/rainbow_25g_233_1_efa4051bf219f567b64eaa61d74eebc0.jpeg
+Tabacos;SASSO GOLD  VIRGINIA BLEND;Tabaco;34,00;293;https://images.tcdn.com.br/img/img_prod/1211384/sasso_virginia_blend_863_1_b9eda36f32aca137498dea1151a4653e.jpeg
+Tabacos;YERBINHA 15G;Tabaco ACREMA;17,00;447;https://images.tcdn.com.br/img/img_prod/1211384/yerbinha_15g_1_20251022152041_59c58209ff9d.png
+Tabacos;YERBINHA 30 G;Tabaco ACREMA;27,00;505;https://images.tcdn.com.br/img/img_prod/1211384/yerbinha_15g_1_20251022152041_59c58209ff9d.png
+Sedas;ALEDA BROWN OURO KING SIZE SLIM;Seda ALEDA KING;13,00;463;https://images.tcdn.com.br/img/img_prod/1211384/seda_aleda_brown_ouro_king_size_slim_1_20251212175748_f40315372b7d.jpg
+Sedas;ALEDA KING CELULOSE;Seda;14,00;98;https://images.tcdn.com.br/img/img_prod/1211384/aleda_king_celulose_293_1_391f69b226f8b709491e13356e805099.jpg
+Sedas;ALPHA HEMP  SLIM SIZE BROWN;Seda ALPHA STORE;10,00;486;https://images.tcdn.com.br/img/img_prod/1211384/alpha_hemp_brasil_1_20260213151335_1104cd47c474.png
+Sedas;CONE RAW - STAGE RAWKET;Seda;90,00;269;https://images.tcdn.com.br/img/img_prod/1211384/cone_raw_stage_rawket_793_1_32b932e56184f3747b62696791b12d84.jpeg
+Sedas;CONE RAW / MASCOTTE;Seda;55,00;101;https://images.tcdn.com.br/img/img_prod/1211384/cone_raw_309_1_cdca0510a57a9597086871aa5ebd5477.png
+Sedas;HEMP ORGANICA;Seda;8,00;93;https://images.tcdn.com.br/img/img_prod/1211384/hemp_organica_277_1_4dbb188bf492195fc3f47a02d03a8f07.jpeg
+Sedas;MASCOTTE AMSTERDAM GENETICS;Seda;13,00;481;https://images.tcdn.com.br/img/img_prod/1211384/mascotte_amsterdam_genetics_1_20260109131944_ca4c2504fa20.png
+Sedas;MASCOTTE BROW KING SIZE;Seda;13,00;267;https://images.tcdn.com.br/img/img_prod/1211384/mascotte_brow_king_size_785_1_484ccaf7a27761ac23ee6f2bdb09b292.jpg
+Sedas;MASCOTTE BROWN SLIM COMBI;Seda SEDA - MASCOTTE;26,00;259;https://images.tcdn.com.br/img/img_prod/1211384/seda_mascotte_brown_slim_767_1_83ffaa2fe2f84cd1fe6effae419d84bd.jpeg
+Sedas;MASCOTTE HEMP TIPS;Seda;24,00;266;https://images.tcdn.com.br/img/img_prod/1211384/mascotte_hemp_tips_783_1_c4dbb2eef3e67db3eb5af6b4814e2261.jpeg
+Sedas;PAY PAY GO GREEN;Seda PAY PAY GO GREEN ALFAFA;13,00;96;https://images.tcdn.com.br/img/img_prod/1211384/pay_pay_go_green_alfafa_289_1_b5f8b3305bded5c30ee64d4c8342a1a7.jpeg
+Sedas;RAW CLASSIC KING SIZE SLIM;Seda;17,00;160;https://images.tcdn.com.br/img/img_prod/1211384/raw_seda_classic_481_1_873076de10467557094fa52bd41262fd.jpg
+Sedas;RAW ROLLS SINGLE WIDE;Seda;35,00;256;https://images.tcdn.com.br/img/img_prod/1211384/raw_rolls_single_wide_757_1_4eae9d487f67475bcfbbc2ae61f2033e.jpeg
+Sedas;SEDA  -SADHU LARGE LONGA EVENING;Seda SEDA -SADHU LARGE LONGA;14,00;262;https://images.tcdn.com.br/img/img_prod/1211384/seda_sadhu_large_longa_evening_773_1_47b62bada5d29a38ff05d1d6e9f0d292.jpeg
+Sedas;SEDA RAW CLASSIC SINGLE WIDE;Seda;16,00;161;https://images.tcdn.com.br/img/img_prod/1211384/raw_classic_1_4_483_1_55f21047e3ae8d3e46a3eb92d183b5c9.jpg
+Sedas;SMOKING DELUXE KING SIZE;Seda SMOKING BROWN;14,00;97;https://images.tcdn.com.br/img/img_prod/1211384/smoking_deluxe_king_size_1_20260216204751_ee13fb6a91b0.jpeg
+Filtros;FILTRO LION ROLLING CIRCUS BIODEGRADAVEL;Filtro;24,00;280;https://images.tcdn.com.br/img/img_prod/1211384/lion_rolling_circus_biodegradavel_823_1_b64f358cc48e5950b330a2d60bf98a72.jpeg
+Filtros;FILTRO SLOW BURNING EXTRA LONGO;Filtro;35,00;479;https://images.tcdn.com.br/img/img_prod/1211384/filtro_slow_burning_extra_longo_1_20260106134100_32be365adf13.png
+Filtros;FILTRO SMOKING SLIM;Filtro;23,00;282;https://images.tcdn.com.br/img/img_prod/1211384/filtro_smoking_slim_831_1_c2b1a1a07158476a4937e05b2d72e494.jpeg
+Filtros;GIZEH MENTHOL;Filtro;25,00;437;https://images.tcdn.com.br/img/img_prod/1211384/gizeh_menthol_1233_1_9f13e1f6dd28327b2808ae7c868703e1.png
+Filtros;GIZEH XXL SLIM FILTRO LONGO;Filtro;25,00;439;https://images.tcdn.com.br/img/img_prod/1211384/gizeh_xxl_slim_filtro_longo_1_20250827153042_ab5a67ce1d71.png
+Filtros;MASCOTTE ACTIVE SLIM;Filtro;29,00;281;https://images.tcdn.com.br/img/img_prod/1211384/mascotte_active_slim_829_1_c0091f029b8762a24349bbfe90d30bca.jpeg
+Filtros;RAW SUPER LONGO SL 30;Filtro;55,00;436;https://images.tcdn.com.br/img/img_prod/1211384/raw_super_longo_sl_30_1231_1_4e43e29865e84cc650b1871e74a50691.png
+Filtros;SILVER SCREEN FILTERS UN;Filtro HONEYPUFF;30,00;198;https://images.tcdn.com.br/img/img_prod/1211384/silver_screen_filters_un_585_1_769de9c5cd82d3f18801ea1642cc2a84.jpg
+Piteiras;ALEDA EXTRA LARGA UNBLEACHED;Piteira;14,00;381;https://images.tcdn.com.br/img/img_prod/1211384/aleda_extra_larga_unbleached_1093_1_e035aa1b0125143d39664ee9a5a35b2d.jpeg
+Piteiras;FULL COLOR M;Piteira;80,00;403;https://images.tcdn.com.br/img/img_prod/1211384/full_color_m_1151_1_58334a34d425f56187bd4e8d23983702.png
+Piteiras;FULL COLOR P;Piteira;70,00;400;https://images.tcdn.com.br/img/img_prod/1211384/full_color_p_1145_1_0b59c6e61a358250ce659f170529fd8a.png
+Piteiras;FULL COLOR SLIM;Piteira;65,00;404;https://images.tcdn.com.br/img/img_prod/1211384/full_color_slim_1153_1_58f303ab30d0ccbf7e6700b15a123aa7.png
+Piteiras;NOWDAYS PITEIRA;Piteira;12,90;279;https://images.tcdn.com.br/img/img_prod/1211384/nowdays_piteira_821_1_b24994bbe108757fbd19a2aac3c13b5f.jpeg
+Piteiras;PAPELITO BIODEGRADAVEL MEGA LONGA;Piteira;14,00;272;https://images.tcdn.com.br/img/img_prod/1211384/papelito_biod_mega_longa_805_1_e575d1f73bebc53597e40c6bd45276d1.jpeg
+Piteiras;PITEIRA RAW PROTIPS;Piteira RAW PERFORATED;24,00;275;https://images.tcdn.com.br/img/img_prod/1211384/raw_perforated_wide_tips_811_1_3796605cdedc5b03f93509367a20cffa.jpeg
+Piteiras;RAW - PITEIRA DE MADEIRA DOUBLE;Piteira;215,00;273;https://images.tcdn.com.br/img/img_prod/1211384/raw_piteira_de_madeira_double_807_1_0b9a48c7843a57ef69e63e0452c06043.jpeg
+Piteiras;RAW - RAWL BOOK 480 UN;Piteira RAW PERFORATED;200,00;445;https://images.tcdn.com.br/img/img_prod/1211384/raw_rawl_book_480_un_1_20251008162619_7ed286080498.png
+Piteiras;SQUADAFUM LARGE;Piteira;13,00;276;https://images.tcdn.com.br/img/img_prod/1211384/squadafum_large_813_1_0c6b564acff52b03a085bb52f0ccc23a.jpeg
+Isqueiros;BIC GRANDE;Isqueiro;16,00;90;https://images.tcdn.com.br/img/img_prod/1211384/isqueiro_bic_grande_265_1_8c7f3a2041462cf0cf002536d107b350.jpg
+Isqueiros;CAPINHA BIC GRANDE;Isqueiro;23,00;444;
+Isqueiros;CLIPPER;Isqueiro;25,00;91;https://images.tcdn.com.br/img/img_prod/1211384/isqueiro_clipper_267_1_ce806630f8b6a36c1e173aa81d9f3d52.jpg
+Isqueiros;HIPER AUTOMÁTICO;Isqueiro;5,00;92;https://images.tcdn.com.br/img/img_prod/1211384/hiper_automatico_269_1_4d3f7af805230d9953d6ebf39606581a.jpeg
+Isqueiros;ZIPPO NUMBER ON;Isqueiro;320,00;105;https://images.tcdn.com.br/img/img_prod/1211384/isqueiro_zippo_number_on_amarelo_329_1_4d5a21b72b910d0d4562847396539cbd.jpg
+Essências de narguile;ADALYA - BANANA MILK ICE;Essência para narguile;34,00;546;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - BLUE MELON;Essência para narguile;34,00;543;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - BLUE MOON;Essência para narguile;34,00;545;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - CHAVES;Essência para narguile;34,00;554;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - GIPSY KINGS;Essência para narguile;34,00;538;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - HAWAII;Essência para narguile;34,00;547;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - HOMER SIMPSONS;Essência para narguile;34,00;555;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - LA CREAM;Essência para narguile;34,00;542;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - LA MUERTE;Essência para narguile;34,00;550;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - LOVE66;Essência para narguile;45,00;556;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - MARIO BROTHERS;Essência para narguile;34,00;551;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - MESTRE MYAGI;Essência para narguile;34,00;549;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - MOON SUGAR;Essência para narguile;34,00;541;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - OH MY BLUE;Essência para narguile;34,00;40;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - POPEYE;Essência para narguile;34,00;548;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - SEVEN SEAS;Essência para narguile;34,00;539;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - SHEIK MONEY;Essência para narguile;34,00;553;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - SWISS BONBON;Essência para narguile;34,00;544;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - TAZ-MANGUI;Essência para narguile;34,00;552;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;ADALYA - TWO APPLES;Essência para narguile;34,00;540;https://images.tcdn.com.br/img/img_prod/1211384/adalya_113_1_fdde16eb6d0aeab65f13e9df3cf3d0e5.jpg
+Essências de narguile;DEBAJ;Essência para narguile;20,00;42;https://images.tcdn.com.br/img/img_prod/1211384/debaj_119_1_3495b316d93940dce8e286b1091fc880.jpg
+Essências de narguile;FUSION;Essência para narguile;22,00;424;https://images.tcdn.com.br/img/img_prod/1211384/fusion_1201_1_da5a910af09d4df298785453d23eced8.jpg
+Essências de narguile;MR. LUCKY - LEMON LIME;LIMÃO DOCE;22,00;575;
+Essências de narguile;MR. LUCKY - NECTAR OF THE GOODS;Um mix frutado e tropical que remete a néctares exóticos.;22,00;576;
+Essências de narguile;MR. LUCKY - ORANGE TANGER;Laranja e Tangerina;22,00;577;
+Essências de narguile;NAY  VANILHA;Essência para narguile;24,00;536;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY BERRIS BLEND;Essência para narguile;24,00;528;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY BISCOITO DE MORANGO;Essência para narguile;24,00;537;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY BLUE BLEND;Essência para narguile;24,00;533;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY CEREJA BLEND;Essência para narguile;24,00;530;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY CHICLETE DE CANELA;Essência para narguile;24,00;527;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY FLORESTA NEGRA;Essência para narguile;24,00;534;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY GUMMY BLEND;Essência para narguile;24,00;529;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY MARACUJA BLEND;Essência para narguile;24,00;532;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY PINE BLEND;Essência para narguile;24,00;535;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY PYRAMID;Essência para narguile;24,00;49;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;NAY SNOW;Essência para narguile;24,00;531;https://images.tcdn.com.br/img/img_prod/1211384/nay_139_1_1b062075ce47112724cc18d89fd1da72.jpeg
+Essências de narguile;SMYRNA;Essência para narguile NAY;24,00;466;https://images.tcdn.com.br/img/img_prod/1211384/smyrna_1_20260102144149_e7a52d14617f.png
+Essências de narguile;TRESD LOOPS;Essência para narguile DEBAJ;20,00;496;https://images.tcdn.com.br/img/img_prod/1211384/tresd_loops_1_20260418201630_89614f7ca300.jpg
+Essências de narguile;ZIGGY  COPA - LARANJA E LIMÃO;COPA 2026-LARANJA E LIMÃO;23,50;574;
+Essências de narguile;ZIGGY -  HAPOCALYX MINT;Essência para narguile;23,50;513;
+Essências de narguile;ZIGGY -  HAPPY BERRY ( 7 BELO );Essência para narguile;23,50;512;
+Essências de narguile;ZIGGY -  HAPPY FRUTTI;Essência para narguile;23,50;514;
+Essências de narguile;ZIGGY -  WATERMELON BOMB;LIMÃO ABACAXI, MARACUJÁ E MAMÃO.;23,50;516;
+Essências de narguile;ZIGGY - ABACAXI TROPICAL;MARACUJÁ;23,50;526;
+Essências de narguile;ZIGGY - BANANA TROPICAL;BANANA TROPICAL;23,50;573;
+Essências de narguile;ZIGGY - BURLEY MINT;Essência para narguile;23,50;510;
+Essências de narguile;ZIGGY - CHERRY;MARACUJÁ;23,50;525;
+Essências de narguile;ZIGGY - FRESH LEMOM;LIMÃO REFRESCANTE;23,50;572;
+Essências de narguile;ZIGGY - FRESH MELON;MELÃO REFRESCANTE;23,50;592;
+Essências de narguile;ZIGGY - MORANGO E LARANJA;Essência para narguile;23,50;509;
+Essências de narguile;ZIGGY - MORANGO TROPICAL;Essência para narguile;23,50;518;
+Essências de narguile;ZIGGY - RED LEMONADE;LIMÃO E FRUTAS VERMELHAS;23,50;63;
+Essências de narguile;ZIGGY - SORVETE DE LIMÃO;MARACUJÁ;23,50;519;
+Essências de narguile;ZIGGY - TROPICAL;LIMÃO ABACAXI, MARACUJÁ E MAMÃO.;23,50;515;
+Essências de narguile;ZIGGY - YELLOW STARBURST;MARACUJÁ;23,50;517;
+Essências de narguile;ZIGGY - YOGURT;LIMÃO REFRESCANTE;23,50;591;
+Essências de narguile;ZIGGY EDIÇÃO COPA;Laranja com Limão: Um mix cítrico e refrescante que equilibra a doçura da laranja com o toque marcante do limão, entregando fumaça densa e aroma intenso.Goiaba com Maracujá: Uma combinação tropical adocicada com um fundo levemente ácido e refrescante;23,50;590;
+Carvão;BRO - 1KG;Carvão para narguile;90,00;383;https://images.tcdn.com.br/img/img_prod/1211384/bro_1kg_1101_1_afdafaaa1c76488f70794c27ad83078c.jpeg
+Papel alumínio;ALUMÍNIO PREDATOR;Papel alumínio para narguile;34,00;28;https://images.tcdn.com.br/img/img_prod/1211384/aluminio_predator_89_1_b63a45a5643d30c208516ce36001fa35.jpg
+Papel alumínio;ALUMINY;Papel alumínio para narguile;65,00;29;https://images.tcdn.com.br/img/img_prod/1211384/aluminy_91_1_96155f0398ea624d1de8fea9688474e7.jpg
