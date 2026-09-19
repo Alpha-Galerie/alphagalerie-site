@@ -1,11 +1,10 @@
 import { useEffect, useMemo } from 'react';
 import { useCardapio99 } from '../hooks/useCardapio99';
-import { enderecoLinha, horarios, useLoja } from '../hooks/useLoja';
 import { gerarCsvCardapio, itensSemFoto, totalDeItens } from '../lib/cardapio99';
 import { formatCurrency } from '../lib/format';
 import styles from './Cardapio99.module.css';
 
-const TITULO = 'Cardápio Alpha Galerie — Delivery';
+const TITULO = 'Cardápio · Delivery';
 
 /**
  * Cardápio enxuto para o cadastro no 99 Food.
@@ -14,10 +13,13 @@ const TITULO = 'Cardápio Alpha Galerie — Delivery';
  * afins, que o marketplace não aceita. Esta página mostra só o que pode ser
  * vendido por lá, num formato de cardápio — dá para mandar o link, imprimir
  * em PDF ou baixar a planilha para subir no cadastro.
+ *
+ * Sem endereço, telefone ou nome da loja em lugar nenhum: no aplicativo a
+ * operação atende por outro nome, e o cardápio não pode contradizer o que
+ * está no cadastro. Só a marca do delivery e os itens.
  */
 export default function Cardapio99() {
   const { data: secoes, isLoading, isError } = useCardapio99();
-  const loja = useLoja();
 
   useEffect(() => {
     const tituloAnterior = document.title;
@@ -57,18 +59,8 @@ export default function Cardapio99() {
   return (
     <main className={styles.pagina}>
       <header className={styles.cabecalho}>
-        <img src="/logo.svg" alt="Alpha Galerie" className={styles.logo} />
+        <img src="/logo-cardapio.jpg" alt="Alpha" className={styles.logo} />
         <h1 className={styles.titulo}>Cardápio · Delivery</h1>
-        <p className={styles.endereco}>{enderecoLinha(loja)}</p>
-        <p className={styles.contato}>
-          {loja.telefone}
-          {loja.email ? ` · ${loja.email}` : ''}
-        </p>
-        <p className={styles.horario}>
-          {horarios(loja)
-            .map((h) => `${h.dias}: ${h.horas}`)
-            .join(' · ')}
-        </p>
       </header>
 
       <div className={styles.acoes}>
@@ -139,7 +131,6 @@ export default function Cardapio99() {
           Venda proibida para menores de 18 anos. Bebida alcoólica e produtos derivados do
           tabaco são entregues somente mediante apresentação de documento com foto.
         </p>
-        <p>Alpha Galerie · alphagalerie.com</p>
       </footer>
     </main>
   );

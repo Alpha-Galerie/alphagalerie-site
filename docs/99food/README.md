@@ -5,11 +5,21 @@ site tem bong, cachimbo, CBD e esotérico, que o marketplace não aceita. O que
 vale para o delivery é o recorte deste cardápio — bebidas, tabaco, seda,
 essência de narguile, alumínio, carvão, isqueiro, filtro e piteira.
 
+## Sem endereço, sem telefone, sem o nome da loja
+
+No aplicativo a operação atende por outro nome. O cardápio não leva endereço,
+telefone, e-mail nem horário: só a logo do delivery, os itens e os preços. O que
+identifica a loja fica no cadastro do marketplace, e não pode ser contradito
+aqui. A marca usada é `public/logo-cardapio.jpg`.
+
+Vale lembrar que o endereço do link (`alphagalerie.com`) carrega o nome antigo.
+Se isso for um problema na análise, mande o PDF em vez do link.
+
 ## O que mandar
 
+- **PDF:** `cardapio-alpha-galerie-99food.pdf` — é o que anexar no cadastro.
 - **Link:** `https://alphagalerie.com/cardapio-99` — página de cardápio, fora do
   índice do Google, sempre com os preços e o estoque do momento.
-- **PDF:** `cardapio-alpha-galerie-99food.pdf` — para anexar no cadastro.
 - **Planilha:** `cardapio-alpha-galerie-99food.csv` — categoria, item, descrição,
   preço, código do produto e link da foto.
 
