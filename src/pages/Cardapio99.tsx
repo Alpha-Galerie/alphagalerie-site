@@ -4,15 +4,16 @@ import { gerarCsvCardapio, itensSemFoto, totalDeItens } from '../lib/cardapio99'
 import { formatCurrency } from '../lib/format';
 import styles from './Cardapio99.module.css';
 
-const TITULO = 'Cardápio · Delivery';
+const TITULO = 'Cardápio de bebidas';
 
 /**
- * Cardápio enxuto para o cadastro no 99 Food.
+ * Cardápio de bebidas para o cadastro no 99 Food.
  *
- * O link da loja inteira foi reprovado: o catálogo tem bong, cachimbo, CBD e
- * afins, que o marketplace não aceita. Esta página mostra só o que pode ser
- * vendido por lá, num formato de cardápio — dá para mandar o link, imprimir
- * em PDF ou baixar a planilha para subir no cadastro.
+ * Duas recusas antes desta versão: o link da loja inteira (o catálogo tem
+ * bong, cachimbo e CBD, que o marketplace não aceita) e um cardápio com
+ * bebida mais fumo e acessório ("grocery store: não pertence ao segmento de
+ * restaurantes"). Sobrou bebida. Dá para mandar o link, imprimir em PDF ou
+ * baixar a planilha para subir no cadastro.
  *
  * Sem endereço, telefone ou nome da loja em lugar nenhum: no aplicativo a
  * operação atende por outro nome, e o cardápio não pode contradizer o que
@@ -51,7 +52,7 @@ export default function Cardapio99() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'cardapio-alpha-galerie-99food.csv';
+    link.download = 'cardapio-bebidas-99food.csv';
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -60,7 +61,7 @@ export default function Cardapio99() {
     <main className={styles.pagina}>
       <header className={styles.cabecalho}>
         <img src="/logo-cardapio.jpg" alt="Alpha" className={styles.logo} />
-        <h1 className={styles.titulo}>Cardápio · Delivery</h1>
+        <h1 className={styles.titulo}>Cardápio de bebidas</h1>
       </header>
 
       <div className={styles.acoes}>
@@ -128,8 +129,8 @@ export default function Cardapio99() {
           <strong>{total}</strong> itens · preços em reais, sujeitos a alteração sem aviso.
         </p>
         <p>
-          Venda proibida para menores de 18 anos. Bebida alcoólica e produtos derivados do
-          tabaco são entregues somente mediante apresentação de documento com foto.
+          Bebida alcoólica é proibida para menores de 18 anos e entregue somente mediante
+          apresentação de documento com foto.
         </p>
       </footer>
     </main>

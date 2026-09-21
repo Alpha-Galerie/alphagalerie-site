@@ -1,9 +1,16 @@
-# Cardápio para o 99 Food
+# Cardápio de bebidas para o 99 Food
 
-O cadastro foi reprovado quando mandamos o link da loja inteira: o catálogo do
-site tem bong, cachimbo, CBD e esotérico, que o marketplace não aceita. O que
-vale para o delivery é o recorte deste cardápio — bebidas, tabaco, seda,
-essência de narguile, alumínio, carvão, isqueiro, filtro e piteira.
+Duas recusas até aqui:
+
+1. Mandamos o link da loja. O catálogo do site tem bong, cachimbo, CBD e
+   esotérico, que o marketplace não aceita.
+2. Mandamos um cardápio com bebida, tabaco, seda, essência e acessório. A
+   resposta foi *"Menu não criado - grocery store: o estabelecimento não
+   pertence ao segmento de restaurantes (ex: mercado, adega...)"* — lista de
+   conveniência não passa por cardápio.
+
+Sobrou bebida, que é o que o segmento aceita. Fumo, acessório e larica ficaram
+de fora por decisão: incluí-los de novo é reabrir o motivo da recusa.
 
 ## Sem endereço, sem telefone, sem o nome da loja
 
@@ -17,10 +24,10 @@ Se isso for um problema na análise, mande o PDF em vez do link.
 
 ## O que mandar
 
-- **PDF:** `cardapio-alpha-galerie-99food.pdf` — é o que anexar no cadastro.
+- **PDF:** `cardapio-bebidas-99food.pdf` — é o que anexar no cadastro.
 - **Link:** `https://alphagalerie.com/cardapio-99` — página de cardápio, fora do
   índice do Google, sempre com os preços e o estoque do momento.
-- **Planilha:** `cardapio-alpha-galerie-99food.csv` — categoria, item, descrição,
+- **Planilha:** `cardapio-bebidas-99food.csv` — categoria, item, descrição,
   preço, código do produto e link da foto.
 
 ## Como atualizar
@@ -32,7 +39,8 @@ ninguém publicar código.
 
 ## Regras que a página aplica sozinha
 
-- Só entra o que está nas seções liberadas (`src/lib/cardapio99.ts`).
+- Só entra bebida da categoria Bebidas, dividida em sem álcool, cervejas e
+  drinks, e garrafas (`src/lib/cardapio99.ts`).
 - Item com estoque zerado fica de fora: no delivery o cliente paga antes de a
   gente separar o pedido, e item que acabou vira cancelamento.
 - O preço é o de venda da loja, não o do Pix — no app o cliente paga por lá.
@@ -40,3 +48,11 @@ ninguém publicar código.
 - Foto só entra na planilha quando é link público. Parte do catálogo tem a
   imagem salva em base64 dentro do banco; esses itens precisam de foto enviada
   à mão no cadastro, e a própria página diz quantos são.
+
+## O que ainda pesa contra a aprovação
+
+Os nomes no catálogo são genéricos — "CERVEJAS", "RED BULL´S", "SMIRNOFF ICE /
+SKOL BEATS" como item único. Cardápio de restaurante ou bar lista item
+específico, com marca e volume ("Heineken 600 ml", "Coca-Cola lata 350 ml").
+Se a recusa se repetir, é por aí que vale mexer: desmembrar esses itens no
+cadastro de produtos.

@@ -2,13 +2,19 @@ import type { Produto } from '../types';
 import { getPrecoInfo } from './preco';
 
 /**
- * Cardápio para marketplace de delivery (99 Food).
+ * Cardápio de bebidas para marketplace de delivery (99 Food).
  *
- * O catálogo do site tem bong, cachimbo, CBD, esotérico — coisa que o
- * marketplace não aceita e que fez o cadastro ser reprovado quando mandamos
- * o link da loja inteira. Aqui a regra é o contrário: nada entra por padrão,
- * só o que está descrito nas seções abaixo (bebidas, tabaco, seda, essência,
- * alumínio, carvão, isqueiro, filtro e piteira).
+ * Duas recusas até aqui. Primeiro mandamos o link da loja inteira, e o
+ * catálogo tem bong, cachimbo, CBD e esotérico, que o marketplace não aceita.
+ * Depois veio um cardápio com bebidas, tabaco, seda, essência e afins, e a
+ * resposta foi "grocery store: o estabelecimento não pertence ao segmento de
+ * restaurantes (ex: mercado, adega...)" — uma lista de conveniência não passa
+ * por cardápio.
+ *
+ * Então sobrou só bebida, que é o que o segmento aceita. A regra continua
+ * sendo lista de permissão: nada entra por padrão, só o que casa com as
+ * seções abaixo. Fumo, acessório e larica ficaram de fora por decisão, não
+ * por esquecimento — voltar a incluí-los é reabrir o motivo da recusa.
  */
 
 export interface ItemCardapio {
@@ -50,85 +56,35 @@ interface RegraSecao {
   /** Subcategorias aceitas. Ausente = o resto da categoria. */
   subcategorias?: string[];
   excetoSubcategorias?: string[];
-  /** Peneira extra: papel alumínio mora na mesma subcategoria dos narguiles. */
-  filtro?: (produto: ProdutoCardapio) => boolean;
 }
 
-const HEADSHOP = 1;
-const CHARUTARIA = 2;
-const ARGUILE = 3;
 const BEBIDAS = 5;
 
 /** Categorias buscadas no banco. O recorte fino é feito pelas seções. */
-export const CATEGORIAS_CARDAPIO = [HEADSHOP, CHARUTARIA, ARGUILE, BEBIDAS];
+export const CATEGORIAS_CARDAPIO = [BEBIDAS];
+
+/** Subcategorias de bebida alcoólica que o cardápio separa das demais. */
+const ALCOOLICAS = ['cervejas', 'smirnoff ice / skol beats'];
 
 const SECOES: RegraSecao[] = [
   {
-    titulo: 'Bebidas',
+    titulo: 'Sem álcool',
     legenda: 'Bebida gelada',
     categorias: [BEBIDAS],
-    excetoSubcategorias: ['destilados', 'laricas'],
+    // Larica (salgadinho, amendoim) é o que faz o cardápio parecer mercado.
+    excetoSubcategorias: [...ALCOOLICAS, 'destilados', 'laricas'],
   },
   {
-    titulo: 'Destilados e vinhos',
-    legenda: 'Garrafa',
+    titulo: 'Cervejas e drinks',
+    legenda: 'Bebida gelada',
+    categorias: [BEBIDAS],
+    subcategorias: ALCOOLICAS,
+  },
+  {
+    titulo: 'Garrafas',
+    legenda: 'Garrafa fechada',
     categorias: [BEBIDAS],
     subcategorias: ['destilados'],
-  },
-  {
-    titulo: 'Para beliscar',
-    legenda: 'Snack',
-    categorias: [BEBIDAS],
-    subcategorias: ['laricas'],
-  },
-  {
-    titulo: 'Tabacos',
-    legenda: 'Tabaco',
-    categorias: [HEADSHOP, CHARUTARIA],
-    subcategorias: ['tabaco'],
-  },
-  {
-    titulo: 'Sedas',
-    legenda: 'Seda',
-    categorias: [HEADSHOP],
-    subcategorias: ['seda'],
-  },
-  {
-    titulo: 'Filtros',
-    legenda: 'Filtro',
-    categorias: [HEADSHOP],
-    subcategorias: ['filtro'],
-  },
-  {
-    titulo: 'Piteiras',
-    legenda: 'Piteira',
-    categorias: [HEADSHOP],
-    subcategorias: ['piteira', 'piteira de vidro'],
-  },
-  {
-    titulo: 'Isqueiros',
-    legenda: 'Isqueiro',
-    categorias: [HEADSHOP],
-    subcategorias: ['isqueiro'],
-  },
-  {
-    titulo: 'Essências de narguile',
-    legenda: 'Essência para narguile',
-    categorias: [ARGUILE],
-    subcategorias: ['essencias'],
-  },
-  {
-    titulo: 'Carvão',
-    legenda: 'Carvão para narguile',
-    categorias: [ARGUILE],
-    subcategorias: ['carvao'],
-  },
-  {
-    titulo: 'Papel alumínio',
-    legenda: 'Papel alumínio para narguile',
-    categorias: [ARGUILE],
-    subcategorias: ['arguile'],
-    filtro: (p) => /^alumi|^alumí/i.test(p.nome.trim()),
   },
 ];
 
@@ -142,7 +98,6 @@ function combina(produto: ProdutoCardapio, regra: RegraSecao): boolean {
   const sub = normalizar(produto.subcategoria);
   if (regra.subcategorias && !regra.subcategorias.includes(sub)) return false;
   if (regra.excetoSubcategorias?.includes(sub)) return false;
-  if (regra.filtro && !regra.filtro(produto)) return false;
 
   return true;
 }
