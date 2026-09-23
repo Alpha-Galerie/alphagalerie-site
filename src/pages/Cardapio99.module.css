@@ -1,0 +1,196 @@
+/* O site é escuro; o cardápio, claro. Sem isto sobra fundo preto nas bordas
+   e na impressão. */
+:global(body.cardapio-claro) {
+  background: #fff;
+}
+
+/* Documento, não vitrine: fundo claro porque este cardápio existe para ser
+   impresso em PDF e anexado no cadastro do marketplace. */
+.pagina {
+  --rosa: #d21c55;
+  --fundo-logo: #2a2e2f;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+  background: #fff;
+  color: #14120e;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+}
+
+.cabecalho {
+  text-align: center;
+  border-bottom: 2px solid var(--rosa);
+  padding-bottom: 1rem;
+}
+
+/* A logo vem com fundo escuro próprio; a faixa repete a mesma cor para a
+   imagem não virar um retângulo colado no meio da página branca. */
+.logo {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  margin: 0 auto;
+  background: var(--fundo-logo);
+  border-radius: 10px;
+}
+
+.titulo {
+  font-size: 0.95rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin: 0.9rem 0 0;
+  font-weight: 600;
+  color: var(--rosa);
+}
+
+.acoes {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.botao {
+  border: 1px solid var(--rosa);
+  background: transparent;
+  color: #14120e;
+  padding: 0.6rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.botao:hover:not(:disabled) {
+  background: var(--rosa);
+  color: #fff;
+}
+
+.botao:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.nota {
+  max-width: 34rem;
+  margin: 0.75rem auto 0;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9c1b44;
+}
+
+.aviso {
+  text-align: center;
+  color: #55504a;
+  padding: 2rem 0;
+}
+
+.secao {
+  margin-top: 2rem;
+  /* Seção inteira na mesma página do PDF sempre que couber. */
+  break-inside: avoid;
+}
+
+.secaoTitulo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border-bottom: 1px solid #e3ded4;
+  padding-bottom: 0.4rem;
+  margin: 0 0 0.75rem;
+}
+
+.secaoQtd {
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: #8a8377;
+}
+
+.itens {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0ece4;
+  break-inside: avoid;
+}
+
+.foto,
+.fotoVazia {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: #f4f1ea;
+}
+
+.descricao {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.itemNome {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.itemDetalhe {
+  font-size: 0.75rem;
+  color: #7a736a;
+}
+
+.preco {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rodape {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e3ded4;
+  font-size: 0.75rem;
+  color: #55504a;
+  text-align: center;
+}
+
+.rodape p {
+  margin: 0.3rem 0;
+}
+
+@media (max-width: 760px) {
+  .pagina {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .acoes {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .acoes,
+  .nota {
+    display: none;
+  }
+
+  .pagina {
+    padding: 0;
+    max-width: none;
+  }
+}

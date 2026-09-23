@@ -7,6 +7,7 @@ import ProductPage from './pages/ProductPage';
 const CheckoutSucesso = lazy(() => import('./pages/CheckoutSucesso'));
 const CheckoutErro = lazy(() => import('./pages/CheckoutErro'));
 const CheckoutPendente = lazy(() => import('./pages/CheckoutPendente'));
+const Cardapio99 = lazy(() => import('./pages/Cardapio99'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/produto/:productSlug" element={<ProductPage />} />
+            <Route path="/cardapio-99" element={<Cardapio99 />} />
             <Route path="/checkout/sucesso" element={<CheckoutSucesso />} />
             <Route path="/checkout/erro" element={<CheckoutErro />} />
             <Route path="/checkout/pendente" element={<CheckoutPendente />} />

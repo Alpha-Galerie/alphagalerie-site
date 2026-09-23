@@ -1,0 +1,139 @@
+import { useEffect, useMemo } from 'react';
+import { useCardapio99 } from '../hooks/useCardapio99';
+import { gerarCsvCardapio, itensSemFoto, totalDeItens } from '../lib/cardapio99';
+import { formatCurrency } from '../lib/format';
+import styles from './Cardapio99.module.css';
+
+const TITULO = 'Cardápio · Aperitivos e bebidas';
+
+/**
+ * Cardápio de bebidas para o cadastro no 99 Food.
+ *
+ * Três recusas antes desta versão: o link da loja inteira (o catálogo tem
+ * bong, cachimbo e CBD, que o marketplace não aceita), um cardápio com bebida
+ * mais fumo e acessório ("grocery store: não pertence ao segmento de
+ * restaurantes") e um só de bebida, recusado com o mesmo texto. Agora abre
+ * com as porções da cozinha. Dá para mandar o link, imprimir em PDF ou baixar
+ * a planilha para subir no cadastro.
+ *
+ * Sem endereço, telefone ou nome da loja em lugar nenhum: no aplicativo a
+ * operação atende por outro nome, e o cardápio não pode contradizer o que
+ * está no cadastro. Só a marca do delivery e os itens.
+ */
+export default function Cardapio99() {
+  const { data: secoes, isLoading, isError } = useCardapio99();
+
+  useEffect(() => {
+    const tituloAnterior = document.title;
+    document.title = TITULO;
+    document.body.classList.add('cardapio-claro');
+
+    // Cardápio de marketplace não é página de loja: fora do índice do Google
+    // para não competir com as páginas de produto nem virar porta de entrada.
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'robots');
+    meta.setAttribute('content', 'noindex, nofollow');
+    document.head.appendChild(meta);
+
+    return () => {
+      document.title = tituloAnterior;
+      document.body.classList.remove('cardapio-claro');
+      meta.remove();
+    };
+  }, []);
+
+  const total = useMemo(() => (secoes ? totalDeItens(secoes) : 0), [secoes]);
+  const semFoto = useMemo(() => (secoes ? itensSemFoto(secoes) : 0), [secoes]);
+
+  function baixarPlanilha() {
+    if (!secoes) return;
+    const blob = new Blob([gerarCsvCardapio(secoes)], {
+      type: 'text/csv;charset=utf-8',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'cardapio-99food.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <main className={styles.pagina}>
+      <header className={styles.cabecalho}>
+        <img src="/logo-cardapio.jpg" alt="Alpha" className={styles.logo} />
+        <h1 className={styles.titulo}>Aperitivos &amp; Bebidas</h1>
+      </header>
+
+      <div className={styles.acoes}>
+        <button type="button" onClick={() => globalThis.print()} className={styles.botao}>
+          Imprimir / salvar em PDF
+        </button>
+        <button
+          type="button"
+          onClick={baixarPlanilha}
+          className={styles.botao}
+          disabled={!secoes || total === 0}
+        >
+          Baixar planilha (CSV)
+        </button>
+      </div>
+
+      {semFoto > 0 && (
+        <p className={styles.nota}>
+          {semFoto} {semFoto === 1 ? 'item precisa' : 'itens precisam'} de foto enviada à mão no
+          cadastro: a imagem está salva dentro do banco, sem link que o app consiga baixar.
+        </p>
+      )}
+
+      {isLoading && <p className={styles.aviso}>Carregando o cardápio…</p>}
+      {isError && (
+        <p className={styles.aviso}>
+          Não foi possível carregar o cardápio agora. Atualize a página em alguns instantes.
+        </p>
+      )}
+
+      {secoes?.map((secao) => (
+        <section key={secao.titulo} className={styles.secao}>
+          <h2 className={styles.secaoTitulo}>
+            {secao.titulo}
+            <span className={styles.secaoQtd}>{secao.itens.length}</span>
+          </h2>
+          <ul className={styles.itens}>
+            {secao.itens.map((item) => (
+              <li key={item.codigo} className={styles.item}>
+                {item.imagem ? (
+                  <img
+                    src={item.imagem}
+                    alt=""
+                    className={styles.foto}
+                    loading="lazy"
+                    width={56}
+                    height={56}
+                  />
+                ) : (
+                  <span className={styles.fotoVazia} aria-hidden="true" />
+                )}
+                <span className={styles.descricao}>
+                  <strong className={styles.itemNome}>{item.nome}</strong>
+                  <span className={styles.itemDetalhe}>{item.descricao}</span>
+                </span>
+                <span className={styles.preco}>{formatCurrency(item.preco)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+
+      <footer className={styles.rodape}>
+        <p>
+          <strong>{total}</strong> itens · preços em reais, sujeitos a alteração sem aviso.
+        </p>
+        <p>
+          Porções servidas em embalagem para viagem. Bebida alcoólica é proibida para menores de
+          18 anos e entregue somente mediante apresentação de documento com foto.
+        </p>
+      </footer>
+    </main>
+  );
+}
