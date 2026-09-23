@@ -4,16 +4,17 @@ import { gerarCsvCardapio, itensSemFoto, totalDeItens } from '../lib/cardapio99'
 import { formatCurrency } from '../lib/format';
 import styles from './Cardapio99.module.css';
 
-const TITULO = 'Cardápio de bebidas';
+const TITULO = 'Cardápio · Aperitivos e bebidas';
 
 /**
  * Cardápio de bebidas para o cadastro no 99 Food.
  *
- * Duas recusas antes desta versão: o link da loja inteira (o catálogo tem
- * bong, cachimbo e CBD, que o marketplace não aceita) e um cardápio com
- * bebida mais fumo e acessório ("grocery store: não pertence ao segmento de
- * restaurantes"). Sobrou bebida. Dá para mandar o link, imprimir em PDF ou
- * baixar a planilha para subir no cadastro.
+ * Três recusas antes desta versão: o link da loja inteira (o catálogo tem
+ * bong, cachimbo e CBD, que o marketplace não aceita), um cardápio com bebida
+ * mais fumo e acessório ("grocery store: não pertence ao segmento de
+ * restaurantes") e um só de bebida, recusado com o mesmo texto. Agora abre
+ * com as porções da cozinha. Dá para mandar o link, imprimir em PDF ou baixar
+ * a planilha para subir no cadastro.
  *
  * Sem endereço, telefone ou nome da loja em lugar nenhum: no aplicativo a
  * operação atende por outro nome, e o cardápio não pode contradizer o que
@@ -52,7 +53,7 @@ export default function Cardapio99() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'cardapio-bebidas-99food.csv';
+    link.download = 'cardapio-99food.csv';
     link.click();
     URL.revokeObjectURL(url);
   }
@@ -61,7 +62,7 @@ export default function Cardapio99() {
     <main className={styles.pagina}>
       <header className={styles.cabecalho}>
         <img src="/logo-cardapio.jpg" alt="Alpha" className={styles.logo} />
-        <h1 className={styles.titulo}>Cardápio de bebidas</h1>
+        <h1 className={styles.titulo}>Aperitivos &amp; Bebidas</h1>
       </header>
 
       <div className={styles.acoes}>
@@ -100,7 +101,7 @@ export default function Cardapio99() {
           </h2>
           <ul className={styles.itens}>
             {secao.itens.map((item) => (
-              <li key={item.id} className={styles.item}>
+              <li key={item.codigo} className={styles.item}>
                 {item.imagem ? (
                   <img
                     src={item.imagem}
@@ -129,8 +130,8 @@ export default function Cardapio99() {
           <strong>{total}</strong> itens · preços em reais, sujeitos a alteração sem aviso.
         </p>
         <p>
-          Bebida alcoólica é proibida para menores de 18 anos e entregue somente mediante
-          apresentação de documento com foto.
+          Porções servidas em embalagem para viagem. Bebida alcoólica é proibida para menores de
+          18 anos e entregue somente mediante apresentação de documento com foto.
         </p>
       </footer>
     </main>

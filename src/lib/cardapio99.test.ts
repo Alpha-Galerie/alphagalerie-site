@@ -43,41 +43,59 @@ const CATALOGO: Produto[] = [
   produto({ id: 12, nome: 'OLEO CBD', categoria_id: 4, subcategoria: 'Cbd' }),
 ];
 
+function porSecao(catalogo: Produto[] = CATALOGO) {
+  return Object.fromEntries(
+    montarCardapio(catalogo).map((s) => [s.titulo, s.itens.map((i) => i.codigo)])
+  );
+}
+
 describe('montarCardapio', () => {
-  it('monta um cardápio de bebidas, separando o que tem álcool', () => {
-    expect(montarCardapio(CATALOGO)).toEqual([
-      { titulo: 'Sem álcool', itens: expect.any(Array) },
-      { titulo: 'Cervejas e drinks', itens: expect.any(Array) },
-      { titulo: 'Garrafas', itens: expect.any(Array) },
+  it('abre com os aperitivos e depois separa a bebida pelo álcool', () => {
+    expect(montarCardapio(CATALOGO).map((s) => s.titulo)).toEqual([
+      'Aperitivos',
+      'Sem álcool',
+      'Cervejas e drinks',
+      'Garrafas',
     ]);
 
-    const porSecao = Object.fromEntries(
-      montarCardapio(CATALOGO).map((s) => [s.titulo, s.itens.map((i) => i.id)])
-    );
-    expect(porSecao['Sem álcool']).toEqual([2, 1, 3]);
-    expect(porSecao['Cervejas e drinks']).toEqual([4, 5]);
-    expect(porSecao['Garrafas']).toEqual([6]);
-    expect(totalDeItens(montarCardapio(CATALOGO))).toBe(6);
+    const secoes = porSecao();
+    expect(secoes['Aperitivos']).toEqual(['APR-1', 'APR-2', 'APR-3']);
+    expect(secoes['Sem álcool']).toEqual(['2', '1', '3']);
+    expect(secoes['Cervejas e drinks']).toEqual(['4', '5']);
+    expect(secoes['Garrafas']).toEqual(['6']);
+    expect(totalDeItens(montarCardapio(CATALOGO))).toBe(9);
+  });
+
+  it('serve os aperitivos mesmo sem catálogo: a cozinha não está no site', () => {
+    const [aperitivos] = montarCardapio([]);
+    expect(aperitivos.titulo).toBe('Aperitivos');
+    expect(aperitivos.itens.map((i) => [i.nome, i.preco])).toEqual([
+      ['Porção de batata frita', 30],
+      ['Porção de nuggets', 30],
+      ['Amendoim japonês', 23],
+    ]);
+    expect(aperitivos.itens.every((i) => i.disponivel)).toBe(true);
   });
 
   it('deixa larica, fumo, acessório e CBD fora — foi o que derrubou o cadastro', () => {
-    const dentro = montarCardapio(CATALOGO).flatMap((s) => s.itens.map((i) => i.id));
-    for (const fora of [7, 8, 9, 10, 11, 12]) {
+    const dentro = montarCardapio(CATALOGO).flatMap((s) => s.itens.map((i) => i.codigo));
+    for (const fora of ['7', '8', '9', '10', '11', '12']) {
       expect(dentro).not.toContain(fora);
     }
   });
 
-  it('não oferece o que está zerado — delivery cobra antes de separar', () => {
+  it('não oferece a bebida que está zerada — delivery cobra antes de separar', () => {
     const zerado = [produto({ id: 20, nome: 'AGUA DE COCO', subcategoria: 'Aguas', estoque: 0 })];
-    expect(montarCardapio(zerado)).toEqual([]);
-    expect(totalDeItens(montarCardapio(zerado, { incluirSemEstoque: true }))).toBe(1);
+    expect(montarCardapio(zerado).map((s) => s.titulo)).toEqual(['Aperitivos']);
+    expect(totalDeItens(montarCardapio(zerado, { incluirSemEstoque: true }))).toBe(4);
   });
 
   it('usa o preço de venda, não o do Pix: no app o cliente paga com cartão', () => {
     const catalogo = [
       produto({ id: 30, nome: 'COCA COLA LATA', preco: 20, preco_pix: 15, preco_promocional: 18 }),
     ];
-    expect(montarCardapio(catalogo)[0].itens[0].preco).toBe(18);
+    expect(porSecao(catalogo)['Sem álcool']).toEqual(['30']);
+    expect(montarCardapio(catalogo)[1].itens[0].preco).toBe(18);
   });
 
   it('descreve o item pela marca quando ela não está no nome', () => {
@@ -85,15 +103,15 @@ describe('montarCardapio', () => {
       produto({ id: 40, nome: 'AMENDOIM JAPONES', subcategoria: 'CERVEJAS', marca: 'DORI' }),
       produto({ id: 41, nome: 'CERVEJAS', subcategoria: 'CERVEJAS', marca: 'CERVEJAS' }),
     ];
-    const itens = montarCardapio(catalogo)[0].itens;
-    expect(itens.find((i) => i.id === 40)?.descricao).toBe('Bebida gelada DORI');
+    const itens = montarCardapio(catalogo)[1].itens;
+    expect(itens.find((i) => i.codigo === '40')?.descricao).toBe('Bebida gelada DORI');
     // Marca repetida no nome só polui a linha.
-    expect(itens.find((i) => i.id === 41)?.descricao).toBe('Bebida gelada');
+    expect(itens.find((i) => i.codigo === '41')?.descricao).toBe('Bebida gelada');
   });
 
   it('respeita a descrição cadastrada quando existe', () => {
     const catalogo = [produto({ id: 50, descricao: '  Lata   350 ml ' })];
-    expect(montarCardapio(catalogo)[0].itens[0].descricao).toBe('Lata 350 ml');
+    expect(montarCardapio(catalogo)[1].itens[0].descricao).toBe('Lata 350 ml');
   });
 });
 
@@ -101,13 +119,14 @@ describe('gerarCsvCardapio', () => {
   it('sai no formato que o Excel em pt-BR abre certo', () => {
     const linhas = gerarCsvCardapio(montarCardapio(CATALOGO)).split('\r\n');
 
-    expect(linhas[0]).toBe('﻿Categoria;Item;Descrição;Preço (R$);Código;Foto (URL)');
-    expect(linhas[1]).toBe('Sem álcool;ÁGUA MINERAL;Bebida gelada;10,00;2;');
+    expect(linhas[0]).toBe('\ufeffCategoria;Item;Descrição;Preço (R$);Código;Foto (URL)');
+    expect(linhas[1]).toBe('Aperitivos;Porção de batata frita;Porção de 500 g;30,00;APR-1;');
+    expect(linhas[4]).toBe('Sem álcool;ÁGUA MINERAL;Bebida gelada;10,00;2;');
   });
 
   it('protege a célula quando o nome do produto tem ponto e vírgula ou aspas', () => {
     const catalogo = [produto({ id: 60, nome: 'COCA "ZERO"; LATA' })];
-    const linha = gerarCsvCardapio(montarCardapio(catalogo)).split('\r\n')[1];
+    const linha = gerarCsvCardapio(montarCardapio(catalogo)).split('\r\n')[4];
     expect(linha).toBe('Sem álcool;"COCA ""ZERO""; LATA";Bebida gelada;10,00;60;');
   });
 
@@ -119,8 +138,9 @@ describe('gerarCsvCardapio', () => {
     const secoes = montarCardapio(catalogo);
     const linhas = gerarCsvCardapio(secoes).split('\r\n');
 
-    expect(linhas[1].endsWith(';70;')).toBe(true);
-    expect(linhas[2].endsWith(';71;https://cdn.exemplo.com/agua.png')).toBe(true);
-    expect(itensSemFoto(secoes)).toBe(1);
+    expect(linhas[4].endsWith(';70;')).toBe(true);
+    expect(linhas[5].endsWith(';71;https://cdn.exemplo.com/agua.png')).toBe(true);
+    // Uma bebida em base64 mais as três porções, que ainda não têm foto.
+    expect(itensSemFoto(secoes)).toBe(4);
   });
 });

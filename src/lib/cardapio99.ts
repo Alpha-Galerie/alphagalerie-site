@@ -11,14 +11,19 @@ import { getPrecoInfo } from './preco';
  * restaurantes (ex: mercado, adega...)" — uma lista de conveniência não passa
  * por cardápio.
  *
- * Então sobrou só bebida, que é o que o segmento aceita. A regra continua
- * sendo lista de permissão: nada entra por padrão, só o que casa com as
- * seções abaixo. Fumo, acessório e larica ficaram de fora por decisão, não
- * por esquecimento — voltar a incluí-los é reabrir o motivo da recusa.
+ * Na terceira tentativa o cardápio abre com aperitivos: o analista recusou de
+ * novo um cardápio só de bebida, e a leitura do dono é que o sistema não
+ * enxergava comida nenhuma. As porções vêm da cozinha, não do catálogo do
+ * site, que não vende comida.
+ *
+ * O resto continua sendo lista de permissão: nada entra por padrão, só o que
+ * casa com as seções abaixo. Fumo e acessório ficaram de fora por decisão,
+ * não por esquecimento — voltar a incluí-los é reabrir o motivo da recusa.
  */
 
 export interface ItemCardapio {
-  id: number;
+  /** Código do produto no catálogo, ou `APR-n` para as porções da cozinha. */
+  codigo: string;
   nome: string;
   marca: string;
   descricao: string;
@@ -48,6 +53,14 @@ type ProdutoCardapio = Pick<
   | 'descricao'
 >;
 
+/** Porção da cozinha: existe no delivery, não no catálogo do site. */
+interface ItemFixo {
+  codigo: string;
+  nome: string;
+  descricao: string;
+  preco: number;
+}
+
 interface RegraSecao {
   titulo: string;
   /** Vira a descrição do item quando o produto não tem uma no cadastro. */
@@ -56,6 +69,8 @@ interface RegraSecao {
   /** Subcategorias aceitas. Ausente = o resto da categoria. */
   subcategorias?: string[];
   excetoSubcategorias?: string[];
+  /** Seção que não sai do catálogo: os itens são estes, sempre disponíveis. */
+  fixos?: ItemFixo[];
 }
 
 const BEBIDAS = 5;
@@ -66,7 +81,25 @@ export const CATEGORIAS_CARDAPIO = [BEBIDAS];
 /** Subcategorias de bebida alcoólica que o cardápio separa das demais. */
 const ALCOOLICAS = ['cervejas', 'smirnoff ice / skol beats'];
 
+/**
+ * A cozinha não está no catálogo do site, que vende produto de prateleira.
+ * Estas porções existem para o delivery e abrem o cardápio de propósito: é a
+ * primeira coisa que o analista vê, e foi a falta delas que derrubou os dois
+ * envios anteriores.
+ */
+const APERITIVOS: ItemFixo[] = [
+  { codigo: 'APR-1', nome: 'Porção de batata frita', descricao: 'Porção de 500 g', preco: 30 },
+  { codigo: 'APR-2', nome: 'Porção de nuggets', descricao: 'Porção de 500 g', preco: 30 },
+  { codigo: 'APR-3', nome: 'Amendoim japonês', descricao: 'Porção para petiscar', preco: 23 },
+];
+
 const SECOES: RegraSecao[] = [
+  {
+    titulo: 'Aperitivos',
+    legenda: 'Porção',
+    categorias: [],
+    fixos: APERITIVOS,
+  },
   {
     titulo: 'Sem álcool',
     legenda: 'Bebida gelada',
@@ -130,11 +163,26 @@ export function montarCardapio(
   { incluirSemEstoque = false }: OpcoesCardapio = {}
 ): SecaoCardapio[] {
   return SECOES.map((regra) => {
+    if (regra.fixos) {
+      return {
+        titulo: regra.titulo,
+        itens: regra.fixos.map((fixo) => ({
+          codigo: fixo.codigo,
+          nome: fixo.nome,
+          marca: '',
+          descricao: fixo.descricao,
+          preco: fixo.preco,
+          imagem: null,
+          disponivel: true,
+        })),
+      };
+    }
+
     const itens = produtos
       .filter((p) => combina(p, regra))
       .filter((p) => incluirSemEstoque || (p.estoque ?? 0) > 0)
       .map((p) => ({
-        id: p.id,
+        codigo: String(p.id),
         nome: p.nome.trim(),
         marca: p.marca?.trim() ?? '',
         descricao: descricaoDoItem(p, regra.legenda),
@@ -198,7 +246,7 @@ export function gerarCsvCardapio(secoes: SecaoCardapio[]): string {
           item.nome,
           item.descricao,
           item.preco.toFixed(2).replace('.', ','),
-          String(item.id),
+          item.codigo,
           fotoPublica(item.imagem),
         ]
           .map(celula)
