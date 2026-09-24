@@ -107,3 +107,10 @@ select pg_temp.eq((select saldo from consultar_cashback('11977776666')), 18.00::
 insert into pedidos (numero, cliente_nome, cliente_whatsapp, total, frete, status) values ('H1','Z','123',200,0,'pendente');
 update pedidos set status='pago' where numero='H1';
 select pg_temp.eq((select count(*) from cashback_creditos c join pedidos p on p.id=c.pedido_id where numero='H1'), 0::bigint, 'telefone inválido não gera crédito');
+
+-- erro no cashback não trava a retaguarda
+insert into pedidos (numero, cliente_nome, cliente_whatsapp, total, frete, status) values ('I1','W','11966665555',100,0,'pendente');
+alter table cashback_creditos add constraint teste_quebra check (valor < 0) not valid;
+update pedidos set status='pago' where numero='I1';
+select pg_temp.eq((select status from pedidos where numero='I1'), 'pago', 'status muda mesmo com o cashback falhando');
+alter table cashback_creditos drop constraint teste_quebra;

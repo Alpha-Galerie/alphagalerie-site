@@ -1,4 +1,6 @@
 import heroArte from '../assets/banner-raw.jpg';
+import { useCashbackRegras } from '../hooks/useCashback';
+import { descreverPercentual } from '../lib/cashback';
 import styles from './HeroSection.module.css';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
@@ -7,6 +9,8 @@ const WA_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Tenho%20uma%20
 const PONTOS = ['Em até 24h', 'Todos os dias', 'Alphaville e região'];
 
 export default function HeroSection() {
+  const cashback = useCashbackRegras();
+
   return (
     <section className={styles.hero} aria-label="Bem-vindo à Alpha Galerie">
       <img
@@ -38,12 +42,25 @@ export default function HeroSection() {
             </strong>
           </p>
 
-          <a href="#produtos" className={styles.cta}>
-            <span>Explorar Vitrine</span>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </a>
+          <div className={styles.ctaRow}>
+            <a href="#produtos" className={styles.cta}>
+              <span>Explorar Vitrine</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+
+            {/* Só aparece com o programa no ar (migração aplicada e percentual > 0). */}
+            {cashback && (
+              <a href="#cashback" className={styles.cashbackTag}>
+                <span className={styles.cashbackSelo} aria-hidden="true">✦</span>
+                <span className={styles.cashbackTexto}>
+                  <strong>Ganhe cashback na sua compra</strong>
+                  <small>{descreverPercentual(cashback)}</small>
+                </span>
+              </a>
+            )}
+          </div>
 
           <div className={styles.meta} aria-label="Números da Alpha Galerie">
             <div>

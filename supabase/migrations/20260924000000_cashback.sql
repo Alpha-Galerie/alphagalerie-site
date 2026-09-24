@@ -182,6 +182,10 @@ BEGIN
     RETURN NEW;
   END IF;
 
+  -- Cashback nunca pode travar a retaguarda: se algo abaixo falhar, a mudança
+  -- de status passa mesmo assim e o erro fica no log do banco.
+  BEGIN
+
   -- Pagou: gera (ou reativa) o crédito deste pedido.
   IF v_e_pago AND NOT v_era_pago THEN
     v_whatsapp := normalizar_whatsapp(NEW.cliente_whatsapp);
@@ -244,6 +248,11 @@ BEGIN
     UPDATE cashback_usos SET devolvido = false
      WHERE pedido_id = NEW.id AND devolvido;
   END IF;
+
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'cashback: pedido % (% → %) não processado: % [%]',
+      NEW.id, OLD.status, NEW.status, SQLERRM, SQLSTATE;
+  END;
 
   RETURN NEW;
 END;
