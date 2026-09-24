@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { useCartStore } from '../store/cart';
 import { formatCurrency } from '../lib/format';
+import { calcularCashbackGanho, formatarDia, validadeCashback } from '../lib/cashback';
+import { useCashbackRegras } from '../hooks/useCashback';
+import Sugestoes from './Sugestoes';
 import styles from './CartDrawer.module.css';
 
 interface CartDrawerProps {
@@ -19,8 +22,11 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
   const removeItem = useCartStore((s) => s.removeItem);
   const changeQty = useCartStore((s) => s.changeQty);
   const selectTotal = useCartStore((s) => s.selectTotal);
+  const addItem = useCartStore((s) => s.addItem);
 
   const total = selectTotal();
+  const cashbackRegras = useCashbackRegras();
+  const cashbackGanho = cashbackRegras ? calcularCashbackGanho(total, cashbackRegras) : 0;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -171,6 +177,10 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
               </div>
             ))
           )}
+
+          {isOpen && items.length > 0 && (
+            <Sugestoes itens={items} onAdd={(produto) => addItem(produto)} />
+          )}
         </div>
 
         {/* Footer */}
@@ -184,6 +194,12 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
               <span className={styles.totalLabel}>Total</span>
               <span className={styles.totalValue}>{formatCurrency(total)}</span>
             </div>
+            {cashbackRegras && cashbackGanho > 0 && (
+              <p className={styles.cashback}>
+                Esta compra te devolve até <strong>{formatCurrency(cashbackGanho)}</strong> de cashback
+                para usar até {formatarDia(validadeCashback(cashbackRegras))}
+              </p>
+            )}
             <button
               type="button"
               className={styles.checkoutBtn}

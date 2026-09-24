@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import CheckoutModal from './CheckoutModal';
 import { useCartStore } from '../../store/cart';
 import type { ItemCarrinho } from '../../types';
+import { limparCacheCashback } from '../../lib/cashback';
 
 const submitPedidoMock = vi.fn();
 
@@ -58,6 +59,7 @@ vi.mock('./PixPayment', () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  limparCacheCashback();
   rpcMock.mockImplementation(async (_fn: string, params: { p_codigo: string }) => {
     const c = CUPONS_NO_BANCO[String(params.p_codigo || '').trim().toUpperCase()];
     return { data: c ? [c] : [], error: null };
@@ -137,7 +139,8 @@ describe('CheckoutModal', () => {
     await aplicarCupom('5OFF');
 
     await waitFor(() => {
-      const params = rpcMock.mock.calls[0][1] as { p_subtotal: number };
+      const chamada = rpcMock.mock.calls.find(([fn]) => fn === 'validar_cupom');
+      const params = chamada?.[1] as { p_subtotal: number };
       expect(params.p_subtotal).toBe(100);
     });
   });
@@ -152,7 +155,11 @@ describe('CheckoutModal', () => {
   });
 
   it('nao quebra o checkout se a consulta ao banco falhar', async () => {
-    rpcMock.mockResolvedValueOnce({ data: null, error: { message: 'network' } });
+    rpcMock.mockImplementation(async (fn: string) =>
+      fn === 'validar_cupom'
+        ? { data: null, error: { message: 'network' } }
+        : { data: [], error: null }
+    );
     render(<CheckoutModal onClose={vi.fn()} />);
 
     await aplicarCupom('5OFF');
@@ -198,5 +205,65 @@ describe('CheckoutModal', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(submitPedidoMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('CheckoutModal com cashback', () => {
+  beforeEach(() => {
+    rpcMock.mockImplementation(async (fn: string) => {
+      if (fn === 'cashback_regras') {
+        return { data: [{ percentual: 100, validade_dias: 30, uso_max_percentual: 50 }], error: null };
+      }
+      if (fn === 'consultar_cashback') {
+        return {
+          data: [{ saldo: 120, proximo_vencimento: '2026-10-24T02:59:59Z', valor_vencendo: 120 }],
+          error: null,
+        };
+      }
+      return { data: [], error: null };
+    });
+  });
+
+  it('mostra o saldo, abate até metade dos produtos e pede ao banco para usar', async () => {
+    submitPedidoMock.mockResolvedValue({ success: true, pedido: { id: 123, total: 97.5 } });
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+
+    // Produto 100, Pix −5 → 95 em produtos; teto de 50% → 47,50 de cashback.
+    expect(await screen.findByText(/Usar R\$\s?47,50 neste pedido/i, undefined, { timeout: 3000 })).toBeInTheDocument();
+    expect(screen.getByText(/Cashback usado/i)).toBeInTheDocument();
+    expect(screen.getByText(/Você ganha/i)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
+
+    await waitFor(() => expect(submitPedidoMock).toHaveBeenCalledTimes(1));
+    const [dados] = submitPedidoMock.mock.calls[0];
+    // O total vai cheio (95 + frete 50); o banco abate e devolve o final.
+    expect(dados).toMatchObject({ usarCashback: true, total: 145, frete: 50 });
+    expect(rpcMock).toHaveBeenCalledWith('consultar_cashback', { p_whatsapp: '11999999999' });
+  });
+
+  it('cliente pode deixar o cashback para depois', async () => {
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+
+    const usar = await screen.findByRole('checkbox', { name: /Usar R\$/i }, { timeout: 3000 });
+    fireEvent.click(usar);
+    expect(screen.queryByText(/Cashback usado/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
+    await waitFor(() => expect(submitPedidoMock).toHaveBeenCalledTimes(1));
+    expect(submitPedidoMock.mock.calls[0][0]).toMatchObject({ usarCashback: false });
+  });
+
+  it('sem o programa no ar, o pedido sai como antes', async () => {
+    rpcMock.mockImplementation(async () => ({ data: null, error: { message: 'function not found' } }));
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
+    await waitFor(() => expect(submitPedidoMock).toHaveBeenCalledTimes(1));
+    expect(submitPedidoMock.mock.calls[0][0].usarCashback).toBeUndefined();
+    expect(screen.queryByText(/cashback/i)).not.toBeInTheDocument();
   });
 });

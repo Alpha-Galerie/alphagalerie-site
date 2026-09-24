@@ -10,6 +10,7 @@ import HeroSection from '../components/HeroSection';
 import Header from '../components/Header';
 import ProductGrid from '../components/ProductGrid';
 import DestaquesSection from '../components/DestaquesSection';
+import CashbackSection from '../components/CashbackSection';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
@@ -96,6 +97,8 @@ export default function Home() {
       <Header onOpenCart={() => setCartOpen(true)} />
 
       <HeroSection />
+
+      <CashbackSection />
 
       <DestaquesSection />
 

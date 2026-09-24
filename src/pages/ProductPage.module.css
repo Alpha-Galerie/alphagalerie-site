@@ -233,3 +233,8 @@
     min-height: 360px;
   }
 }
+
+.sugestoes {
+  max-width: 560px;
+  margin-top: 32px;
+}

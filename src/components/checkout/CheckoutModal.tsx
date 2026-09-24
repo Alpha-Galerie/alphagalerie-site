@@ -12,6 +12,13 @@ import { formatCurrency as fmt } from '../../lib/format';
 import styles from './CheckoutModal.module.css';
 import { supabase } from '../../lib/supabase';
 import { checkoutProvider } from '../../lib/checkout';
+import { useCashbackRegras, useCashbackSaldo } from '../../hooks/useCashback';
+import {
+  calcularCashbackGanho,
+  calcularCashbackUso,
+  formatarDia,
+  validadeCashback,
+} from '../../lib/cashback';
 
 class CardErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -101,6 +108,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const [pedidoId, setPedidoId] = useState<number | null>(null);
   const [txid, setTxid] = useState('');
   const [submittedTotal, setSubmittedTotal] = useState<number | null>(null);
+  const [cashbackGanhoFinal, setCashbackGanhoFinal] = useState(0);
 
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -134,7 +142,25 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     if (cupomAtivo.tipo === 'fixo') return Math.min(cupomAtivo.valor, subtotal - descontoPix);
     return 0;
   })();
-  const total = Math.max(0, subtotal - descontoPix - descontoCupom + freteValor);
+  const totalSemCashback = Math.max(0, subtotal - descontoPix - descontoCupom + freteValor);
+
+  // Cashback: o saldo do WhatsApp digitado abate até o teto do programa, sobre
+  // o valor dos produtos (frete fora). O banco refaz essa conta ao criar o
+  // pedido; aqui é só para o cliente ver antes de confirmar.
+  const cashbackRegras = useCashbackRegras();
+  const cashbackSaldo = useCashbackSaldo(telefone, cashbackRegras !== null);
+  const [usarCashback, setUsarCashback] = useState(true);
+  const valorProdutos = Math.max(0, totalSemCashback - freteValor);
+  const cashbackDisponivel =
+    cashbackRegras && cashbackSaldo
+      ? calcularCashbackUso(cashbackSaldo.saldo, valorProdutos, cashbackRegras)
+      : 0;
+  const cashbackUsado = usarCashback ? cashbackDisponivel : 0;
+  const total = Math.max(0, totalSemCashback - cashbackUsado);
+  const cashbackGanho = cashbackRegras
+    ? calcularCashbackGanho(total - freteValor, cashbackRegras)
+    : 0;
+  const cashbackValidade = cashbackRegras ? formatarDia(validadeCashback(cashbackRegras)) : '';
   const displayTotal = submittedTotal ?? total;
 
   useEffect(() => {
@@ -294,6 +320,13 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       total, status: 'pendente', itens: items,
     };
 
+    if (cashbackRegras) {
+      // O banco abate o saldo; ele recebe o total cheio e devolve o final.
+      dadosPedido.total = totalSemCashback;
+      dadosPedido.frete = freteValor;
+      dadosPedido.usarCashback = cashbackUsado > 0;
+    }
+
     const result = await submitPedido(dadosPedido, items);
     setIsSubmitting(false);
 
@@ -302,9 +335,17 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       return;
     }
 
+    // Vale o total que o banco gravou: se o saldo mudou entre a tela e o
+    // pedido, o Pix e o cartão cobram o valor certo.
+    const totalGravado = Number(result.pedido?.total);
+    const totalFinal = Number.isFinite(totalGravado) && result.pedido?.total != null ? totalGravado : total;
+
     setPedidoId(result.pedido?.id ?? null);
     setTxid(`AG${Date.now()}`);
-    setSubmittedTotal(total);
+    setSubmittedTotal(totalFinal);
+    setCashbackGanhoFinal(
+      cashbackRegras ? calcularCashbackGanho(totalFinal - freteValor, cashbackRegras) : 0
+    );
 
     if (pagamento === 'pix') {
       clearCart();
@@ -327,10 +368,17 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
               unit_price: freteValor,
             });
           }
+          // Com desconto (Pix, cupom, cashback) a soma dos itens passa do que o
+          // cliente deve; o Mercado Pago não aceita item negativo, então vai
+          // um item só com o valor do pedido.
+          const somaItens = checkoutItems.reduce((acc, i) => acc + i.unit_price * i.quantity, 0);
+          const itensMp = Math.abs(somaItens - totalFinal) > 0.01
+            ? [{ title: 'Pedido Alpha Galerie', quantity: 1, unit_price: totalFinal }]
+            : checkoutItems;
           const checkoutResult = await checkoutProvider.startCheckout({
           pedido_id,
-          items: checkoutItems,
-          total,
+          items: itensMp,
+          total: totalFinal,
           email: email || undefined,
         });
         setCardProcessing(false);
@@ -385,6 +433,27 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="co_whats">WhatsApp *</label>
                   <input id="co_whats" type="tel" required className={styles.input} value={telefone} onChange={(e) => setTelefone(maskTelefone(e.target.value))} placeholder="(11) 99999-9999" autoComplete="tel" />
+                  {cashbackSaldo && cashbackSaldo.saldo > 0 && (
+                    <div className={styles.cashbackBox}>
+                      <p className={styles.cashbackSaldo}>
+                        Você tem <strong>{fmt(cashbackSaldo.saldo)}</strong> de cashback
+                        {cashbackSaldo.proximoVencimento && (
+                          <> · {fmt(cashbackSaldo.valorVencendo)} vence {formatarDia(cashbackSaldo.proximoVencimento)}</>
+                        )}
+                      </p>
+                      {cashbackDisponivel > 0 && (
+                        <label className={styles.cashbackUsar}>
+                          <input type="checkbox" checked={usarCashback} onChange={(e) => setUsarCashback(e.target.checked)} />
+                          <span>Usar {fmt(cashbackDisponivel)} neste pedido</span>
+                        </label>
+                      )}
+                      {cashbackRegras && cashbackDisponivel < cashbackSaldo.saldo && cashbackDisponivel > 0 && (
+                        <span className={styles.cashbackNota}>
+                          O cashback paga até {cashbackRegras.usoMaxPercentual}% dos produtos de cada pedido.
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="co_email">E-mail</label>
@@ -522,10 +591,21 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                       <span>− {fmt(descontoCupom)}</span>
                     </div>
                   )}
+                  {cashbackUsado > 0 && (
+                    <div className={`${styles.summaryLine} ${styles.summaryLineGreen}`}>
+                      <span>Cashback usado</span>
+                      <span>− {fmt(cashbackUsado)}</span>
+                    </div>
+                  )}
                   <div className={styles.summaryTotal}>
                     <span className={styles.summaryTotalLabel}>Total</span>
                     <span className={styles.summaryTotalValue}>{fmt(total)}</span>
                   </div>
+                  {cashbackGanho > 0 && (
+                    <p className={styles.cashbackGanho}>
+                      Você ganha <strong>{fmt(cashbackGanho)}</strong> de cashback para usar até {cashbackValidade}
+                    </p>
+                  )}
                 </div>
 
                 {submitError && <p className={styles.error} role="alert">{submitError}</p>}
@@ -556,6 +636,11 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
         {step === 'pix' && (
           <>
             <div className={styles.body}>
+              {cashbackGanhoFinal > 0 && (
+                <p className={styles.cashbackGanho} style={{ margin: '20px 24px 0' }}>
+                  Seus <strong>{fmt(cashbackGanhoFinal)}</strong> de cashback são liberados assim que o pagamento for confirmado. Use até {cashbackValidade}.
+                </p>
+              )}
               <PixPayment total={displayTotal} txid={txid} onClose={onClose} />
             </div>
           </>
@@ -611,6 +696,11 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
             <h2 className={styles.successTitle}>Pedido confirmado!</h2>
             {pedidoId && <p className={styles.successId}>Pedido #{pedidoId}</p>}
             <p className={styles.successMsg}>Em breve entraremos em contato pelo WhatsApp para confirmar os detalhes.</p>
+            {cashbackGanhoFinal > 0 && (
+              <p className={styles.cashbackGanho}>
+                Você ganhou <strong>{fmt(cashbackGanhoFinal)}</strong> de cashback. Use na próxima compra até {cashbackValidade}.
+              </p>
+            )}
             <button type="button" onClick={onClose} style={{ padding: '14px 48px', background: '#c9a961', border: 'none', color: '#000', fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer', marginTop: 8 }}>FECHAR</button>
           </div>
         )}
