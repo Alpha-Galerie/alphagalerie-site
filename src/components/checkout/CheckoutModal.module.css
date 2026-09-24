@@ -492,8 +492,8 @@
   .optBoxText small { font-size: 11px; line-height: 1.4; }
 }
 
-/* ── Cashback ── */
-.cashbackBox {
+/* ── Alpha Club ── */
+.clubeBox {
   margin-top: 10px;
   padding: 12px 14px;
   border: 1px solid rgba(201, 169, 97, 0.35);
@@ -503,18 +503,18 @@
   gap: 8px;
 }
 
-.cashbackSaldo {
+.clubeSaldo {
   margin: 0;
   font-size: 13px;
   color: #f4f4f4;
   line-height: 1.5;
 }
 
-.cashbackSaldo strong {
+.clubeSaldo strong {
   color: #c9a961;
 }
 
-.cashbackUsar {
+.clubeUsar {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -526,18 +526,18 @@
   min-height: 32px;
 }
 
-.cashbackUsar input {
+.clubeUsar input {
   width: 18px;
   height: 18px;
   accent-color: #c9a961;
 }
 
-.cashbackNota {
+.clubeNota {
   font-size: 11px;
   color: #888;
 }
 
-.cashbackGanho {
+.clubeGanho {
   margin: 12px 0 0;
   padding: 10px 12px;
   border: 1px dashed rgba(201, 169, 97, 0.45);
@@ -547,6 +547,39 @@
   text-align: center;
 }
 
-.cashbackGanho strong {
+.clubeGanho strong {
   color: #c9a961;
+}
+
+.clubeCupomBtn {
+  text-align: left;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px dashed rgba(201, 169, 97, 0.6);
+  color: #c9a961;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  line-height: 1.5;
+}
+
+.clubeCupomBtn small {
+  color: #888;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0;
+}
+
+.clubeCupomBtn:hover {
+  background: rgba(201, 169, 97, 0.1);
+}
+
+.clubeExtras {
+  padding: 4px 0 0;
+}
+
+.labelDica {
+  color: #888;
+  text-transform: none;
+  letter-spacing: 0.02em;
 }

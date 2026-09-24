@@ -1,6 +1,6 @@
 import heroArte from '../assets/banner-raw.jpg';
-import { useCashbackRegras } from '../hooks/useCashback';
-import { descreverPercentual } from '../lib/cashback';
+import { useClubeRegras } from '../hooks/useClube';
+import { percentualDeVolta } from '../lib/clube';
 import styles from './HeroSection.module.css';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
@@ -9,7 +9,7 @@ const WA_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Tenho%20uma%20
 const PONTOS = ['Em até 24h', 'Todos os dias', 'Alphaville e região'];
 
 export default function HeroSection() {
-  const cashback = useCashbackRegras();
+  const clube = useClubeRegras();
 
   return (
     <section className={styles.hero} aria-label="Bem-vindo à Alpha Galerie">
@@ -50,13 +50,13 @@ export default function HeroSection() {
               </svg>
             </a>
 
-            {/* Só aparece com o programa no ar (migração aplicada e percentual > 0). */}
-            {cashback && (
-              <a href="#cashback" className={styles.cashbackTag}>
+            {/* Só aparece com o Alpha Club no ar (ligado na retaguarda). */}
+            {clube?.ativo && (
+              <a href="#clube" className={styles.cashbackTag}>
                 <span className={styles.cashbackSelo} aria-hidden="true">✦</span>
                 <span className={styles.cashbackTexto}>
                   <strong>Ganhe cashback na sua compra</strong>
-                  <small>{descreverPercentual(cashback)}</small>
+                  <small>{clube.nome} · {percentualDeVolta(clube).toLocaleString('pt-BR')}% de volta em pontos</small>
                 </span>
               </a>
             )}

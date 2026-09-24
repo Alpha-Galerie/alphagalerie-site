@@ -47,7 +47,8 @@ export const useCartStore = create<CartState>()(
             };
           }
 
-          const preco = getPrecoInfo(produto, variacao).precoFinal;
+          const precoInfo = getPrecoInfo(produto, variacao);
+          const preco = precoInfo.precoFinal;
           const novoItem: ItemCarrinho = {
             id: produto.id,
             cartKey,
@@ -57,6 +58,7 @@ export const useCartStore = create<CartState>()(
             marca: produto.marca,
             categoria: produto.categorias?.nome ?? '',
             subcategoria: produto.subcategoria,
+            promocional: precoInfo.emPromocao,
             preco,
             imagem: produto.imagem_url,
             estoque: variacao !== undefined ? variacao.estoque : produto.estoque,

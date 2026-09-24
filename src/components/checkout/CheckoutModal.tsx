@@ -12,13 +12,18 @@ import { formatCurrency as fmt } from '../../lib/format';
 import styles from './CheckoutModal.module.css';
 import { supabase } from '../../lib/supabase';
 import { checkoutProvider } from '../../lib/checkout';
-import { useCashbackRegras, useCashbackSaldo } from '../../hooks/useCashback';
+import { useClubeRegras, useClubeSaldo } from '../../hooks/useClube';
 import {
-  calcularCashbackGanho,
-  calcularCashbackUso,
+  aniversarioValido,
+  formatarDataBanco,
   formatarDia,
-  validadeCashback,
-} from '../../lib/cashback';
+  formatarPontos,
+  mascararAniversario,
+  pontosGanhos,
+  pontosParaUsar,
+  valorDosPontos,
+  whatsappValido,
+} from '../../lib/clube';
 
 class CardErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   constructor(props: { children: ReactNode }) {
@@ -66,10 +71,15 @@ type CupomAplicado = CupomInfo & { codigo: string };
 // apenas o código consultado, e só quando ele está ativo, dentro da validade,
 // do limite de usos e do valor mínimo. Assim ninguém descobre os códigos
 // existentes lendo a chave pública.
-async function buscarCupom(codigo: string, subtotal: number): Promise<CupomAplicado | null> {
+//
+// Cupom do Alpha Club é preso ao WhatsApp de quem trocou os pontos: por isso
+// o número vai junto quando o banco já tem o clube (antes dele, a função só
+// aceita código e subtotal).
+async function buscarCupom(codigo: string, subtotal: number, whatsapp?: string | null): Promise<CupomAplicado | null> {
   const { data, error } = await supabase.rpc('validar_cupom', {
     p_codigo: codigo,
     p_subtotal: subtotal,
+    ...(whatsapp != null ? { p_whatsapp: whatsapp } : {}),
   });
   if (error) {
     console.error('[CheckoutModal] erro ao validar cupom:', error);
@@ -108,7 +118,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const [pedidoId, setPedidoId] = useState<number | null>(null);
   const [txid, setTxid] = useState('');
   const [submittedTotal, setSubmittedTotal] = useState<number | null>(null);
-  const [cashbackGanhoFinal, setCashbackGanhoFinal] = useState(0);
+  const [pontosGanhoFinal, setPontosGanhoFinal] = useState(0);
 
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
@@ -142,25 +152,30 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     if (cupomAtivo.tipo === 'fixo') return Math.min(cupomAtivo.valor, subtotal - descontoPix);
     return 0;
   })();
-  const totalSemCashback = Math.max(0, subtotal - descontoPix - descontoCupom + freteValor);
+  const totalSemPontos = Math.max(0, subtotal - descontoPix - descontoCupom + freteValor);
 
-  // Cashback: o saldo do WhatsApp digitado abate até o teto do programa, sobre
-  // o valor dos produtos (frete fora). O banco refaz essa conta ao criar o
-  // pedido; aqui é só para o cliente ver antes de confirmar.
-  const cashbackRegras = useCashbackRegras();
-  const cashbackSaldo = useCashbackSaldo(telefone, cashbackRegras !== null);
-  const [usarCashback, setUsarCashback] = useState(true);
-  const valorProdutos = Math.max(0, totalSemCashback - freteValor);
-  const cashbackDisponivel =
-    cashbackRegras && cashbackSaldo
-      ? calcularCashbackUso(cashbackSaldo.saldo, valorProdutos, cashbackRegras)
-      : 0;
-  const cashbackUsado = usarCashback ? cashbackDisponivel : 0;
-  const total = Math.max(0, totalSemCashback - cashbackUsado);
-  const cashbackGanho = cashbackRegras
-    ? calcularCashbackGanho(total - freteValor, cashbackRegras)
-    : 0;
-  const cashbackValidade = cashbackRegras ? formatarDia(validadeCashback(cashbackRegras)) : '';
+  // Alpha Club: os pontos do WhatsApp digitado pagam até o teto do programa
+  // sobre os produtos fora de promoção, e não somam com cupom. O banco refaz
+  // a conta ao criar o pedido; aqui é só para o cliente ver antes.
+  // `clube` null = banco sem o clube; `ativo` false = programa pausado.
+  const clube = useClubeRegras();
+  const clubeNoAr = clube?.ativo === true;
+  const { saldo: clubeSaldo } = useClubeSaldo(telefone, clubeNoAr);
+  const [usarPontos, setUsarPontos] = useState(true);
+  const [aniversario, setAniversario] = useState('');
+  const [indicadoPor, setIndicadoPor] = useState('');
+  const valorElegivel = items
+    .filter((i) => !i.promocional)
+    .reduce((acc, i) => acc + i.preco * i.qtd, 0);
+  const pontosDisponiveis =
+    clubeNoAr && clube && clubeSaldo && !cupomAtivo
+      ? pontosParaUsar(clubeSaldo.pontos, valorElegivel, clube)
+      : { pontos: 0, desconto: 0 };
+  const pontosUsados = usarPontos ? pontosDisponiveis : { pontos: 0, desconto: 0 };
+  const total = Math.max(0, totalSemPontos - pontosUsados.desconto);
+  const primeiraCompra = clubeNoAr && clubeSaldo !== null && !clubeSaldo.participante;
+  const bonusBoasVindas = primeiraCompra && clube ? clube.bonusBoasVindas : 0;
+  const pontosGanho = clubeNoAr && clube ? pontosGanhos(total - freteValor, clube) : 0;
   const displayTotal = submittedTotal ?? total;
 
   useEffect(() => {
@@ -245,19 +260,32 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     }
   }
 
-  async function handleAplicarCupom() {
-    const codigo = cupomInput.trim().toUpperCase();
+  async function handleAplicarCupom(codigoInformado?: string) {
+    const codigo = (codigoInformado ?? cupomInput).trim().toUpperCase();
+    if (codigoInformado) setCupomInput(codigo);
     if (!codigo) { setCupomAtivo(null); setCupomStatus(null); return; }
     if (cupomLoading) return;
 
+    const cupomDoClube = codigo.startsWith('CLUBE-');
+    if (cupomDoClube && !whatsappValido(telefone)) {
+      setCupomAtivo(null);
+      setCupomStatus({ ok: false, msg: '✗ Cupom do clube: preencha antes o WhatsApp que trocou os pontos' });
+      return;
+    }
+
     setCupomLoading(true);
     setCupomStatus({ ok: true, msg: 'Verificando...' });
-    const cupom = await buscarCupom(codigo, subtotal);
+    const cupom = await buscarCupom(codigo, subtotal, clube ? telefone : null);
     setCupomLoading(false);
 
     if (!cupom) {
       setCupomAtivo(null);
-      setCupomStatus({ ok: false, msg: '✗ Cupom inválido ou expirado' });
+      setCupomStatus({
+        ok: false,
+        msg: cupomDoClube
+          ? '✗ Cupom do clube inválido: confira o WhatsApp, a validade e o valor mínimo'
+          : '✗ Cupom inválido ou expirado',
+      });
     } else {
       setCupomAtivo(cupom);
       setCupomStatus({ ok: true, msg: `✓ ${cupom.descricao} aplicado!` });
@@ -303,6 +331,15 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       return;
     }
 
+    if (clubeNoAr && aniversario.trim() && !aniversarioValido(aniversario)) {
+      setSubmitError('Aniversário no formato dia/mês, por exemplo 15/03.');
+      return;
+    }
+    if (clubeNoAr && indicadoPor.trim() && !whatsappValido(indicadoPor)) {
+      setSubmitError('Confira o WhatsApp de quem te indicou (com DDD).');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const enderecoCompleto = [endereco, numero, complemento, bairro, cidade, cep].filter(Boolean).join(', ');
@@ -320,11 +357,15 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       total, status: 'pendente', itens: items,
     };
 
-    if (cashbackRegras) {
-      // O banco abate o saldo; ele recebe o total cheio e devolve o final.
-      dadosPedido.total = totalSemCashback;
+    if (clube) {
+      // O banco abate os pontos e revalida o cupom; ele recebe o total sem
+      // os pontos e devolve o final.
+      dadosPedido.total = totalSemPontos;
       dadosPedido.frete = freteValor;
-      dadosPedido.usarCashback = cashbackUsado > 0;
+      dadosPedido.usarCashback = clubeNoAr && pontosUsados.pontos > 0;
+      dadosPedido.cupomCodigo = cupomAtivo?.codigo;
+      if (clubeNoAr && aniversarioValido(aniversario)) dadosPedido.aniversario = aniversario.trim();
+      if (clubeNoAr && whatsappValido(indicadoPor)) dadosPedido.indicadoPor = indicadoPor;
     }
 
     const result = await submitPedido(dadosPedido, items);
@@ -343,8 +384,8 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     setPedidoId(result.pedido?.id ?? null);
     setTxid(`AG${Date.now()}`);
     setSubmittedTotal(totalFinal);
-    setCashbackGanhoFinal(
-      cashbackRegras ? calcularCashbackGanho(totalFinal - freteValor, cashbackRegras) : 0
+    setPontosGanhoFinal(
+      clubeNoAr && clube ? pontosGanhos(totalFinal - freteValor, clube) + bonusBoasVindas : 0
     );
 
     if (pagamento === 'pix') {
@@ -368,7 +409,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
               unit_price: freteValor,
             });
           }
-          // Com desconto (Pix, cupom, cashback) a soma dos itens passa do que o
+          // Com desconto (Pix, cupom, pontos) a soma dos itens passa do que o
           // cliente deve; o Mercado Pago não aceita item negativo, então vai
           // um item só com o valor do pedido.
           const somaItens = checkoutItems.reduce((acc, i) => acc + i.unit_price * i.quantity, 0);
@@ -433,32 +474,83 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="co_whats">WhatsApp *</label>
                   <input id="co_whats" type="tel" required className={styles.input} value={telefone} onChange={(e) => setTelefone(maskTelefone(e.target.value))} placeholder="(11) 99999-9999" autoComplete="tel" />
-                  {cashbackSaldo && cashbackSaldo.saldo > 0 && (
-                    <div className={styles.cashbackBox}>
-                      <p className={styles.cashbackSaldo}>
-                        Você tem <strong>{fmt(cashbackSaldo.saldo)}</strong> de cashback
-                        {cashbackSaldo.proximoVencimento && (
-                          <> · {fmt(cashbackSaldo.valorVencendo)} vence {formatarDia(cashbackSaldo.proximoVencimento)}</>
+                  {clubeNoAr && clube && clubeSaldo && (clubeSaldo.pontos > 0 || clubeSaldo.cupons.length > 0) && (
+                    <div className={styles.clubeBox}>
+                      <p className={styles.clubeSaldo}>
+                        {clube.nome}: você tem <strong>{formatarPontos(clubeSaldo.pontos)}</strong> ({fmt(clubeSaldo.valor)})
+                        {clubeSaldo.proximoVencimento && clubeSaldo.pontosVencendo > 0 && (
+                          <> · {formatarPontos(clubeSaldo.pontosVencendo)} vencem em {formatarDia(clubeSaldo.proximoVencimento)}</>
                         )}
                       </p>
-                      {cashbackDisponivel > 0 && (
-                        <label className={styles.cashbackUsar}>
-                          <input type="checkbox" checked={usarCashback} onChange={(e) => setUsarCashback(e.target.checked)} />
-                          <span>Usar {fmt(cashbackDisponivel)} neste pedido</span>
-                        </label>
+                      {clubeSaldo.aniversarioPontos > 0 && (
+                        <span className={styles.clubeNota}>🎂 Feliz aniversário! Entraram {formatarPontos(clubeSaldo.aniversarioPontos)} de presente.</span>
                       )}
-                      {cashbackRegras && cashbackDisponivel < cashbackSaldo.saldo && cashbackDisponivel > 0 && (
-                        <span className={styles.cashbackNota}>
-                          O cashback paga até {cashbackRegras.usoMaxPercentual}% dos produtos de cada pedido.
-                        </span>
+                      {cupomAtivo ? (
+                        clubeSaldo.pontos > 0 && (
+                          <span className={styles.clubeNota}>Pontos não somam com cupom. Para usar os pontos, remova o cupom.</span>
+                        )
+                      ) : pontosDisponiveis.pontos > 0 ? (
+                        <>
+                          <label className={styles.clubeUsar}>
+                            <input type="checkbox" checked={usarPontos} onChange={(e) => setUsarPontos(e.target.checked)} />
+                            <span>Usar {formatarPontos(pontosDisponiveis.pontos)} (− {fmt(pontosDisponiveis.desconto)})</span>
+                          </label>
+                          <span className={styles.clubeNota}>
+                            Os pontos pagam até {clube.checkoutMaxPercentual}% dos produtos fora de promoção.
+                          </span>
+                        </>
+                      ) : (
+                        clubeSaldo.pontos > 0 && (
+                          <span className={styles.clubeNota}>
+                            Os pontos pagam até {clube.checkoutMaxPercentual}% dos produtos fora de promoção; neste carrinho não há o que abater.
+                          </span>
+                        )
                       )}
+                      {clubeSaldo.cupons.filter((c) => c.codigo !== cupomAtivo?.codigo).map((c) => (
+                        <button
+                          key={c.codigo}
+                          type="button"
+                          className={styles.clubeCupomBtn}
+                          onClick={() => handleAplicarCupom(c.codigo)}
+                        >
+                          Usar cupom {c.codigo} · {fmt(c.valor)}
+                          <small> (carrinho a partir de {fmt(c.valorMinimo)}, até {formatarDataBanco(c.validade)})</small>
+                        </button>
+                      ))}
                     </div>
+                  )}
+                  {primeiraCompra && clube && clube.bonusBoasVindas > 0 && (
+                    <span className={styles.clubeNota} style={{ display: 'block', marginTop: 8 }}>
+                      Primeira compra? Você entra no {clube.nome} e ganha {formatarPontos(clube.bonusBoasVindas)} de boas-vindas.
+                    </span>
                   )}
                 </div>
                 <div className={styles.field}>
                   <label className={styles.label} htmlFor="co_email">E-mail</label>
                   <input id="co_email" type="email" className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="seu@email.com" autoComplete="email" />
                 </div>
+
+                {/* Alpha Club: aniversário e indicação (opcionais) */}
+                {clubeNoAr && clube && (
+                  <div className={styles.clubeExtras}>
+                    {!clubeSaldo?.temAniversario && clube.bonusAniversario > 0 && (
+                      <div className={styles.field}>
+                        <label className={styles.label} htmlFor="co_aniver">
+                          Aniversário <span className={styles.labelDica}>· ganhe {formatarPontos(clube.bonusAniversario)} no seu mês</span>
+                        </label>
+                        <input id="co_aniver" type="text" inputMode="numeric" className={styles.input} value={aniversario} onChange={(e) => setAniversario(mascararAniversario(e.target.value))} placeholder="dia/mês — ex.: 15/03" maxLength={5} style={{ maxWidth: 180 }} />
+                      </div>
+                    )}
+                    {!clubeSaldo?.participante && clube.bonusIndicacao > 0 && (
+                      <div className={styles.field}>
+                        <label className={styles.label} htmlFor="co_indicado">
+                          Quem te indicou? <span className={styles.labelDica}>· número do amigo, opcional</span>
+                        </label>
+                        <input id="co_indicado" type="tel" className={styles.input} value={indicadoPor} onChange={(e) => setIndicadoPor(maskTelefone(e.target.value))} placeholder="(11) 99999-9999" />
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Campos de endereço */}
                 <div className={styles.field}>
@@ -520,7 +612,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                       placeholder="Digite o código"
                       style={{ textTransform: 'uppercase' }}
                     />
-                    <button type="button" className={styles.cupomBtn} onClick={handleAplicarCupom} disabled={cupomLoading}>{cupomLoading ? '...' : 'APLICAR'}</button>
+                    <button type="button" className={styles.cupomBtn} onClick={() => handleAplicarCupom()} disabled={cupomLoading}>{cupomLoading ? '...' : 'APLICAR'}</button>
                   </div>
                   {cupomStatus && (
                     <span className={`${styles.cupomStatus} ${cupomStatus.ok ? styles.cupomOk : styles.cupomErr}`}>
@@ -591,19 +683,21 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                       <span>− {fmt(descontoCupom)}</span>
                     </div>
                   )}
-                  {cashbackUsado > 0 && (
+                  {pontosUsados.pontos > 0 && (
                     <div className={`${styles.summaryLine} ${styles.summaryLineGreen}`}>
-                      <span>Cashback usado</span>
-                      <span>− {fmt(cashbackUsado)}</span>
+                      <span>{clube?.nome} ({formatarPontos(pontosUsados.pontos)})</span>
+                      <span>− {fmt(pontosUsados.desconto)}</span>
                     </div>
                   )}
                   <div className={styles.summaryTotal}>
                     <span className={styles.summaryTotalLabel}>Total</span>
                     <span className={styles.summaryTotalValue}>{fmt(total)}</span>
                   </div>
-                  {cashbackGanho > 0 && (
-                    <p className={styles.cashbackGanho}>
-                      Você ganha <strong>{fmt(cashbackGanho)}</strong> de cashback para usar até {cashbackValidade}
+                  {clubeNoAr && clube && pontosGanho + bonusBoasVindas > 0 && (
+                    <p className={styles.clubeGanho}>
+                      Você ganha <strong>{formatarPontos(pontosGanho + bonusBoasVindas)}</strong>
+                      {' '}({fmt(valorDosPontos(pontosGanho + bonusBoasVindas, clube))}) no {clube.nome}
+                      {bonusBoasVindas > 0 && <>, com {formatarPontos(bonusBoasVindas)} de boas-vindas</>}
                     </p>
                   )}
                 </div>
@@ -636,9 +730,9 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
         {step === 'pix' && (
           <>
             <div className={styles.body}>
-              {cashbackGanhoFinal > 0 && (
-                <p className={styles.cashbackGanho} style={{ margin: '20px 24px 0' }}>
-                  Seus <strong>{fmt(cashbackGanhoFinal)}</strong> de cashback são liberados assim que o pagamento for confirmado. Use até {cashbackValidade}.
+              {pontosGanhoFinal > 0 && clube && (
+                <p className={styles.clubeGanho} style={{ margin: '20px 24px 0' }}>
+                  Seus <strong>{formatarPontos(pontosGanhoFinal)}</strong> entram no {clube.nome} assim que o pagamento for confirmado.
                 </p>
               )}
               <PixPayment total={displayTotal} txid={txid} onClose={onClose} />
@@ -696,9 +790,9 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
             <h2 className={styles.successTitle}>Pedido confirmado!</h2>
             {pedidoId && <p className={styles.successId}>Pedido #{pedidoId}</p>}
             <p className={styles.successMsg}>Em breve entraremos em contato pelo WhatsApp para confirmar os detalhes.</p>
-            {cashbackGanhoFinal > 0 && (
-              <p className={styles.cashbackGanho}>
-                Você ganhou <strong>{fmt(cashbackGanhoFinal)}</strong> de cashback. Use na próxima compra até {cashbackValidade}.
+            {pontosGanhoFinal > 0 && clube && (
+              <p className={styles.clubeGanho}>
+                Você ganhou <strong>{formatarPontos(pontosGanhoFinal)}</strong> no {clube.nome}. Consulte e use na página inicial da loja.
               </p>
             )}
             <button type="button" onClick={onClose} style={{ padding: '14px 48px', background: '#c9a961', border: 'none', color: '#000', fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', cursor: 'pointer', marginTop: 8 }}>FECHAR</button>

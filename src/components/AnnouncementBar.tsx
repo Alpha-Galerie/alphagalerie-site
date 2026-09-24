@@ -1,5 +1,5 @@
-import { useCashbackRegras } from '../hooks/useCashback';
-import { descreverPercentual } from '../lib/cashback';
+import { useClubeRegras } from '../hooks/useClube';
+import { percentualDeVolta } from '../lib/clube';
 import styles from './AnnouncementBar.module.css';
 
 const ITEMS = [
@@ -11,9 +11,9 @@ const ITEMS = [
 ];
 
 export default function AnnouncementBar() {
-  const cashback = useCashbackRegras();
-  const itens = cashback
-    ? [`Cashback: ${descreverPercentual(cashback)} · ${cashback.validadeDias} dias para usar`, ...ITEMS]
+  const clube = useClubeRegras();
+  const itens = clube?.ativo
+    ? [`${clube.nome}: ${percentualDeVolta(clube).toLocaleString('pt-BR')}% de volta em pontos em toda compra`, ...ITEMS]
     : ITEMS;
   // Duplicar para que o marquee seja contínuo (sem gap visível no loop)
   const ALL = [...itens, ...itens];
