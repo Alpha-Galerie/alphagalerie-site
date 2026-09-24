@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -7,6 +7,8 @@ import VariacoesModal from '../components/VariacoesModal';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import AddedToCartToast from '../components/AddedToCartToast';
 import { useProduct } from '../hooks/useProduct';
+import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
+import Sugestoes from '../components/Sugestoes';
 import { formatCurrency } from '../lib/format';
 import { getPrecoInfo } from '../lib/preco';
 import { buildProductPath, extractProductIdFromParam } from '../lib/productPath';
@@ -88,6 +90,8 @@ export default function ProductPage() {
   const addItem = useCartStore((s) => s.addItem);
   const showToast = useToastStore((s) => s.showToast);
   const { data: produto, isLoading, isError } = useProduct(produtoId);
+  const { adicionar } = useCarrinhoActions();
+  const produtoComoItens = useMemo(() => (produto ? [produto] : []), [produto]);
 
   useEffect(() => {
     if (produto) {
@@ -328,6 +332,12 @@ export default function ProductPage() {
               </div>
             </div>
           </article>
+        )}
+
+        {produto && (
+          <div className={styles.sugestoes}>
+            <Sugestoes itens={produtoComoItens} onAdd={adicionar} titulo="Combina com este produto" />
+          </div>
         )}
       </main>
 

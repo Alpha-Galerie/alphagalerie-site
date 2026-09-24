@@ -56,6 +56,7 @@ export const useCartStore = create<CartState>()(
             variacao: variacao?.nome,
             marca: produto.marca,
             categoria: produto.categorias?.nome ?? '',
+            subcategoria: produto.subcategoria,
             preco,
             imagem: produto.imagem_url,
             estoque: variacao !== undefined ? variacao.estoque : produto.estoque,

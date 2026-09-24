@@ -319,6 +319,18 @@
   cursor: not-allowed;
 }
 
+/* Cashback que a compra gera */
+.cashback {
+  margin: -8px 0 16px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #bbb;
+}
+
+.cashback strong {
+  color: #c9a961;
+}
+
 /* ── Mobile ── */
 @media (max-width: 640px) {
   .drawer { max-width: 100%; }

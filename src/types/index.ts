@@ -47,6 +47,8 @@ export interface ItemCarrinho {
   variacao?: string;
   marca: string;
   categoria: string;
+  /** Usada para sugerir o que combina (seda → piteira). Ausente em carrinhos antigos. */
+  subcategoria?: string | null;
   preco: number;
   imagem: string | null;
   estoque: number | null;
@@ -67,6 +69,14 @@ export interface Pedido {
   pagamento: 'pix' | 'cartao';
   entrega: 'delivery';
   observacoes?: string;
+  /** Frete já incluso em `total`. */
+  frete?: number;
+  /**
+   * Presente só quando o programa de cashback está no ar. true pede ao banco
+   * para abater o saldo do WhatsApp; nesse caso `total` vai sem o abatimento
+   * e o banco devolve o total final.
+   */
+  usarCashback?: boolean;
   total: number;
   status: string;
   itens: ItemCarrinho[];

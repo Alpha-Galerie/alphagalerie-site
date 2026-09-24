@@ -1,0 +1,104 @@
+.wrap {
+  padding: 20px 0 8px;
+}
+
+.titulo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin: 0 0 12px;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--line-soft);
+}
+
+.img {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: var(--bg-soft);
+  overflow: hidden;
+}
+
+.img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nome {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px;
+  line-height: 1.25;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preco {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gold);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+
+.precoDe {
+  color: var(--text-faint);
+  font-size: 10px;
+}
+
+.add {
+  flex-shrink: 0;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid rgba(201, 169, 97, 0.5);
+  color: var(--gold);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  min-height: 40px;
+}
+
+.add:hover {
+  background: var(--gold);
+  color: #000;
+}

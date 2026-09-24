@@ -491,3 +491,62 @@
   .optBox { padding: 12px 12px; gap: 10px; }
   .optBoxText small { font-size: 11px; line-height: 1.4; }
 }
+
+/* ── Cashback ── */
+.cashbackBox {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(201, 169, 97, 0.35);
+  background: rgba(201, 169, 97, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cashbackSaldo {
+  margin: 0;
+  font-size: 13px;
+  color: #f4f4f4;
+  line-height: 1.5;
+}
+
+.cashbackSaldo strong {
+  color: #c9a961;
+}
+
+.cashbackUsar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: #c9a961;
+  cursor: pointer;
+  min-height: 32px;
+}
+
+.cashbackUsar input {
+  width: 18px;
+  height: 18px;
+  accent-color: #c9a961;
+}
+
+.cashbackNota {
+  font-size: 11px;
+  color: #888;
+}
+
+.cashbackGanho {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border: 1px dashed rgba(201, 169, 97, 0.45);
+  font-size: 12px;
+  line-height: 1.5;
+  color: #d8d8d8;
+  text-align: center;
+}
+
+.cashbackGanho strong {
+  color: #c9a961;
+}
