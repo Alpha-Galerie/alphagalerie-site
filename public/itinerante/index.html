@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="canonical" href="https://alphagalerie.com/itinerante/">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Alpha Itinerante 2026 · Alpha Galerie">
+<meta property="og:description" content="A Alpha Galerie leva a loja para o seu evento. Sem aluguel e sem custo para o evento.">
+<meta property="og:url" content="https://alphagalerie.com/itinerante/">
+<title>Alpha Itinerante 2026</title>
+<meta name="description" content="A Alpha Galerie leva a loja para o seu evento. Você entra com o espaço, a gente leva os produtos e a equipe, e o faturamento do dia é dividido.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+/* =====================================================
+   PAINEL DE CONTROLE — edite aqui
+   ===================================================== */
+var CONFIG = {
+  whatsapp: "5511942920076",           // número com DDI + DDD
+  email: "alphagalerie@gmail.com",     // aparece como contato alternativo
+  site: "alphagalerie.com",            // site oficial
+  instagram: "alpha.galerie",          // sem @
+  splitAlpha: 90,                      // % do faturamento do dia que fica com a Alpha
+  splitEvento: 10,                     // % do faturamento do dia que vai para o evento
+  desde: "2014"
+};
+</script>
+<style>
+/* Paleta e tipografia oficiais do alphagalerie.com (src/styles/tokens.css).
+   O site é só escuro, então a página também é. */
+:root{
+  color-scheme:dark;
+  --bg:#0a0a0a;
+  --bg-soft:#111;
+  --bg-card:#161616;
+  --bg-deep:#050505;
+  --line:#222;
+  --line-soft:#1a1a1a;
+  --text:#f4f4f4;
+  --text-2:rgba(244,244,244,.7);
+  --text-dim:#888;
+  --text-faint:#555;
+  --gold:#c9a961;
+  --gold-soft:#b39555;
+  --gold-glow:rgba(201,169,97,.25);
+  --gold-wash:rgba(201,169,97,.07);
+  --maxw:1320px;
+  --serif:"Cormorant Garamond",Georgia,"Times New Roman",serif;
+  --sans:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:16px;font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img,svg{max-width:100%;display:block}
+h1,h2,h3{font-family:var(--serif);font-weight:400;line-height:1.08;margin:0;text-wrap:balance;color:var(--text)}
+h1 em,h2 em,h3 em{color:var(--gold);font-style:italic}
+p{margin:0}
+:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+.container{max-width:var(--maxw);margin:0 auto;padding-inline:24px}
+section{padding-block:96px;border-bottom:1px solid var(--line-soft)}
+
+.eyebrow{display:inline-flex;align-items:center;gap:14px;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:22px}
+.eyebrow::before{content:"";width:32px;height:1px;background:var(--gold)}
+.eyebrow .num{color:rgba(244,244,244,.35)}
+.section-head{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:24px 48px;margin-bottom:48px}
+.section-title{font-size:clamp(2rem,4vw,3.25rem);font-weight:400}
+.section-sub{max-width:440px;font-size:15px;line-height:1.7;color:rgba(244,244,244,.58)}
+
+/* botões — mesmos do site */
+.btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:12px;padding:17px 32px;font-family:var(--mono);font-size:11.5px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;border:1px solid transparent;cursor:pointer;background:none;color:inherit;transition:color .3s,border-color .3s,box-shadow .3s}
+.btn>*{position:relative;z-index:1}
+.btn-gold{background:var(--gold);color:#000}
+.btn-gold::before{content:"";position:absolute;inset:0;background:var(--text);transform:translateX(-101%);transition:transform .3s}
+.btn-gold:hover::before{transform:translateX(0)}
+.btn-gold:hover{box-shadow:0 10px 40px var(--gold-glow)}
+.btn-ghost{border-color:var(--line);color:var(--text-dim)}
+.btn-ghost:hover{border-color:var(--text-dim);color:var(--text)}
+.btn svg{width:16px;height:16px}
+
+/* topo */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(10,10,10,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--line-soft)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:18px}
+.brand{display:inline-flex;align-items:center;gap:10px;font-family:var(--serif);font-size:18px;letter-spacing:.04em;color:var(--gold)}
+.brand-mark{width:32px;height:32px;border:1.5px solid var(--gold);border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.brand-mark::after{content:"ag";font-family:var(--serif);font-style:italic;font-weight:500;font-size:18px;color:var(--gold);line-height:1;letter-spacing:-.02em}
+.brand-tag{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);padding-left:12px;margin-left:4px;border-left:1px solid var(--line)}
+.nav-actions{display:flex;align-items:center;gap:28px}
+.nav-link{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);transition:color .2s}
+.nav-link:hover{color:var(--gold)}
+.nav .btn{padding:11px 18px;font-size:10.5px}
+
+/* hero */
+.hero{position:relative;overflow:hidden;padding-block:64px 88px}
+.hero::before{content:"";position:absolute;top:0;right:-12%;width:640px;height:640px;background:radial-gradient(circle,rgba(201,169,97,.18) 0%,transparent 60%);filter:blur(80px);pointer-events:none}
+.hero-grid{position:relative;display:grid;grid-template-columns:1fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(2.5rem,5.4vw,4.4rem);letter-spacing:-.02em;line-height:1.02;margin-bottom:26px}
+.hero h1 .light{font-weight:300}
+.lead{max-width:540px;font-size:17px;line-height:1.7;color:var(--text-2)}
+.lead strong{color:var(--text);font-weight:500}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:38px}
+.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:52px;padding-top:32px;border-top:1px solid var(--line-soft);max-width:520px}
+.meta-num{font-family:var(--serif);font-size:38px;line-height:1;color:var(--gold);font-variant-numeric:tabular-nums}
+.meta-label{margin-top:8px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);line-height:1.5}
+
+/* planta */
+.sheet{margin:0;background:var(--bg-soft);border:1px solid var(--line)}
+.sheet-head,.sheet-foot{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 18px;padding:14px 20px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim)}
+.sheet-head{border-bottom:1px solid var(--line)}
+.sheet-head b{color:var(--gold);font-weight:500}
+.sheet-foot{border-top:1px solid var(--line);color:var(--text-faint)}
+.sheet-body{display:grid;grid-template-columns:1fr;gap:0}
+.plan-wrap{padding:18px 14px 8px;overflow-x:auto}
+.plan{width:100%;min-width:300px;height:auto;margin:0 auto;max-width:560px}
+.legend{padding:20px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.legend h4{margin:0 0 12px;display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--text)}
+.sw{width:14px;height:14px;flex-shrink:0;border:1.2px solid var(--gold)}
+.sw.fill{background:var(--gold)}
+.legend ol{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.legend li{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:baseline;font-size:13px;line-height:1.4;color:var(--text-2)}
+.legend li span{font-family:var(--mono);font-size:10.5px;color:var(--gold);font-variant-numeric:tabular-nums}
+
+/* passos */
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr;border-top:1px solid var(--line)}
+.steps li{display:grid;grid-template-columns:64px 1fr;gap:20px;padding:28px 0;border-bottom:1px solid var(--line)}
+.step-n{font-family:var(--mono);font-size:11px;letter-spacing:.15em;color:var(--gold);padding-top:6px}
+.steps h3{font-size:1.65rem;margin-bottom:8px}
+.steps p{color:var(--text-dim);font-size:15px;max-width:46ch}
+
+/* modalidades */
+.modes{display:grid;grid-template-columns:1fr;gap:16px}
+.mode{background:var(--bg-soft);border:1px solid var(--line);display:grid;grid-template-rows:auto auto 1fr;}
+.mode.feature{border-color:rgba(201,169,97,.55)}
+.mode-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:18px 26px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim)}
+.mode.feature .mode-top{color:var(--gold)}
+.badge{border:1px solid currentColor;padding:4px 10px;border-radius:999px}
+.mode-plan{padding:22px 26px 6px;border-bottom:1px solid var(--line-soft)}
+.mode-plan svg{width:100%;max-width:300px;height:auto}
+.mode-body{padding:26px}
+.mode h3{font-size:2.2rem;margin-bottom:6px}
+.mode .size{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.mode .desc{color:var(--text-2);font-size:15px;margin-bottom:22px;max-width:44ch}
+.provide{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text);margin-bottom:10px}
+.mode ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.mode li{position:relative;padding-left:20px;font-size:14.5px;color:var(--text-dim)}
+.mode li::before{content:"";position:absolute;left:0;top:.72em;width:10px;height:1px;background:var(--gold)}
+.scale-note{margin-top:16px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+
+/* modelo */
+.model{background:var(--bg-deep)}
+.split{display:flex;height:96px;border:1px solid var(--line);margin-bottom:14px}
+.split div{display:flex;flex-direction:column;justify-content:center;gap:6px;padding:0 22px;min-width:0}
+.split .a{background:var(--bg-card)}
+.split .e{background:var(--gold);color:#000;min-width:104px}
+.split b{font-family:var(--serif);font-weight:400;font-size:2.4rem;line-height:1;font-variant-numeric:tabular-nums}
+.split small{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.8}
+.fine{font-size:13.5px;color:var(--text-dim);max-width:60ch}
+.sim{margin-top:48px;background:var(--bg-soft);border:1px solid var(--line);display:grid;grid-template-columns:1fr}
+.sim-in{padding:28px;display:grid;gap:28px;border-bottom:1px solid var(--line)}
+.sim-label{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim)}
+.sim-label output{font-family:var(--serif);font-size:1.9rem;letter-spacing:0;text-transform:none;color:var(--text);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;height:28px;accent-color:var(--gold);background:transparent}
+.days{display:flex;border:1px solid var(--line);width:max-content;max-width:100%}
+.days button{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:11px 18px;background:none;border:0;border-right:1px solid var(--line);color:var(--text-dim);cursor:pointer}
+.days button:last-child{border-right:0}
+.days button[aria-pressed="true"]{background:var(--gold);color:#000}
+.sim-out{display:grid;grid-template-columns:1fr 1fr}
+.sim-out div{padding:24px 28px}
+.sim-out div+div{border-left:1px solid var(--line)}
+.sim-out span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px}
+.sim-out b{font-family:var(--serif);font-weight:400;font-size:clamp(2rem,4vw,2.8rem);line-height:1;font-variant-numeric:tabular-nums}
+.sim-out .you b{color:var(--gold)}
+.sim-note{padding:0 28px 24px;font-size:13.5px;color:var(--text-dim)}
+
+/* benefícios */
+.benefits{display:grid;grid-template-columns:1fr;border-top:1px solid var(--line)}
+.benefits div{padding:26px 0;border-bottom:1px solid var(--line)}
+.benefits h3{font-size:1.6rem;margin-bottom:8px}
+.benefits p{color:var(--text-dim);font-size:15px;max-width:48ch}
+.venues{display:flex;flex-wrap:wrap;gap:10px;margin-top:40px}
+.venues span{border:1px solid var(--line);padding:9px 16px;border-radius:999px;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+
+/* contato */
+.contact-grid{display:grid;grid-template-columns:1fr;gap:48px}
+.contact-aside{display:grid;gap:26px;align-content:start}
+.contact-aside .lead{font-size:16px}
+.alt{border-top:1px solid var(--line);padding-top:22px;display:grid;gap:10px}
+.alt-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim)}
+.alt-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+.alt-row code{font-family:var(--mono);font-size:13px;color:var(--text);user-select:all}
+.copy-btn{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);background:none;border:1px solid rgba(201,169,97,.45);border-radius:999px;padding:6px 12px;cursor:pointer}
+.copy-btn:hover{background:var(--gold);color:#000}
+form{display:grid;grid-template-columns:1fr;gap:18px;background:var(--bg-soft);border:1px solid var(--line);padding:28px}
+.field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-dim);margin-bottom:8px}
+.field label i{font-style:normal;color:var(--gold)}
+.field input,.field select,.field textarea{width:100%;font-family:var(--sans);font-size:16px;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:0;padding:13px 14px;transition:border-color .2s}
+.field input::placeholder,.field textarea::placeholder{color:var(--text-faint)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--gold)}
+.field [aria-invalid="true"]{border-color:#c96a61}
+.field textarea{min-height:104px;resize:vertical}
+.field select option{background:var(--bg)}
+.form-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px}
+.form-msg{font-size:13.5px;color:var(--text-dim);min-height:1.4em}
+.form-msg.err{color:#d98a82}
+
+/* vista frontal */
+.elev{margin:0;background:var(--bg-soft);border:1px solid var(--line)}
+.elev-wrap{overflow-x:auto;padding:24px 16px 8px}
+.elev svg{width:100%;min-width:560px;max-width:1040px;height:auto;margin:0 auto}
+.elev-notes{display:grid;grid-template-columns:1fr;border-top:1px solid var(--line)}
+.elev-notes div{padding:20px 24px}
+.elev-notes div+div{border-top:1px solid var(--line)}
+.elev-notes b{display:block;font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.elev-notes p{font-size:14px;color:var(--text-dim)}
+@media (min-width:760px){.elev-notes{grid-template-columns:repeat(3,1fr)}.elev-notes div+div{border-top:0;border-left:1px solid var(--line)}}
+
+/* referências */
+.refs{margin-top:56px}
+.refs-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 24px;margin-bottom:18px}
+.refs-head h3{font-size:1.9rem}
+.refs-head p{font-size:13.5px;color:var(--text-dim);max-width:52ch}
+.refs-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.ref{margin:0;background:var(--bg-soft);border:1px solid var(--line);display:flex;flex-direction:column}
+.ref img{width:100%;aspect-ratio:4/3;object-fit:cover;filter:saturate(.7)}
+.ref figcaption{padding:14px 16px;display:grid;gap:4px}
+.ref b{font-family:var(--mono);font-size:10px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+.ref span{font-size:13.5px;color:var(--text-dim)}
+@media (min-width:900px){
+  .refs-grid{grid-template-columns:1.5fr 1.5fr 1fr}
+  .ref img{aspect-ratio:auto;height:340px}
+}
+
+/* rodapé */
+footer{background:var(--bg-deep);padding-block:64px 36px}
+.foot-grid{display:grid;grid-template-columns:1fr;gap:28px;justify-content:space-between}
+.foot-desc{margin-top:16px;font-size:14px;line-height:1.8;color:var(--text-dim);max-width:380px}
+.foot-links{display:grid;gap:10px;align-content:start}
+.foot-links a{font-family:var(--mono);font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--text-dim);transition:color .2s}
+.foot-links a:hover{color:var(--gold)}
+.foot-legal{margin-top:48px;padding-top:24px;border-top:1px solid var(--line-soft);display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+
+@media (min-width:760px){
+  .legend{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr 1fr;column-gap:56px}
+  .steps li:nth-child(odd){padding-right:8px}
+  .modes{grid-template-columns:1fr 1fr}
+  .benefits{grid-template-columns:1fr 1fr;column-gap:56px}
+  form{grid-template-columns:1fr 1fr}
+  .full{grid-column:1 / -1}
+  .foot-grid{grid-template-columns:1fr auto}
+}
+@media (min-width:1080px){
+  section{padding-block:128px}
+  .hero{padding-block:88px 112px}
+  .hero-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px}
+  .contact-grid{grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:72px}
+}
+@media (max-width:640px){
+  .container{padding-inline:16px}
+  section{padding-block:72px}
+  .brand-tag,.nav-link{display:none}
+  .meta{gap:14px}
+  .meta-num{font-size:30px}
+  .legend{grid-template-columns:1fr}
+  .steps li{grid-template-columns:44px 1fr;gap:12px}
+  .sim-out{grid-template-columns:1fr}
+  .sim-out div+div{border-left:0;border-top:1px solid var(--line)}
+  .split div{padding:0 14px}
+  .split b{font-size:2rem}
+  form{padding:20px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .hero .copy>*{animation:up .8s ease both}
+  .hero .copy>*:nth-child(2){animation-delay:.06s}
+  .hero .copy>*:nth-child(3){animation-delay:.12s}
+  .hero .copy>*:nth-child(4){animation-delay:.18s}
+  .hero .copy>*:nth-child(5){animation-delay:.24s}
+  .plan .draw{stroke-dasharray:1500;animation:draw 2.2s ease-out both}
+}
+@keyframes up{from{transform:translateY(14px)}to{transform:none}}
+@keyframes draw{from{stroke-dashoffset:1500}to{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand js-site" href="#" aria-label="Alpha Galerie, site oficial">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>alpha.galerie</span>
+      <span class="brand-tag">Itinerante 2026</span>
+    </a>
+    <div class="nav-actions">
+      <a class="nav-link js-site" href="#">Site oficial ↗</a>
+      <a class="btn btn-gold" href="#contato"><span>Levar ao meu evento</span></a>
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero" aria-label="Alpha Itinerante 2026">
+  <div class="container hero-grid">
+    <div class="copy">
+      <p class="eyebrow">Alpha Galerie · Itinerante · 2026</p>
+      <h1><span class="light">A loja da Alpha</span><br>dentro do <em>seu evento</em>.</h1>
+      <p class="lead">Você entra com o espaço e a estrutura. A gente leva os produtos, a equipe e a maquininha. No fim do dia, o faturamento é dividido. <strong>Sem aluguel e sem custo para o evento.</strong></p>
+      <div class="cta-row">
+        <a class="btn btn-gold js-wa" href="#"><span>Chamar no WhatsApp</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        <a class="btn btn-ghost" href="#modalidades"><span>Ver modalidades</span></a>
+      </div>
+      <div class="meta">
+        <div><div class="meta-num js-desde">2014</div><div class="meta-label">Na cena desde</div></div>
+        <div><div class="meta-num js-pe">10%</div><div class="meta-label">Do faturamento para o evento</div></div>
+        <div><div class="meta-num">R$ 0</div><div class="meta-label">De investimento</div></div>
+      </div>
+    </div>
+
+    <figure class="sheet" id="planta" aria-labelledby="planta-titulo">
+      <div class="sheet-head"><b id="planta-titulo">Prancha 01 · Loja + Lounge</b><span>Planta de referência</span></div>
+      <div class="sheet-body">
+        <div class="plan-wrap">
+          <svg class="plan" viewBox="0 0 520 480" role="img" aria-label="Planta baixa de um espaço de 6 por 6 metros. Ao fundo, painel da marca, equipe e balcão com produtos. À frente, lounge com tapete, sofá, dois puffs e luminárias. Fundo e laterais fechados; a frente fica aberta para o público.">
+            <defs>
+              <pattern id="grid" x="90" y="60" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#1b1b1b" stroke-width="1"/></pattern>
+              <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#c9a961" stroke-width="1" stroke-opacity=".35"/></pattern>
+              <radialGradient id="lamp"><stop offset="0" stop-color="#c9a961" stop-opacity=".28"/><stop offset="1" stop-color="#c9a961" stop-opacity="0"/></radialGradient>
+            </defs>
+
+            <!-- piso e grade de 50 cm -->
+            <rect x="90" y="60" width="360" height="360" fill="#0d0d0d"/>
+            <rect x="90" y="60" width="360" height="360" fill="url(#grid)"/>
+
+            <!-- divisão loja / lounge -->
+            <line x1="90" y1="216" x2="450" y2="216" stroke="#3a3a3a" stroke-width="1" stroke-dasharray="4 5"/>
+            <text x="100" y="208" fill="#6d6d6d" font-family="JetBrains Mono,ui-monospace,monospace" font-size="8.5" letter-spacing="1.6">LOJA</text>
+            <text x="100" y="231" fill="#6d6d6d" font-family="JetBrains Mono,ui-monospace,monospace" font-size="8.5" letter-spacing="1.6">LOUNGE</text>
+
+            <!-- 1 painel da marca (Alpha) -->
+            <rect x="180" y="62" width="180" height="8" fill="#c9a961"/>
+            <!-- 2 área da equipe (Alpha) -->
+            <rect x="180" y="80" width="180" height="62" fill="url(#hatch)" stroke="#c9a961" stroke-opacity=".35" stroke-width="1"/>
+            <!-- 4 balcão (evento) com 3 produtos e maquininha (Alpha) -->
+            <rect x="162" y="150" width="216" height="36" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.4"/>
+            <g fill="#c9a961">
+              <rect x="176" y="156" width="14" height="9"/><rect x="198" y="156" width="10" height="9"/><rect x="216" y="156" width="16" height="9"/>
+              <rect x="240" y="156" width="12" height="9"/><rect x="260" y="156" width="14" height="9"/><rect x="282" y="156" width="10" height="9"/>
+              <rect x="300" y="156" width="16" height="9"/>
+              <rect x="344" y="160" width="12" height="18"/>
+            </g>
+            <line x1="356" y1="169" x2="381" y2="169" stroke="#c9a961" stroke-width=".8"/>
+
+            <!-- 5 ponto de energia (evento) -->
+            <circle cx="438" cy="74" r="6" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.2"/>
+            <path d="M439.5 69.5 L436 74.5 H440 L436.5 78.5" fill="none" stroke="#c9a961" stroke-width="1.1" stroke-linejoin="round"/>
+
+            <!-- 6 tapete (evento) -->
+            <rect x="144" y="246" width="216" height="132" fill="rgba(201,169,97,.06)" stroke="#c9a961" stroke-width="1.1"/>
+            <rect x="152" y="254" width="200" height="116" fill="none" stroke="#c9a961" stroke-opacity=".4" stroke-width=".8" stroke-dasharray="2 4"/>
+
+            <!-- 7 sofá de 3 lugares (evento) -->
+            <rect x="384" y="246" width="52" height="132" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.4"/>
+            <line x1="424" y1="254" x2="424" y2="370" stroke="#c9a961" stroke-width="1"/>
+            <line x1="384" y1="254" x2="436" y2="254" stroke="#c9a961" stroke-width="1"/>
+            <line x1="384" y1="370" x2="436" y2="370" stroke="#c9a961" stroke-width="1"/>
+            <line x1="384" y1="292.7" x2="424" y2="292.7" stroke="#c9a961" stroke-opacity=".55" stroke-width=".8"/>
+            <line x1="384" y1="331.3" x2="424" y2="331.3" stroke="#c9a961" stroke-opacity=".55" stroke-width=".8"/>
+
+            <!-- 8 puffs (evento) -->
+            <circle cx="186" cy="288" r="21" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.4"/>
+            <circle cx="186" cy="288" r="13" fill="none" stroke="#c9a961" stroke-opacity=".45" stroke-width=".8"/>
+            <circle cx="186" cy="340" r="21" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.4"/>
+            <circle cx="186" cy="340" r="13" fill="none" stroke="#c9a961" stroke-opacity=".45" stroke-width=".8"/>
+
+            <!-- 9 luminárias de piso (evento) -->
+            <circle cx="116" cy="246" r="30" fill="url(#lamp)"/>
+            <circle cx="116" cy="246" r="7" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.2"/>
+            <circle cx="116" cy="246" r="2.2" fill="#c9a961"/>
+            <circle cx="424" cy="400" r="30" fill="url(#lamp)"/>
+            <circle cx="424" cy="400" r="7" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.2"/>
+            <circle cx="424" cy="400" r="2.2" fill="#c9a961"/>
+
+            <!-- tenda 6 × 6 (evento): fundo e laterais fechados, frente aberta -->
+            <line x1="90" y1="420" x2="450" y2="420" stroke="#c9a961" stroke-opacity=".4" stroke-width="1" stroke-dasharray="2 6"/>
+            <path class="draw" d="M90 420 V60 H450 V420" fill="none" stroke="#c9a961" stroke-width="2.2" stroke-linecap="square"/>
+            <g fill="#c9a961"><rect x="86" y="56" width="8" height="8"/><rect x="446" y="56" width="8" height="8"/><rect x="86" y="416" width="8" height="8"/><rect x="446" y="416" width="8" height="8"/></g>
+
+            <!-- frente aberta: o público vê e entra por toda a largura -->
+            <g fill="none" stroke="#f4f4f4" stroke-opacity=".5" stroke-width="1">
+              <line x1="185" y1="468" x2="185" y2="432"/><path d="M180 438 L185 430 L190 438"/>
+              <line x1="230" y1="468" x2="230" y2="432"/><path d="M225 438 L230 430 L235 438"/>
+              <line x1="275" y1="468" x2="275" y2="432"/><path d="M270 438 L275 430 L280 438"/>
+            </g>
+            <text x="450" y="444" text-anchor="end" fill="#8a8a8a" font-family="JetBrains Mono,ui-monospace,monospace" font-size="8" letter-spacing="1.4">FRENTE ABERTA · PÚBLICO</text>
+            <!-- 10 sinalização 18+ (Alpha) -->
+            <rect x="96" y="428" width="36" height="18" fill="#c9a961"/>
+            <text x="114" y="440.5" text-anchor="middle" fill="#0a0a0a" font-family="JetBrains Mono,ui-monospace,monospace" font-size="9.5" font-weight="500">18+</text>
+
+            <!-- cotas -->
+            <g stroke="#6d6d6d" stroke-width="1" fill="none">
+              <line x1="90" y1="34" x2="450" y2="34"/><line x1="90" y1="28" x2="90" y2="48"/><line x1="450" y1="28" x2="450" y2="48"/>
+              <line x1="86" y1="38" x2="94" y2="30"/><line x1="446" y1="38" x2="454" y2="30"/>
+              <line x1="58" y1="60" x2="58" y2="420"/><line x1="52" y1="60" x2="72" y2="60"/><line x1="52" y1="420" x2="72" y2="420"/>
+              <line x1="54" y1="64" x2="62" y2="56"/><line x1="54" y1="424" x2="62" y2="416"/>
+              <line x1="480" y1="60" x2="480" y2="420"/><line x1="468" y1="60" x2="486" y2="60"/><line x1="468" y1="216" x2="486" y2="216"/><line x1="468" y1="420" x2="486" y2="420"/>
+              <line x1="476" y1="64" x2="484" y2="56"/><line x1="476" y1="220" x2="484" y2="212"/><line x1="476" y1="424" x2="484" y2="416"/>
+            </g>
+            <g fill="#9a9a9a" font-family="JetBrains Mono,ui-monospace,monospace" font-size="10">
+              <text x="270" y="27" text-anchor="middle">6,00</text>
+              <text x="0" y="0" text-anchor="middle" transform="translate(48 240) rotate(-90)">6,00</text>
+              <text x="0" y="0" text-anchor="middle" transform="translate(496 138) rotate(90)">2,60</text>
+              <text x="0" y="0" text-anchor="middle" transform="translate(496 318) rotate(90)">3,40</text>
+            </g>
+
+            <!-- chamadas -->
+            <g font-family="JetBrains Mono,ui-monospace,monospace" font-size="9" font-weight="500" text-anchor="middle">
+              <g><circle cx="270" cy="66" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="270" y="69.2" fill="#c9a961">1</text></g>
+              <g><circle cx="270" cy="111" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="270" y="114.2" fill="#c9a961">2</text></g>
+              <g><circle cx="392" cy="169" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="392" y="172.2" fill="#c9a961">3</text></g>
+              <g><circle cx="146" cy="168" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="146" y="171.2" fill="#c9a961">4</text></g>
+              <g><circle cx="418" cy="96" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="418" y="99.2" fill="#c9a961">5</text></g>
+              <line x1="424" y1="89" x2="433" y2="79" stroke="#c9a961" stroke-width=".8"/>
+              <g><circle cx="290" cy="312" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="290" y="315.2" fill="#c9a961">6</text></g>
+              <g><circle cx="404" cy="312" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="404" y="315.2" fill="#c9a961">7</text></g>
+              <g><circle cx="186" cy="288" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="186" y="291.2" fill="#c9a961">8</text></g>
+              <g><circle cx="116" cy="276" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="116" y="279.2" fill="#c9a961">9</text></g>
+              <g><circle cx="148" cy="437" r="9" fill="#0a0a0a" stroke="#c9a961"/><text x="148" y="440.2" fill="#c9a961" font-size="8">10</text></g>
+            </g>
+          </svg>
+        </div>
+        <div class="legend">
+          <div>
+            <h4><span class="sw fill" aria-hidden="true"></span>A Alpha leva</h4>
+            <ol>
+              <li><span>1</span>Painel com a identidade visual</li>
+              <li><span>2</span>Equipe de vendas</li>
+              <li><span>3</span>Produtos e maquininha</li>
+              <li><span>10</span>Sinalização 18+ e checagem de documento na venda</li>
+            </ol>
+          </div>
+          <div>
+            <h4><span class="sw" aria-hidden="true"></span>O evento fornece</h4>
+            <ol>
+              <li><span>—</span>Tenda 6 × 6 m, com fundo e laterais fechados</li>
+              <li><span>4</span>Balcão de exposição e venda</li>
+              <li><span>5</span>Ponto de energia</li>
+              <li><span>6</span>Tapete</li>
+              <li><span>7</span>Sofá</li>
+              <li><span>8</span>Puffs</li>
+              <li><span>9</span>Iluminação ambiente</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+      <figcaption class="sheet-foot"><span>Frente aberta · cotas em metros · medidas mínimas</span><span>Layout final ajustado ao local</span></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="como-funciona">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow"><span class="num">01</span>Como funciona</p>
+        <h2 class="section-title">Do espaço montado ao <em>repasse</em>.</h2>
+      </div>
+      <p class="section-sub">Quatro etapas, a mesma em todo evento. O combinado fica fechado antes da montagem.</p>
+    </div>
+    <ol class="steps">
+      <li><span class="step-n">01</span><div><h3>O evento monta a estrutura</h3><p>Tenda ou cobertura, balcão e ponto de energia. No formato Loja + Lounge, também sofás, puffs, tapete e iluminação.</p></div></li>
+      <li><span class="step-n">02</span><div><h3>A Alpha leva a loja</h3><p>Chegamos com o estoque, a equipe de vendas, a maquininha e a identidade visual do stand.</p></div></li>
+      <li><span class="step-n">03</span><div><h3>O público compra e fica</h3><p>Venda de acessórios e produtos Alpha, com checagem de documento na hora da venda.</p></div></li>
+      <li><span class="step-n">04</span><div><h3>Fechamento no fim do dia</h3><p>Relatório de vendas da maquininha e repasse da porcentagem do evento sobre o faturamento do dia.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section id="vista">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow"><span class="num">02</span>Vista de frente</p>
+        <h2 class="section-title">Aberto para quem <em>passa</em>.</h2>
+      </div>
+      <p class="section-sub">Fundo e laterais fechados, frente livre. Quem circula pelo evento vê a loja e o lounge de longe e entra sem barreira. Montagem simples, com estrutura que o evento já costuma ter.</p>
+    </div>
+    <figure class="elev">
+      <div class="elev-wrap">
+        <svg viewBox="0 0 900 380" role="img" aria-label="Vista frontal da tenda de 6 metros com a frente aberta: ao fundo o painel da marca e o balcão com produtos, à frente o lounge com puffs, tapete, sofá e luminária.">
+          <defs><radialGradient id="glowE"><stop offset="0" stop-color="#c9a961" stop-opacity=".22"/><stop offset="1" stop-color="#c9a961" stop-opacity="0"/></radialGradient></defs>
+          <!-- chão -->
+          <line x1="40" y1="320" x2="860" y2="320" stroke="#333" stroke-width="1"/>
+          <!-- fundo fechado (lona do fundo) -->
+          <rect x="150" y="108" width="600" height="212" fill="#0f0f0f"/>
+          <!-- telhado -->
+          <polygon points="140,92 450,38 760,92" fill="#141414" stroke="#c9a961" stroke-width="1.6" stroke-linejoin="round"/>
+          <rect x="140" y="92" width="620" height="16" fill="#c9a961"/>
+          <text x="450" y="104" text-anchor="middle" fill="#0a0a0a" font-family="JetBrains Mono,ui-monospace,monospace" font-size="9" font-weight="500" letter-spacing="3">ALPHA ITINERANTE</text>
+          <!-- laterais fechadas, vistas de topo -->
+          <rect x="146" y="108" width="10" height="212" fill="#1a1a1a" stroke="#c9a961" stroke-width="1.2"/>
+          <rect x="744" y="108" width="10" height="212" fill="#1a1a1a" stroke="#c9a961" stroke-width="1.2"/>
+          <!-- luz -->
+          <ellipse cx="450" cy="190" rx="260" ry="120" fill="url(#glowE)"/>
+          <!-- painel da marca -->
+          <rect x="330" y="132" width="240" height="56" fill="#0a0a0a" stroke="#c9a961" stroke-width="1.2"/>
+          <circle cx="378" cy="160" r="15" fill="none" stroke="#c9a961" stroke-width="1.3"/>
+          <text x="378" y="165" text-anchor="middle" fill="#c9a961" font-family="Cormorant Garamond,Georgia,serif" font-style="italic" font-size="16">ag</text>
+          <text x="404" y="166" fill="#c9a961" font-family="Cormorant Garamond,Georgia,serif" font-size="21" letter-spacing="1">alpha.galerie</text>
+          <!-- balcão com produtos -->
+          <rect x="300" y="240" width="300" height="80" fill="#121212" stroke="#c9a961" stroke-width="1.3"/>
+          <line x1="300" y1="252" x2="600" y2="252" stroke="#c9a961" stroke-opacity=".45"/>
+          <g fill="#c9a961"><rect x="318" y="226" width="12" height="14"/><rect x="338" y="230" width="9" height="10"/><rect x="355" y="222" width="14" height="18"/><rect x="377" y="229" width="10" height="11"/><rect x="395" y="224" width="12" height="16"/><rect x="415" y="230" width="16" height="10"/><rect x="439" y="225" width="9" height="15"/><rect x="456" y="228" width="13" height="12"/><rect x="560" y="226" width="12" height="14"/></g>
+          <text x="450" y="292" text-anchor="middle" fill="#6d6d6d" font-family="JetBrains Mono,ui-monospace,monospace" font-size="9" letter-spacing="2">BALCÃO</text>
+          <!-- lounge -->
+          <rect x="200" y="316" width="330" height="4" fill="#c9a961" fill-opacity=".35"/>
+          <rect x="208" y="286" width="46" height="30" rx="10" fill="#141414" stroke="#c9a961" stroke-width="1.2"/>
+          <rect x="262" y="290" width="40" height="26" rx="10" fill="#141414" stroke="#c9a961" stroke-width="1.2"/>
+          <rect x="640" y="262" width="92" height="58" fill="#141414" stroke="#c9a961" stroke-width="1.2"/>
+          <line x1="640" y1="286" x2="732" y2="286" stroke="#c9a961" stroke-opacity=".5"/>
+          <line x1="190" y1="320" x2="190" y2="200" stroke="#c9a961" stroke-width="1.2"/>
+          <polygon points="176,200 204,200 198,180 182,180" fill="#141414" stroke="#c9a961" stroke-width="1.2"/>
+          <circle cx="190" cy="206" r="40" fill="url(#glowE)"/>
+          <!-- placa 18+ -->
+          <rect x="790" y="250" width="40" height="22" fill="#c9a961"/>
+          <text x="810" y="265" text-anchor="middle" fill="#0a0a0a" font-family="JetBrains Mono,ui-monospace,monospace" font-size="11" font-weight="500">18+</text>
+          <line x1="810" y1="272" x2="810" y2="320" stroke="#c9a961" stroke-width="1.2"/>
+          <!-- cotas -->
+          <g stroke="#6d6d6d" stroke-width="1" fill="none">
+            <line x1="150" y1="350" x2="750" y2="350"/><line x1="150" y1="342" x2="150" y2="358"/><line x1="750" y1="342" x2="750" y2="358"/>
+            <line x1="100" y1="108" x2="100" y2="320"/><line x1="92" y1="108" x2="108" y2="108"/><line x1="92" y1="320" x2="108" y2="320"/>
+          </g>
+          <g fill="#9a9a9a" font-family="JetBrains Mono,ui-monospace,monospace" font-size="11">
+            <text x="450" y="372" text-anchor="middle">6,00 · FRENTE ABERTA</text>
+            <text x="0" y="0" text-anchor="middle" transform="translate(88 214) rotate(-90)">2,30</text>
+          </g>
+        </svg>
+      </div>
+      <div class="elev-notes">
+        <div><b>Frente livre</b><p>Sem lona nem balcão na frente. A loja fica visível de toda a circulação.</p></div>
+        <div><b>Fundo e laterais</b><p>Fechados com lona, para proteger o estoque e dar fundo ao painel da marca.</p></div>
+        <div><b>Montagem simples</b><p>Tenda padrão de evento, um balcão, tapete, puffs e luz quente. Nada sob medida.</p></div>
+      </div>
+    </figure>
+
+    <div class="refs">
+      <div class="refs-head">
+        <h3>Referências <em>internacionais</em></h3>
+        <p>Lounges de marca montados em festivais lá fora. Mostram o clima que a gente quer levar. Não são montagens da Alpha.</p>
+      </div>
+      <div class="refs-grid">
+        <figure class="ref">
+          <img src="ref/tenda-lounge.jpg" alt="Lounge debaixo de tenda branca com sofás brancos, almofadas e tapete de sisal, aberto para o gramado do festival" loading="lazy" decoding="async">
+          <figcaption><b>Debaixo da tenda</b><span>Sofás, tapete e frente aberta para o festival. Cornbury Music Festival, Reino Unido.</span></figcaption>
+        </figure>
+        <figure class="ref">
+          <img src="ref/lounge-aberto.jpg" alt="Lounge a céu aberto sob cobertura de tecido, com sofás brancos, puffs e tapetes sobre grama sintética, ao lado do palco" loading="lazy" decoding="async">
+          <figcaption><b>Área aberta com cobertura</b><span>Tapetes, puffs e sofás ao lado do palco. Festival nos Estados Unidos.</span></figcaption>
+        </figure>
+        <figure class="ref">
+          <img src="ref/lounge-puffs.jpg" alt="Público sentado em sofás e puffs brancos sobre tapete, com plantas, sob cobertura de tecido" loading="lazy" decoding="async">
+          <figcaption><b>Lounge em uso</b><span>O público senta, conversa e fica mais tempo.</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="modalidades">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow"><span class="num">03</span>Modalidades</p>
+        <h2 class="section-title">Dois formatos, <em>um padrão</em>.</h2>
+      </div>
+      <p class="section-sub">Nas duas, a Alpha leva o estoque, a equipe, a maquininha e a identidade visual. Muda o tamanho do espaço e o que o evento fornece.</p>
+    </div>
+    <div class="modes">
+      <article class="mode">
+        <div class="mode-top"><span>Formato 01</span><span class="badge">Compacto</span></div>
+        <div class="mode-plan">
+          <svg viewBox="0 0 200 190" role="img" aria-label="Planta de 3 por 3 metros, na mesma escala da planta de 6 por 6">
+            <rect x="30" y="24" width="78" height="78" fill="#0d0d0d"/>
+            <rect x="43" y="25" width="52" height="3" fill="#c9a961"/>
+            <rect x="40.4" y="63" width="57.2" height="13" fill="none" stroke="#c9a961" stroke-width="1.1"/>
+            <g fill="#c9a961"><rect x="46" y="66" width="6" height="4"/><rect x="56" y="66" width="5" height="4"/><rect x="65" y="66" width="7" height="4"/><rect x="85" y="65.5" width="5" height="8"/></g>
+            <line x1="30" y1="102" x2="108" y2="102" stroke="#c9a961" stroke-opacity=".4" stroke-dasharray="2 4"/><path d="M30 102 V24 H108 V102" fill="none" stroke="#c9a961" stroke-width="1.8"/>
+            <g stroke="#6d6d6d" stroke-width="1"><line x1="30" y1="12" x2="108" y2="12"/><line x1="30" y1="8" x2="30" y2="16"/><line x1="108" y1="8" x2="108" y2="16"/><line x1="16" y1="24" x2="16" y2="102"/><line x1="12" y1="24" x2="20" y2="24"/><line x1="12" y1="102" x2="20" y2="102"/></g>
+            <g fill="#9a9a9a" font-family="JetBrains Mono,ui-monospace,monospace" font-size="8.5"><text x="69" y="8" text-anchor="middle">3,00</text><text x="0" y="0" text-anchor="middle" transform="translate(9 63) rotate(-90)">3,00</text></g>
+          </svg>
+          <p class="scale-note">Mesma escala nas duas plantas</p>
+        </div>
+        <div class="mode-body">
+          <h3>Loja</h3>
+          <p class="size">Espaço mínimo 3 × 3 m</p>
+          <p class="desc">Sedas, piteiras, isqueiros, cases, vestuário e a linha própria Alpha, num stand enxuto que cabe em qualquer circulação.</p>
+          <p class="provide">O evento fornece</p>
+          <ul>
+            <li>Tenda ou cobertura</li>
+            <li>Balcão para exposição e venda</li>
+            <li>Ponto de energia, se precisar</li>
+          </ul>
+        </div>
+      </article>
+      <article class="mode feature">
+        <div class="mode-top"><span>Formato 02</span><span class="badge">Experiência completa</span></div>
+        <div class="mode-plan">
+          <svg viewBox="0 0 200 190" role="img" aria-label="Planta de 6 por 6 metros com loja ao fundo e lounge à frente">
+            <rect x="30" y="24" width="156" height="156" fill="#0d0d0d"/>
+            <line x1="30" y1="91.6" x2="186" y2="91.6" stroke="#3a3a3a" stroke-dasharray="3 4"/>
+            <rect x="69" y="25" width="78" height="3" fill="#c9a961"/>
+            <rect x="69" y="32" width="78" height="27" fill="url(#hatch)"/>
+            <rect x="61.2" y="63" width="93.6" height="15.6" fill="none" stroke="#c9a961" stroke-width="1.1"/>
+            <g fill="#c9a961"><rect x="67" y="66" width="6" height="4"/><rect x="77" y="66" width="5" height="4"/><rect x="86" y="66" width="7" height="4"/><rect x="97" y="66" width="5" height="4"/><rect x="106" y="66" width="6" height="4"/><rect x="143" y="66" width="5" height="8"/></g>
+            <rect x="53.4" y="104.6" width="93.6" height="57.2" fill="rgba(201,169,97,.06)" stroke="#c9a961" stroke-width=".9"/>
+            <rect x="157.4" y="104.6" width="22.1" height="57.2" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.1"/>
+            <circle cx="69" cy="122.8" r="9" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.1"/>
+            <circle cx="69" cy="146.2" r="9" fill="#0d0d0d" stroke="#c9a961" stroke-width="1.1"/>
+            <line x1="30" y1="180" x2="186" y2="180" stroke="#c9a961" stroke-opacity=".4" stroke-dasharray="2 4"/><path d="M30 180 V24 H186 V180" fill="none" stroke="#c9a961" stroke-width="1.8"/>
+            <g stroke="#6d6d6d" stroke-width="1"><line x1="30" y1="12" x2="186" y2="12"/><line x1="30" y1="8" x2="30" y2="16"/><line x1="186" y1="8" x2="186" y2="16"/><line x1="16" y1="24" x2="16" y2="180"/><line x1="12" y1="24" x2="20" y2="24"/><line x1="12" y1="180" x2="20" y2="180"/></g>
+            <g fill="#9a9a9a" font-family="JetBrains Mono,ui-monospace,monospace" font-size="8.5"><text x="108" y="8" text-anchor="middle">6,00</text><text x="0" y="0" text-anchor="middle" transform="translate(9 102) rotate(-90)">6,00</text></g>
+          </svg>
+          <p class="scale-note">Planta completa na prancha 01</p>
+        </div>
+        <div class="mode-body">
+          <h3>Loja + <em>Lounge</em></h3>
+          <p class="size">Espaço mínimo 6 × 6 m</p>
+          <p class="desc">Tudo do formato Loja, mais um espaço para o público sentar, conversar e descansar entre os sets.</p>
+          <p class="provide">O evento fornece</p>
+          <ul>
+            <li>Tenda ou cobertura e balcão</li>
+            <li>Sofás, puffs e tapete</li>
+            <li>Iluminação ambiente e ponto de energia</li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="model" id="modelo">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow"><span class="num">04</span>Modelo comercial</p>
+        <h2 class="section-title">Sem aluguel. <em>Dividimos o resultado.</em></h2>
+      </div>
+      <p class="section-sub">Em vez de cobrar pelo espaço, o evento participa do faturamento. Se o dia for bom, é bom para os dois.</p>
+    </div>
+    <div class="split" role="img" id="splitBar" aria-label="Divisão do faturamento">
+      <div class="a" id="barA"><b id="pA">90%</b><small>Alpha</small></div>
+      <div class="e" id="barE"><b id="pE">10%</b><small>Evento</small></div>
+    </div>
+    <p class="fine">Percentual sobre o faturamento bruto das vendas do dia, com o relatório da maquininha no fechamento.</p>
+
+    <div class="sim">
+      <div class="sim-in">
+        <div>
+          <label class="sim-label" for="fat"><span>Faturamento por dia (simulação)</span><output id="fatTxt" for="fat">R$ 10.000</output></label>
+          <input type="range" id="fat" min="2000" max="60000" step="1000" value="10000">
+        </div>
+        <div>
+          <p class="sim-label" id="dias-label"><span>Dias de evento</span></p>
+          <div class="days" role="group" aria-labelledby="dias-label">
+            <button type="button" data-d="1" aria-pressed="true">1 dia</button>
+            <button type="button" data-d="2" aria-pressed="false">2 dias</button>
+            <button type="button" data-d="3" aria-pressed="false">3 dias</button>
+          </div>
+        </div>
+      </div>
+      <div class="sim-out">
+        <div class="you"><span>O evento recebe</span><b id="outE">R$ 1.000</b></div>
+        <div><span>O evento investe</span><b>R$ 0</b></div>
+      </div>
+      <p class="sim-note" id="simNote">Repasse feito no fechamento de cada dia de operação.</p>
+    </div>
+  </div>
+</section>
+
+<section id="beneficios">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow"><span class="num">05</span>Para o seu evento</p>
+        <h2 class="section-title">O que o evento <em>ganha</em>.</h2>
+      </div>
+    </div>
+    <div class="benefits">
+      <div><h3>Receita sem investimento</h3><p>Uma nova fonte de renda por dia de evento, sem comprar estoque nem contratar equipe de vendas.</p></div>
+      <div><h3>Uma área de respiro</h3><p>O lounge tira gente da pista e da fila, e dá ao público um lugar confortável para ficar mais tempo.</p></div>
+      <div><h3>Uma marca que conhece a cena</h3><p>A Alpha Galerie atua desde <span class="js-desde">2014</span> em Alphaville e nasceu dentro da cultura da música eletrônica.</p></div>
+      <div><h3>Operação responsável</h3><p>Checagem de maioridade em toda venda, equipe própria e montagem dentro das regras do local.</p></div>
+    </div>
+    <div class="venues" aria-label="Tipos de evento">
+      <span>Festivais de música eletrônica</span><span>Shows em estádios</span><span>Arenas</span><span>Open airs</span><span>Clubs e beach clubs</span>
+    </div>
+  </div>
+</section>
+
+<section id="contato" style="border-bottom:0">
+  <div class="container contact-grid">
+    <div class="contact-aside">
+      <div>
+        <p class="eyebrow"><span class="num">06</span>Contato</p>
+        <h2 class="section-title">Vamos levar a Alpha para o <em>seu evento</em>.</h2>
+      </div>
+      <p class="lead">Conte um pouco sobre o evento. A mensagem sai pronta no WhatsApp, e a gente responde com a proposta e fotos de montagem.</p>
+      <div class="alt">
+        <p class="alt-label">Prefere e-mail?</p>
+        <div class="alt-row"><code id="emailTxt">alphagalerie@gmail.com</code><button type="button" class="copy-btn" id="copyEmail">Copiar</button></div>
+        <p class="alt-label" style="margin-top:8px">Resposta em até 1 dia útil</p>
+      </div>
+    </div>
+
+    <form id="leadForm" novalidate>
+      <div class="field"><label for="nome">Seu nome <i>*</i></label><input id="nome" name="nome" required autocomplete="name"></div>
+      <div class="field"><label for="evento">Evento ou produtora <i>*</i></label><input id="evento" name="evento" required></div>
+      <div class="field"><label for="data">Data do evento</label><input id="data" name="data" placeholder="Ex.: 12 e 13 de dezembro"></div>
+      <div class="field"><label for="local">Local</label><input id="local" name="local" placeholder="Cidade e espaço"></div>
+      <div class="field"><label for="publico">Público estimado por dia</label><select id="publico" name="publico"><option>Até 2 mil</option><option>2 a 5 mil</option><option>5 a 15 mil</option><option>Mais de 15 mil</option></select></div>
+      <div class="field"><label for="modalidade">Formato de interesse</label><select id="modalidade" name="modalidade"><option>Loja + Lounge</option><option>Loja</option><option>Ainda não sei</option></select></div>
+      <div class="field full"><label for="msg">Algo mais que devemos saber?</label><textarea id="msg" name="mensagem" placeholder="Horários, estrutura disponível, outras marcas no evento…"></textarea></div>
+      <div class="form-actions full">
+        <a class="btn btn-gold" id="enviarWa" href="#" target="_blank" rel="noopener"><span>Enviar pelo WhatsApp</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        <p class="form-msg" id="formMsg" role="status" aria-live="polite">Campos com * são obrigatórios.</p>
+      </div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <a class="brand js-site" href="#"><span class="brand-mark" aria-hidden="true"></span><span>alpha.galerie</span></a>
+        <p class="foot-desc">Headshop, charutaria, arguile e lifestyle em Alphaville desde <span class="js-desde">2014</span>. Agora também no seu evento.</p>
+      </div>
+      <nav class="foot-links" aria-label="Links">
+        <a class="js-site" href="#">Site oficial ↗</a>
+        <a class="js-insta" href="#">Instagram ↗</a>
+        <a class="js-wa" href="#">WhatsApp ↗</a>
+      </nav>
+    </div>
+    <div class="foot-legal">
+      <span>© 2026 Alpha Galerie · Alpha Itinerante</span>
+      <span>Venda proibida para menores de 18 anos</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var c = CONFIG, i;
+  document.documentElement.lang = "pt-BR";
+
+  function each(sel, fn){ var els = document.querySelectorAll(sel); for(var k=0;k<els.length;k++){ fn(els[k]); } }
+  function ext(a, url){ a.setAttribute("href", url); a.setAttribute("target","_blank"); a.setAttribute("rel","noopener"); }
+  function wa(text){ return "https://wa.me/" + c.whatsapp + "?text=" + encodeURIComponent(text); }
+
+  each(".js-wa", function(a){ ext(a, wa("Olá! Vi a página do Alpha Itinerante 2026 e quero conversar sobre levar a Alpha para o meu evento.")); });
+  each(".js-site", function(a){ ext(a, "https://" + c.site); });
+  each(".js-insta", function(a){ if(c.instagram){ ext(a, "https://instagram.com/" + c.instagram); } else { a.hidden = true; } });
+  each(".js-desde", function(el){ el.textContent = c.desde; });
+  each(".js-pe", function(el){ el.textContent = c.splitEvento + "%"; });
+
+  /* divisão */
+  document.getElementById("pA").textContent = c.splitAlpha + "%";
+  document.getElementById("pE").textContent = c.splitEvento + "%";
+  document.getElementById("barA").style.flex = c.splitAlpha;
+  document.getElementById("barE").style.flex = c.splitEvento;
+  document.getElementById("splitBar").setAttribute("aria-label","Divisão do faturamento: " + c.splitAlpha + "% Alpha, " + c.splitEvento + "% evento");
+
+  /* simulador */
+  function brl(v){ return "R$ " + Math.round(v).toLocaleString("pt-BR"); }
+  var fat = document.getElementById("fat"), dias = 1;
+  var dayBtns = document.querySelectorAll(".days button");
+  function upd(){
+    var v = Number(fat.value);
+    document.getElementById("fatTxt").textContent = brl(v);
+    document.getElementById("outE").textContent = brl(v * c.splitEvento / 100 * dias);
+    document.getElementById("simNote").textContent = dias === 1
+      ? "Repasse feito no fechamento do dia de operação."
+      : "Total de " + dias + " dias, com " + brl(v * c.splitEvento / 100) + " repassados no fechamento de cada dia.";
+  }
+  fat.addEventListener("input", upd);
+  for(i=0;i<dayBtns.length;i++){
+    dayBtns[i].addEventListener("click", function(){
+      dias = Number(this.getAttribute("data-d"));
+      for(var k=0;k<dayBtns.length;k++){ dayBtns[k].setAttribute("aria-pressed", dayBtns[k] === this ? "true" : "false"); }
+      upd();
+    });
+  }
+  upd();
+
+  /* copiar e-mail */
+  document.getElementById("emailTxt").textContent = c.email;
+  var copyBtn = document.getElementById("copyEmail");
+  copyBtn.addEventListener("click", function(){
+    function selecionar(){
+      var r = document.createRange(); r.selectNodeContents(document.getElementById("emailTxt"));
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      copyBtn.textContent = "Selecionado";
+    }
+    try{
+      navigator.clipboard.writeText(c.email).then(function(){ copyBtn.textContent = "Copiado"; }, selecionar);
+    }catch(e){ selecionar(); }
+    setTimeout(function(){ copyBtn.textContent = "Copiar"; }, 2200);
+  });
+
+  /* formulário → mensagem pronta no WhatsApp */
+  var form = document.getElementById("leadForm");
+  var send = document.getElementById("enviarWa");
+  var msg = document.getElementById("formMsg");
+  function val(id){ return document.getElementById(id).value.trim(); }
+  function montar(){
+    var linhas = [
+      "Olá! Quero levar a Alpha Itinerante 2026 para o meu evento.",
+      "",
+      "Nome: " + (val("nome") || "-"),
+      "Evento/produtora: " + (val("evento") || "-"),
+      "Data: " + (val("data") || "-"),
+      "Local: " + (val("local") || "-"),
+      "Público por dia: " + val("publico"),
+      "Formato: " + val("modalidade")
+    ];
+    if(val("msg")){ linhas.push("", val("msg")); }
+    send.setAttribute("href", wa(linhas.join("\n")));
+  }
+  function faltando(){
+    var req = ["nome","evento"], primeiro = null;
+    for(var k=0;k<req.length;k++){
+      var el = document.getElementById(req[k]);
+      var vazio = !el.value.trim();
+      el.setAttribute("aria-invalid", vazio ? "true" : "false");
+      if(vazio && !primeiro){ primeiro = el; }
+    }
+    return primeiro;
+  }
+  form.addEventListener("input", function(e){
+    montar();
+    if(e.target.getAttribute("aria-invalid") === "true" && e.target.value.trim()){ e.target.setAttribute("aria-invalid","false"); }
+  });
+  form.addEventListener("change", montar);
+  send.addEventListener("click", function(e){
+    var f = faltando();
+    if(f){
+      e.preventDefault();
+      msg.textContent = "Preencha seu nome e o nome do evento para enviar.";
+      msg.className = "form-msg err";
+      f.focus();
+      return;
+    }
+    montar();
+    msg.textContent = "A conversa abre no WhatsApp com a mensagem pronta. É só enviar.";
+    msg.className = "form-msg";
+  });
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    var f = faltando();
+    if(f){ msg.textContent = "Preencha seu nome e o nome do evento para enviar."; msg.className = "form-msg err"; f.focus(); }
+    else { montar(); msg.textContent = "Tudo certo. Toque em Enviar pelo WhatsApp."; msg.className = "form-msg"; send.focus(); }
+  });
+  montar();
+})();
+</script>
+</body>
+</html>
