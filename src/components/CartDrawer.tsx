@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { useCartStore } from '../store/cart';
 import { formatCurrency } from '../lib/format';
-import { calcularCashbackGanho, formatarDia, validadeCashback } from '../lib/cashback';
-import { useCashbackRegras } from '../hooks/useCashback';
+import { formatarPontos, pontosGanhos, valorDosPontos } from '../lib/clube';
+import { useClubeRegras } from '../hooks/useClube';
 import Sugestoes from './Sugestoes';
 import styles from './CartDrawer.module.css';
 
@@ -25,8 +25,8 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
   const addItem = useCartStore((s) => s.addItem);
 
   const total = selectTotal();
-  const cashbackRegras = useCashbackRegras();
-  const cashbackGanho = cashbackRegras ? calcularCashbackGanho(total, cashbackRegras) : 0;
+  const clube = useClubeRegras();
+  const pontos = clube?.ativo ? pontosGanhos(total, clube) : 0;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -194,10 +194,10 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
               <span className={styles.totalLabel}>Total</span>
               <span className={styles.totalValue}>{formatCurrency(total)}</span>
             </div>
-            {cashbackRegras && cashbackGanho > 0 && (
+            {clube?.ativo && pontos > 0 && (
               <p className={styles.cashback}>
-                Esta compra te devolve até <strong>{formatCurrency(cashbackGanho)}</strong> de cashback
-                para usar até {formatarDia(validadeCashback(cashbackRegras))}
+                Esta compra rende <strong>{formatarPontos(pontos)}</strong> no {clube.nome}
+                {' '}({formatCurrency(valorDosPontos(pontos, clube))} para a próxima)
               </p>
             )}
             <button

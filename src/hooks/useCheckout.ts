@@ -92,17 +92,23 @@ export function useCheckout() {
 
       // Use RPC function for atomic transaction (optimized & safer)
       // Fallback to individual inserts if RPC not available (before migration)
-      // p_frete e p_usar_cashback só existem depois da migração do cashback.
+      // Os parâmetros do Alpha Club só existem com a migração do clube.
       // Mandá-los antes dela faria a chamada falhar, então só vão quando o
-      // checkout sabe que o programa está no ar.
-      const paramsCashback =
+      // checkout sabe que o banco tem o clube (usarCashback definido).
+      const paramsClube =
         dados.usarCashback === undefined
           ? {}
-          : { p_frete: dados.frete ?? 0, p_usar_cashback: dados.usarCashback };
+          : {
+              p_frete: dados.frete ?? 0,
+              p_usar_cashback: dados.usarCashback,
+              p_cupom_codigo: dados.cupomCodigo || null,
+              p_indicado_por: dados.indicadoPor || null,
+              p_aniversario: dados.aniversario || null,
+            };
 
       try {
         const { data, error } = await supabase.rpc('create_order_with_items', {
-          ...paramsCashback,
+          ...paramsClube,
           p_numero: numero,
           p_cliente_nome: dados.nome,
           p_cliente_whatsapp: dados.telefone,
@@ -117,6 +123,11 @@ export function useCheckout() {
         });
 
         if (error) throw error;
+        // Cupom recusado pelo banco é resposta para o cliente, não falha de
+        // sistema: o pedido não pode sair pelo caminho alternativo sem ele.
+        if (data?.success === false && data.code === 'CUPOM_INVALIDO') {
+          return { success: false, error: 'Cupom inválido, expirado ou já usado. Remova ou troque o cupom.' };
+        }
         // A função devolve { success: false } quando o insert falha lá dentro;
         // sem isso o cliente via "pedido confirmado" de um pedido que não existe.
         if (data?.success === false) throw new Error(data.error ?? 'Falha ao criar pedido');

@@ -49,6 +49,8 @@ export interface ItemCarrinho {
   categoria: string;
   /** Usada para sugerir o que combina (seda → piteira). Ausente em carrinhos antigos. */
   subcategoria?: string | null;
+  /** Em promoção: pontos do Alpha Club não pagam este item. O banco confere. */
+  promocional?: boolean;
   preco: number;
   imagem: string | null;
   estoque: number | null;
@@ -72,11 +74,17 @@ export interface Pedido {
   /** Frete já incluso em `total`. */
   frete?: number;
   /**
-   * Presente só quando o programa de cashback está no ar. true pede ao banco
-   * para abater o saldo do WhatsApp; nesse caso `total` vai sem o abatimento
-   * e o banco devolve o total final.
+   * Presente só quando o banco tem o Alpha Club. true pede ao banco para
+   * abater pontos do WhatsApp; `total` vai sem o abatimento e o banco devolve
+   * o total final.
    */
   usarCashback?: boolean;
+  /** Código do cupom aplicado; o banco revalida e marca como usado. */
+  cupomCodigo?: string;
+  /** WhatsApp de quem indicou (Indique e Ganhe). */
+  indicadoPor?: string;
+  /** "dd/mm" para o bônus de aniversário. */
+  aniversario?: string;
   total: number;
   status: string;
   itens: ItemCarrinho[];

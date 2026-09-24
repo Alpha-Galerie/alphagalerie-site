@@ -60,6 +60,7 @@ const Footer: FC = () => {
           <p className={styles.colTitle}>Navegue</p>
           <ul className={styles.navList}>
             <li><a href="#produtos">Vitrine</a></li>
+            <li><a href="/alpha-club">Alpha Club</a></li>
             <li><a href="#sobre">Sobre</a></li>
             <li>
               <a href="https://alphahempbrasil.com" target="_blank" rel="noopener noreferrer">
