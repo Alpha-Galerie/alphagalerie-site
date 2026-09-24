@@ -28,6 +28,8 @@ create function create_order_with_items(p_numero text, p_cliente_nome text, p_cl
 
 -- ── migração ─────────────────────────────────────────────────────────────
 \ir ../migrations/20260924000000_cashback.sql
+\ir ../migrations/20260924000100_cashback_fecha_funcoes_internas.sql
+\ir ../migrations/20260924000200_cashback_base_ate_subtotal.sql
 
 -- ── cenários ─────────────────────────────────────────────────────────────
 \set ON_ERROR_STOP 1
@@ -114,3 +116,9 @@ alter table cashback_creditos add constraint teste_quebra check (valor < 0) not 
 update pedidos set status='pago' where numero='I1';
 select pg_temp.eq((select status from pedidos where numero='I1'), 'pago', 'status muda mesmo com o cashback falhando');
 alter table cashback_creditos drop constraint teste_quebra;
+
+-- pedido antigo (sem frete gravado) não gera cashback sobre o frete
+update configuracoes set valor='100' where chave='cashback_percentual';
+insert into pedidos (numero, cliente_nome, cliente_whatsapp, subtotal, total, frete, status) values ('J1','Antigo','11944443333',20,49,0,'pendente');
+update pedidos set status='pago' where numero='J1';
+select pg_temp.eq((select saldo from consultar_cashback('11944443333')), 20.00::numeric, 'pedido antigo: base limitada ao subtotal dos produtos');
