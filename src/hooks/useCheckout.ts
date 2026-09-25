@@ -12,11 +12,11 @@ interface SubmitResult {
 function buildEnderecoTexto(dados: Pedido): string | null {
   const parts = [
     dados.endereco,
+    dados.complemento,
     dados.bairro,
     dados.cidade,
     dados.estado,
     dados.cep,
-    dados.complemento,
   ].filter(Boolean);
   return parts.length > 0 ? parts.join(', ') : null;
 }

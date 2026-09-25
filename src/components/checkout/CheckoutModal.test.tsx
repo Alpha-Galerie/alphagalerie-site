@@ -121,6 +121,25 @@ describe('CheckoutModal', () => {
     });
   });
 
+  it('manda rua e número separados de bairro, cidade e complemento', async () => {
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/Número/i), { target: { value: '12' } });
+    fireEvent.change(screen.getByLabelText(/Complemento/i), { target: { value: 'Apto 3' } });
+    fireEvent.change(screen.getByLabelText(/Bairro/i), { target: { value: 'Alphaville' } });
+    fireEvent.change(screen.getByLabelText(/Cidade/i), { target: { value: 'Barueri' } });
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
+
+    await waitFor(() => expect(submitPedidoMock).toHaveBeenCalledTimes(1));
+    expect(submitPedidoMock.mock.calls[0][0]).toMatchObject({
+      endereco: 'Rua Teste, 12',
+      complemento: 'Apto 3',
+      bairro: 'Alphaville',
+      cidade: 'Barueri',
+      cep: '06454-700',
+    });
+  });
+
   it('aplica cupom consultando o banco, nao uma lista fixa', async () => {
     render(<CheckoutModal onClose={vi.fn()} />);
 

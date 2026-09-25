@@ -345,7 +345,10 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
 
     setIsSubmitting(true);
 
-    const enderecoCompleto = [endereco, numero, complemento, bairro, cidade, cep].filter(Boolean).join(', ');
+    // Só rua e número: complemento, bairro, cidade e CEP vão nos próprios
+    // campos e o useCheckout monta o texto. Antes iam nos dois lugares e o
+    // endereço do pedido saía com tudo repetido.
+    const ruaNumero = [endereco, numero].filter(Boolean).join(', ');
     // A loja vê nas observações que o pedido vai na coleta da Pex, e qual.
     // Recalcula na hora do envio: a tela pode ter aberto antes das 12h.
     const pex = usaProgramada ? calcularEntregaProgramada(cep) : null;
@@ -357,7 +360,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       nome, telefone,
       email: email || undefined,
       cep: cep || undefined,
-      endereco: enderecoCompleto || undefined,
+      endereco: ruaNumero || undefined,
       bairro: bairro || undefined,
       cidade: cidade || undefined,
       complemento: complemento || undefined,
