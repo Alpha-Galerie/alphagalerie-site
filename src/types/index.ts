@@ -69,7 +69,8 @@ export interface Pedido {
   estado?: string;
   complemento?: string;
   pagamento: 'pix' | 'cartao';
-  entrega: 'delivery';
+  /** 'programada' = Entrega Programada (coleta da Pex); 'delivery' = motoboy. */
+  entrega: 'delivery' | 'programada';
   observacoes?: string;
   /** Frete já incluso em `total`. */
   frete?: number;
