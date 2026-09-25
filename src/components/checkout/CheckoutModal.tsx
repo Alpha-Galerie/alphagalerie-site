@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useCartStore } from '../../store/cart';
 import { useCheckout } from '../../hooks/useCheckout';
 import { loadMercadoPago } from '../../lib/mercadopago';
-import { calcularFrete } from '../../lib/frete';
+import { calcularEntregaProgramada, calcularFrete, PEX_CORTE_TEXTO } from '../../lib/frete';
 import type { FreteResult } from '../../lib/frete';
 import type { Pedido } from '../../types';
 import PixPayment from './PixPayment';
@@ -138,10 +138,17 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const [cupomAtivo, setCupomAtivo] = useState<CupomAplicado | null>(null);
   const [cupomStatus, setCupomStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [cupomLoading, setCupomLoading] = useState(false);
-  const [frete, setFrete] = useState<FreteResult>({ valor: 0, label: '' });
   const [cepStatus, setCepStatus] = useState<{ ok: boolean; msg: string } | null>(null);
   const [cepLoading, setCepLoading] = useState(false);
   const numeroRef = useRef<HTMLInputElement>(null);
+
+  // Onde a Pex atende, o cliente escolhe: Entrega Programada (mais barata,
+  // sai na coleta do meio-dia) ou motoboy. A programada vem marcada.
+  const [modalidade, setModalidade] = useState<'programada' | 'motoboy'>('programada');
+  const freteMotoboy = calcularFrete(cep);
+  const programada = freteMotoboy.valor > 0 ? calcularEntregaProgramada(cep) : null;
+  const usaProgramada = modalidade === 'programada' && programada !== null;
+  const frete: FreteResult = usaProgramada ? programada : freteMotoboy;
 
   const subtotal = items.reduce((acc, i) => acc + i.preco * i.qtd, 0);
   const descontoPix = pagamento === 'pix' ? subtotal * 0.05 : 0;
@@ -225,10 +232,6 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     });
     return () => { cancelado = true; };
   }, []);
-
-  useEffect(() => {
-    setFrete(calcularFrete(cep));
-  }, [cep]);
 
   function handleCepChange(e: React.ChangeEvent<HTMLInputElement>) {
     let v = e.target.value.replace(/\D/g, '').slice(0, 8);
@@ -343,6 +346,12 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     setIsSubmitting(true);
 
     const enderecoCompleto = [endereco, numero, complemento, bairro, cidade, cep].filter(Boolean).join(', ');
+    // A loja vê nas observações que o pedido vai na coleta da Pex, e qual.
+    // Recalcula na hora do envio: a tela pode ter aberto antes das 12h.
+    const pex = usaProgramada ? calcularEntregaProgramada(cep) : null;
+    const obsPedido = pex
+      ? [pex.observacao, observacoes.trim()].filter(Boolean).join(' | ')
+      : observacoes;
 
     const dadosPedido: Pedido = {
       nome, telefone,
@@ -352,8 +361,8 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       bairro: bairro || undefined,
       cidade: cidade || undefined,
       complemento: complemento || undefined,
-      pagamento, entrega: 'delivery',
-      observacoes: observacoes || undefined,
+      pagamento, entrega: usaProgramada ? 'programada' : 'delivery',
+      observacoes: obsPedido || undefined,
       total, status: 'pendente', itens: items,
     };
 
@@ -562,7 +571,34 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                     </span>
                   )}
                 </div>
-                {frete.label && (
+                {programada ? (
+                  <div className={styles.field}>
+                    <label className={styles.label}>Entrega *</label>
+                    <div className={styles.options}>
+                      <label className={styles.optLabel}>
+                        <input type="radio" name="entrega" value="programada" checked={usaProgramada} onChange={() => setModalidade('programada')} />
+                        <span className={styles.optBox}>
+                          <span className={styles.optBoxText}>
+                            <strong>{programada.label}</strong>
+                            <small className={styles.optPrazo}>{programada.prazo}</small>
+                            <small>Pedidos até {PEX_CORTE_TEXTO} saem no mesmo dia · seg. a sáb., exceto feriados</small>
+                          </span>
+                          <span className={styles.optPreco}>{fmt(cupomAtivo?.tipo === 'frete' ? 0 : programada.valor)}</span>
+                        </span>
+                      </label>
+                      <label className={styles.optLabel}>
+                        <input type="radio" name="entrega" value="motoboy" checked={!usaProgramada} onChange={() => setModalidade('motoboy')} />
+                        <span className={styles.optBox}>
+                          <span className={styles.optBoxText}>
+                            <strong>{freteMotoboy.label}</strong>
+                            <small>Mais rápida · todos os dias</small>
+                          </span>
+                          <span className={styles.optPreco}>{fmt(cupomAtivo?.tipo === 'frete' ? 0 : freteMotoboy.valor)}</span>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                ) : frete.label && (
                   <div className={`${styles.freteBox} ${frete.valor === 0 ? styles.freteCombinar : ''}`}>
                     <span className={styles.freteLabel}>{frete.label}</span>
                     {frete.valor > 0 && (

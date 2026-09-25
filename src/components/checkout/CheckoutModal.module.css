@@ -185,6 +185,18 @@
   color: #888;
 }
 
+.optBoxText small.optPrazo {
+  color: #c9a961;
+}
+
+.optPreco {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  color: #c9a961;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .badgeGold {
   background: #c9a961;
   color: #000;
