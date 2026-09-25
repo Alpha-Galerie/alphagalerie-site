@@ -286,7 +286,7 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     fireEvent.change(screen.getByLabelText(/Bairro/i), { target: { value: 'Paiol Velho' } });
 
     const programada = screen.getByLabelText(/Entrega Programada/).closest('label')!;
-    const motoboy = screen.getByLabelText(/Motoboy · Santana de Parnaíba \(afastado\)/);
+    const motoboy = screen.getByLabelText(/Motoboy · Santana de Parnaíba/);
     expect(programada.textContent).toMatch(/R\$\s?15,00/);
     expect(motoboy.closest('label')!.textContent).toMatch(/R\$\s?35,00/);
     fireEvent.click(motoboy);

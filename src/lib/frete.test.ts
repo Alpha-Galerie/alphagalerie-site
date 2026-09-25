@@ -36,7 +36,7 @@ describe('calcularFrete', () => {
   ])('R$ 35 em Santana, bairro afastado: %s (%s)', (cep, bairro) => {
     const r = calcularFrete(cep, bairro);
     expect(r.valor).toBe(35);
-    expect(r.label).toMatch(/afastado/);
+    expect(r.label).toBe('Motoboy · Santana de Parnaíba');
   });
 
   it.each([

@@ -32,7 +32,7 @@ export function calcularFrete(cep: string, bairro = ''): FreteResult {
   }
   // Santana de Parnaíba, bairros afastados
   if (n >= 6500000 && n <= 6549999 && SANTANA_AFASTADO.test(semAcento(bairro))) {
-    return { valor: 35, label: 'Motoboy · Santana de Parnaíba (afastado)' };
+    return { valor: 35, label: 'Motoboy · Santana de Parnaíba' };
   }
   // Cidades vizinhas (Osasco, Carapicuíba, Itapevi, Jandira, Cotia, Santana de Parnaíba)
   if (n >= 6000000 && n <= 6999999) {
