@@ -26,6 +26,29 @@ describe('calcularFrete', () => {
     expect(r.label).toMatch(/Região próxima/);
   });
 
+  it.each([
+    ['06543-340', 'Paiol Velho'],
+    ['06501-001', 'Centro'],
+    ['06530-000', 'Fazendinha'],
+    ['06530-000', 'Colinas da Anhanguera'],
+    ['06528-070', 'CHACARA DO SOLAR III'],
+    ['06528-070', 'Chácara do Solar I'],
+  ])('R$ 35 em Santana, bairro afastado: %s (%s)', (cep, bairro) => {
+    const r = calcularFrete(cep, bairro);
+    expect(r.valor).toBe(35);
+    expect(r.label).toMatch(/afastado/);
+  });
+
+  it.each([
+    ['06543-001', 'Tamboré'],
+    ['06541-005', 'Alphaville'],
+    ['06543-340', ''],
+    ['06401-000', 'Centro'], // Centro de Barueri não é Santana
+    ['06010-000', 'Centro'], // nem o de Osasco
+  ])('segue R$ 30 fora dos bairros afastados de Santana: %s (%s)', (cep, bairro) => {
+    expect(calcularFrete(cep, bairro).valor).toBe(30);
+  });
+
   it('returns "a combinar" for national delivery', () => {
     const r = calcularFrete('80010-010');
     expect(r.valor).toBe(0);
