@@ -209,7 +209,7 @@ describe('CheckoutModal', () => {
 });
 
 describe('CheckoutModal: Entrega Programada (Pex)', () => {
-  // Sexta, 25/09/2026, 12:50 em São Paulo: já passou da coleta do dia.
+  // Sexta, 25/09/2026, 12:50 em São Paulo: já passou do corte das 11h30.
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-09-25T12:50:00-03:00'));
@@ -232,9 +232,9 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     expect(screen.getByText('Chega amanhã, sábado (26/09)')).toBeInTheDocument();
     expect(screen.getByLabelText(/Motoboy · Gênesis/)).not.toBeChecked();
 
-    // R$ 100 − Pix 5% + R$ 15.
+    // R$ 100 − Pix 5% + R$ 20 (programada no Gênesis).
     expect(await confirmar()).toMatchObject({
-      total: 110,
+      total: 115,
       entrega: 'programada',
       observacoes: 'Entrega Programada (Pex) · coleta sáb. 26/09 12h · chega sáb. 26/09',
     });
@@ -312,7 +312,7 @@ describe('CheckoutModal com o Alpha Club', () => {
 
   it('mostra os pontos, usa até 10% dos produtos fora de promoção e pede ao banco', async () => {
     clubeNoBanco();
-    submitPedidoMock.mockResolvedValue({ success: true, pedido: { id: 123, total: 147.5, pontos_usados: 100 } });
+    submitPedidoMock.mockResolvedValue({ success: true, pedido: { id: 123, total: 152.5, pontos_usados: 100 } });
     render(<CheckoutModal onClose={vi.fn()} />);
     fillRequiredFields();
 
@@ -324,9 +324,9 @@ describe('CheckoutModal com o Alpha Club', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
     await waitFor(() => expect(submitPedidoMock).toHaveBeenCalledTimes(1));
-    // R$ 150 − Pix 5% (7,50) + Entrega Programada 15: o total vai sem os
-    // pontos; o banco abate.
-    expect(submitPedidoMock.mock.calls[0][0]).toMatchObject({ usarCashback: true, total: 157.5, frete: 15 });
+    // R$ 150 − Pix 5% (7,50) + Entrega Programada no Gênesis 20: o total vai
+    // sem os pontos; o banco abate.
+    expect(submitPedidoMock.mock.calls[0][0]).toMatchObject({ usarCashback: true, total: 162.5, frete: 20 });
     expect(rpcMock).toHaveBeenCalledWith('consultar_clube', { p_whatsapp: '11999999999' });
   });
 

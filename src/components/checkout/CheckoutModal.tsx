@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useCartStore } from '../../store/cart';
 import { useCheckout } from '../../hooks/useCheckout';
 import { loadMercadoPago } from '../../lib/mercadopago';
-import { calcularEntregaProgramada, calcularFrete, PEX_CORTE_HORA } from '../../lib/frete';
+import { calcularEntregaProgramada, calcularFrete, PEX_CORTE_TEXTO } from '../../lib/frete';
 import type { FreteResult } from '../../lib/frete';
 import type { Pedido } from '../../types';
 import PixPayment from './PixPayment';
@@ -143,7 +143,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const numeroRef = useRef<HTMLInputElement>(null);
 
   // Onde a Pex atende, o cliente escolhe: Entrega Programada (mais barata,
-  // sai na coleta das 12h) ou motoboy. A programada vem marcada.
+  // sai na coleta do meio-dia) ou motoboy. A programada vem marcada.
   const [modalidade, setModalidade] = useState<'programada' | 'motoboy'>('programada');
   const freteMotoboy = calcularFrete(cep);
   const programada = freteMotoboy.valor > 0 ? calcularEntregaProgramada(cep) : null;
@@ -581,7 +581,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                           <span className={styles.optBoxText}>
                             <strong>{programada.label}</strong>
                             <small className={styles.optPrazo}>{programada.prazo}</small>
-                            <small>Pedidos até {PEX_CORTE_HORA}h saem no mesmo dia · seg. a sáb.</small>
+                            <small>Pedidos até {PEX_CORTE_TEXTO} saem no mesmo dia · seg. a sáb., exceto feriados</small>
                           </span>
                           <span className={styles.optPreco}>{fmt(cupomAtivo?.tipo === 'frete' ? 0 : programada.valor)}</span>
                         </span>
