@@ -145,7 +145,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   // Onde a Pex atende, o cliente escolhe: Entrega Programada (mais barata,
   // sai na coleta do meio-dia) ou motoboy. A programada vem marcada.
   const [modalidade, setModalidade] = useState<'programada' | 'motoboy'>('programada');
-  const freteMotoboy = calcularFrete(cep);
+  const freteMotoboy = calcularFrete(cep, bairro);
   const programada = freteMotoboy.valor > 0 ? calcularEntregaProgramada(cep) : null;
   const usaProgramada = modalidade === 'programada' && programada !== null;
   const frete: FreteResult = usaProgramada ? programada : freteMotoboy;

@@ -9,7 +9,16 @@ function cepNumero(cep: string): number | null {
   return parseInt(digits.slice(0, 8).padEnd(8, '0'), 10);
 }
 
-export function calcularFrete(cep: string): FreteResult {
+// Bairros de Santana de Parnaíba longe de Alphaville: o Uber sai bem mais
+// caro. Vão pelo nome do bairro (o ViaCEP preenche): os CEPs deles se
+// misturam com os de Tamboré e Alphaville, que seguem na região próxima.
+const SANTANA_AFASTADO = /^centro\b|paiol velho|fazendinha|anhanguera|chacara do solar/;
+
+function semAcento(txt: string): string {
+  return txt.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+}
+
+export function calcularFrete(cep: string, bairro = ''): FreteResult {
   const n = cepNumero(cep);
   if (n === null) return { valor: 0, label: '' };
 
@@ -20,6 +29,10 @@ export function calcularFrete(cep: string): FreteResult {
   // Região Barueri / Alphaville
   if (n >= 6400000 && n <= 6499999) {
     return { valor: 30, label: 'Motoboy · Região Barueri' };
+  }
+  // Santana de Parnaíba, bairros afastados
+  if (n >= 6500000 && n <= 6549999 && SANTANA_AFASTADO.test(semAcento(bairro))) {
+    return { valor: 35, label: 'Motoboy · Santana de Parnaíba' };
   }
   // Cidades vizinhas (Osasco, Carapicuíba, Itapevi, Jandira, Cotia, Santana de Parnaíba)
   if (n >= 6000000 && n <= 6999999) {

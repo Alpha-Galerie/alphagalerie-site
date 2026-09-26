@@ -279,6 +279,20 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     expect(pedido.observacoes).toBeUndefined();
   });
 
+  it('bairro afastado de Santana: motoboy R$ 35, programada segue R$ 15', async () => {
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '06543-340' } });
+    fireEvent.change(screen.getByLabelText(/Bairro/i), { target: { value: 'Paiol Velho' } });
+
+    const programada = screen.getByLabelText(/Entrega Programada/).closest('label')!;
+    const motoboy = screen.getByLabelText(/Motoboy · Santana de Parnaíba/);
+    expect(programada.textContent).toMatch(/R\$\s?15,00/);
+    expect(motoboy.closest('label')!.textContent).toMatch(/R\$\s?35,00/);
+    fireEvent.click(motoboy);
+    expect(await confirmar()).toMatchObject({ total: 130, entrega: 'delivery' });
+  });
+
   it('fora da área da Pex só aparece o motoboy', async () => {
     render(<CheckoutModal onClose={vi.fn()} />);
     fillRequiredFields();
