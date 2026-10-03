@@ -56,3 +56,19 @@ No modal do produto:
 3. Clique no **★** para jogar ele na vitrine de destaques da home.
 
 Ele passa a aparecer no topo da home, com selo de desconto e preço riscado.
+
+## Kits exclusivos
+
+Seção própria na home (`#kits`, entre o Alpha Club e os Destaques), com fundo
+dourado para chamar atenção. Mostra os produtos ativos e com estoque da
+subcategoria **Kits Exclusivos**, na ordem de `destaque_ordem` (do kit básico
+ao case completo). No celular vira carrossel, igual aos destaques.
+
+- **Preço cheio** = soma dos itens avulsos (sai riscado, com o selo -X%).
+- **Preço promocional** = preço do kit. Case Alpha 2.0 entra a R$ 85; os
+  outros itens pelo preço Pix/promo do site; tesoura prata é brinde.
+- Kit em promoção não aceita pontos do Alpha Club no checkout (regra do clube).
+- Vender um kit **não baixa** o estoque dos itens avulsos: o estoque do kit é
+  o número de kits montados. Ajuste na retaguarda.
+- Para criar um kit novo: cadastre o produto na subcategoria `Kits Exclusivos`.
+- Fotos: `public/kits/`. Cadastro inicial: `supabase/migrations/20261003000000_kits_exclusivos.sql`.

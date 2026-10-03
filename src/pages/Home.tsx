@@ -10,6 +10,7 @@ import HeroSection from '../components/HeroSection';
 import Header from '../components/Header';
 import ProductGrid from '../components/ProductGrid';
 import DestaquesSection from '../components/DestaquesSection';
+import KitsSection from '../components/KitsSection';
 import ClubeSection from '../components/ClubeSection';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
@@ -99,6 +100,8 @@ export default function Home() {
       <HeroSection />
 
       <ClubeSection />
+
+      <KitsSection />
 
       <DestaquesSection />
 
