@@ -368,3 +368,21 @@
     padding: 4px 8px;
   }
 }
+
+/* Kit com foto de cenário: sem moldura branca, a foto preenche o card.
+   As fotos têm folga de cenário em volta do kit, então quando o card fica
+   retangular (desktop) o corte pega só o fundo. */
+.imageWrapper.fotoCheia {
+  padding: 0;
+  background: #d8bb98;
+}
+
+.imageWrapper.fotoCheia .productImg {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  padding: 0;
+  background: transparent;
+  mix-blend-mode: normal;
+  object-fit: cover;
+}

@@ -4,6 +4,7 @@ import type { Produto } from '../types';
 import { formatCurrency } from '../lib/format';
 import { getPrecoInfo } from '../lib/preco';
 import { buildProductPath } from '../lib/productPath';
+import { temFotoDeCenario } from '../lib/kits';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
@@ -41,6 +42,7 @@ const ProductCard: FC<ProductCardProps> = ({
   const temVariacoes = produto._variacoes && produto._variacoes.length > 0;
   const productPath = buildProductPath(produto);
   const preco = getPrecoInfo(produto);
+  const fotoCheia = Boolean(produto.imagem_url) && temFotoDeCenario(produto);
 
   const handleCta = () => {
     if (esgotado) return;
@@ -54,7 +56,7 @@ const ProductCard: FC<ProductCardProps> = ({
   return (
     <article className={`${styles.product}${esgotado ? ` ${styles.esgotado}` : ''}`}>
       <Link to={productPath} className={styles.imageLink} aria-label={`Ver detalhes de ${produto.nome}`}>
-        <div className={styles.imageWrapper}>
+        <div className={fotoCheia ? `${styles.imageWrapper} ${styles.fotoCheia}` : styles.imageWrapper}>
         {produto.imagem_url ? (
           <img
             src={produto.imagem_url}

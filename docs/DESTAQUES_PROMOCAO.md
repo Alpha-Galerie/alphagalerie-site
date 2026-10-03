@@ -71,4 +71,8 @@ ao case completo). No celular vira carrossel, igual aos destaques.
 - Vender um kit **não baixa** o estoque dos itens avulsos: o estoque do kit é
   o número de kits montados. Ajuste na retaguarda.
 - Para criar um kit novo: cadastre o produto na subcategoria `Kits Exclusivos`.
-- Fotos: `public/kits/`. Cadastro inicial: `supabase/migrations/20261003000000_kits_exclusivos.sql`.
+- Fotos: `public/kits/`, com cenário (pedra e sombra de folhagem) e folga em volta
+  do kit. No card a foto preenche tudo, sem a moldura branca das fotos de produto
+  recortado (`temFotoDeCenario` em `src/lib/kits.ts`). Foto nova = nome de arquivo
+  novo, porque as imagens ficam em cache por 1 ano.
+- Cadastro inicial: `supabase/migrations/20261003000000_kits_exclusivos.sql`.

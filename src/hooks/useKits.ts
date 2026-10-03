@@ -1,9 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { KITS_SUBCATEGORIA } from '../lib/kits';
 import type { Produto, Variacao } from '../types';
-
-/** Subcategoria que reúne os kits montados pela loja. */
-export const KITS_SUBCATEGORIA = 'Kits Exclusivos';
 
 const COLS =
   'id,nome,marca,preco,preco_pix,preco_promocional,categoria_id,subcategoria,estoque,ativo,destaque,destaque_ordem,imagem_url,descricao,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em),categorias!produtos_categoria_id_fkey(*)';
