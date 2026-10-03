@@ -1,0 +1,100 @@
+/* Fundo próprio para os kits se destacarem do resto da home: brilho dourado
+   e filetes em cima e embaixo. */
+.section {
+  position: relative;
+  padding: 72px 0 64px;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 0%, rgba(201, 169, 97, 0.16), transparent 70%),
+    linear-gradient(180deg, #120f09 0%, #0a0a0a 100%);
+  border-top: 1px solid rgba(201, 169, 97, 0.35);
+  border-bottom: 1px solid rgba(201, 169, 97, 0.35);
+  overflow: hidden;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(135deg, rgba(201, 169, 97, 0.035) 0 1px, transparent 1px 48px);
+  pointer-events: none;
+}
+
+.inner {
+  position: relative;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 28px;
+}
+
+.selo {
+  color: #c9a961;
+  margin-right: 6px;
+}
+
+.sub {
+  max-width: 440px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(244, 244, 244, 0.62);
+  margin: 0;
+}
+
+.sub strong {
+  color: #c9a961;
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.grid > * {
+  border-color: rgba(201, 169, 97, 0.28);
+}
+
+@media (max-width: 767px) {
+  .head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+  }
+
+  .grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .grid > * {
+    flex: 0 0 66vw;
+    max-width: 280px;
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 480px) {
+  .section {
+    padding: 48px 0 40px;
+  }
+
+  .inner {
+    padding: 0 16px;
+  }
+}
