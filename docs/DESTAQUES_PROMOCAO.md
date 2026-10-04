@@ -24,11 +24,21 @@ O botão "Ver toda a vitrine" leva para a vitrine completa (`#produtos`).
 | `destaque_ordem` | Ordem manual da vitrine (menor primeiro); desempate depois do desconto |
 | `preco` | Preço cheio — é o valor riscado quando há promoção |
 | `preco_promocional` | Preço "por". Vazio = sem promoção. Só vale se for **menor** que `preco` |
-| `preco_pix` | Preço à vista no Pix. Só aparece se for menor que o preço de venda |
+| `preco_pix` | Preço no Pix. Só aparece se for menor que o preço de venda |
 
 A regra de preço fica num lugar só: `src/lib/preco.ts` (`getPrecoInfo`), usada
 pelo card, pela página do produto, pelos modais e pelo carrinho. O desconto do
 selo é calculado de `preco` para o preço de venda (o Pix não entra na conta).
+
+### Quanto o cliente paga
+
+- **Cartão:** o preço de venda (`preco_promocional` quando há promoção, senão
+  `preco`). A taxa do Mercado Pago sai daqui, então o cartão não leva o preço Pix.
+- **Pix:** o `preco_pix` cadastrado — e só ele. O checkout não dá outro desconto
+  por cima. Produto com o mesmo valor no Pix e no cartão: deixe `preco_pix` igual
+  ao preço de venda (ou vazio).
+- O card mostra o preço Pix em destaque e, embaixo, "ou R$ X no cartão"; o
+  carrinho mostra os dois totais. Regra em `precoNoPagamento` (`src/lib/preco.ts`).
 
 Migration: `supabase/migrations/20260917000000_add_preco_promocional.sql`.
 

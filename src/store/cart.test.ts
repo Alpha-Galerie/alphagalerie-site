@@ -42,3 +42,30 @@ describe('changeQty', () => {
     expect(useCartStore.getState().items[0].qtd).toBe(1);
   });
 });
+
+function produto(parcial: Partial<Produto>): Produto {
+  return {
+    id: 1, nome: 'KIT DUO DE SEDAS', marca: 'ALPHA', preco: 55, preco_pix: 47, preco_promocional: 50,
+    categoria_id: 1, subcategoria: 'Kits Exclusivos', estoque: 3, ativo: true, destaque: false,
+    imagem_url: null, _variacoes: [], ...parcial,
+  };
+}
+
+describe('carrinho guarda o preço de cada forma de pagamento', () => {
+  it('cartão no preço de venda, Pix no preço Pix', () => {
+    useCartStore.getState().addItem(produto({}));
+    const [item] = useCartStore.getState().items;
+    expect(item.preco).toBe(50);
+    expect(item.precoPix).toBe(47);
+    expect(useCartStore.getState().selectTotal()).toBe(50);
+    expect(useCartStore.getState().selectTotalPix()).toBe(47);
+  });
+
+  it('produto com o mesmo preço no Pix não guarda preço Pix', () => {
+    useCartStore.getState().addItem(produto({ preco_pix: 50 }));
+    const [item] = useCartStore.getState().items;
+    expect(item.preco).toBe(50);
+    expect(item.precoPix).toBeUndefined();
+    expect(useCartStore.getState().selectTotalPix()).toBe(50);
+  });
+});

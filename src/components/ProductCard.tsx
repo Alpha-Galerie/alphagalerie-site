@@ -112,6 +112,9 @@ const ProductCard: FC<ProductCardProps> = ({
           </span>
           {preco.precoPix !== null && <span className={styles.priceLabel}>no pix</span>}
         </div>
+        {preco.precoPix !== null && (
+          <p className={styles.priceCartao}>ou {formatCurrency(preco.precoVenda)} no cartão</p>
+        )}
 
         <button
           type="button"
