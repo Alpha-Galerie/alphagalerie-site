@@ -251,9 +251,9 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     expect(screen.getByText('Chega amanhã, sábado (26/09)')).toBeInTheDocument();
     expect(screen.getByLabelText(/Motoboy · Gênesis/)).not.toBeChecked();
 
-    // R$ 100 − Pix 5% + R$ 20 (programada no Gênesis).
+    // R$ 100 (sem preço Pix próprio) + R$ 20 (programada no Gênesis).
     expect(await confirmar()).toMatchObject({
-      total: 115,
+      total: 120,
       entrega: 'programada',
       observacoes: 'Entrega Programada (Pex) · coleta sáb. 26/09 12h · chega sáb. 26/09',
     });
@@ -275,7 +275,7 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     fireEvent.click(screen.getByLabelText(/Motoboy · Gênesis/));
 
     const pedido = await confirmar();
-    expect(pedido).toMatchObject({ total: 145, entrega: 'delivery' });
+    expect(pedido).toMatchObject({ total: 150, entrega: 'delivery' });
     expect(pedido.observacoes).toBeUndefined();
   });
 
@@ -290,7 +290,7 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     expect(programada.textContent).toMatch(/R\$\s?15,00/);
     expect(motoboy.closest('label')!.textContent).toMatch(/R\$\s?35,00/);
     fireEvent.click(motoboy);
-    expect(await confirmar()).toMatchObject({ total: 130, entrega: 'delivery' });
+    expect(await confirmar()).toMatchObject({ total: 135, entrega: 'delivery' });
   });
 
   it('fora da área da Pex só aparece o motoboy', async () => {
@@ -300,7 +300,64 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
 
     expect(screen.queryByText(/Entrega Programada/)).not.toBeInTheDocument();
     expect(screen.getAllByText('Motoboy · Região próxima').length).toBeGreaterThan(0);
-    expect(await confirmar()).toMatchObject({ total: 125, entrega: 'delivery' });
+    expect(await confirmar()).toMatchObject({ total: 130, entrega: 'delivery' });
+  });
+});
+
+// Cartão paga o preço de venda (a taxa do Mercado Pago sai dele); Pix paga o
+// preço Pix cadastrado — e só ele, sem 5% por cima.
+describe('CheckoutModal: preço por forma de pagamento', () => {
+  const kit: ItemCarrinho = {
+    id: 604, cartKey: '604', nome: 'KIT CASE ALPHA COMPLETO', marca: 'ALPHA', categoria: 'Headshop',
+    preco: 285, precoPix: 280, imagem: null, estoque: 3, qtd: 1, promocional: true,
+  };
+
+  beforeEach(() => {
+    useCartStore.setState({ items: [kit] });
+  });
+
+  async function confirmar() {
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
+    await waitFor(() => expect(submitPedidoMock).toHaveBeenCalledTimes(1));
+    const [pedido, itens] = submitPedidoMock.mock.calls[0];
+    return { pedido, itens };
+  }
+
+  it('Pix cobra o preço Pix, sem desconto extra', async () => {
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+
+    expect(screen.getByText(/Preços no Pix: você economiza/)).toBeInTheDocument();
+    expect(screen.queryByText(/5% OFF/)).not.toBeInTheDocument();
+
+    const { pedido, itens } = await confirmar();
+    expect(itens[0].preco).toBe(280);
+    expect(pedido.pagamento).toBe('pix');
+    expect(pedido.total - (pedido.frete ?? 0)).not.toBeLessThan(280);
+  });
+
+  it('cartão cobra o preço de venda', async () => {
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/E-mail/i), { target: { value: 'cliente@teste.com' } });
+    fireEvent.click(screen.getByLabelText(/Cartão/i));
+
+    expect(screen.queryByText(/Preços no Pix: você economiza/)).not.toBeInTheDocument();
+
+    const { pedido, itens } = await confirmar();
+    expect(itens[0].preco).toBe(285);
+    expect(pedido.pagamento).toBe('cartao');
+  });
+
+  it('carrinho antigo, sem preço Pix guardado, cobra o mesmo valor nos dois', async () => {
+    const { precoPix: _semPix, ...antigo } = kit;
+    void _semPix;
+    useCartStore.setState({ items: [{ ...antigo, preco: 280 }] });
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+
+    const { itens } = await confirmar();
+    expect(itens[0].preco).toBe(280);
   });
 });
 
@@ -345,7 +402,7 @@ describe('CheckoutModal com o Alpha Club', () => {
 
   it('mostra os pontos, usa até 10% dos produtos fora de promoção e pede ao banco', async () => {
     clubeNoBanco();
-    submitPedidoMock.mockResolvedValue({ success: true, pedido: { id: 123, total: 152.5, pontos_usados: 100 } });
+    submitPedidoMock.mockResolvedValue({ success: true, pedido: { id: 123, total: 160, pontos_usados: 100 } });
     render(<CheckoutModal onClose={vi.fn()} />);
     fillRequiredFields();
 
@@ -357,9 +414,9 @@ describe('CheckoutModal com o Alpha Club', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
     await waitFor(() => expect(submitPedidoMock).toHaveBeenCalledTimes(1));
-    // R$ 150 − Pix 5% (7,50) + Entrega Programada no Gênesis 20: o total vai
+    // R$ 150 + Entrega Programada no Gênesis 20: o total vai
     // sem os pontos; o banco abate.
-    expect(submitPedidoMock.mock.calls[0][0]).toMatchObject({ usarCashback: true, total: 162.5, frete: 20 });
+    expect(submitPedidoMock.mock.calls[0][0]).toMatchObject({ usarCashback: true, total: 170, frete: 20 });
     expect(rpcMock).toHaveBeenCalledWith('consultar_clube', { p_whatsapp: '11999999999' });
   });
 

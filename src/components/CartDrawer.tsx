@@ -22,11 +22,14 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
   const removeItem = useCartStore((s) => s.removeItem);
   const changeQty = useCartStore((s) => s.changeQty);
   const selectTotal = useCartStore((s) => s.selectTotal);
+  const selectTotalPix = useCartStore((s) => s.selectTotalPix);
   const addItem = useCartStore((s) => s.addItem);
 
   const total = selectTotal();
+  const totalPix = selectTotalPix();
+  const temPrecoPix = totalPix < total;
   const clube = useClubeRegras();
-  const pontos = clube?.ativo ? pontosGanhos(total, clube) : 0;
+  const pontos = clube?.ativo ? pontosGanhos(totalPix, clube) : 0;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -187,12 +190,12 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
         {items.length > 0 && (
           <div className={styles.footer} id="cartFooter">
             <div className={styles.totalRow}>
-              <span>Subtotal</span>
+              <span>{temPrecoPix ? 'No cartão' : 'Subtotal'}</span>
               <span>{formatCurrency(total)}</span>
             </div>
             <div className={styles.totalFinal}>
-              <span className={styles.totalLabel}>Total</span>
-              <span className={styles.totalValue}>{formatCurrency(total)}</span>
+              <span className={styles.totalLabel}>{temPrecoPix ? 'No Pix' : 'Total'}</span>
+              <span className={styles.totalValue}>{formatCurrency(temPrecoPix ? totalPix : total)}</span>
             </div>
             {clube?.ativo && pontos > 0 && (
               <p className={styles.cashback}>

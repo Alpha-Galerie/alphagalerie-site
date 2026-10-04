@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getPrecoInfo } from './preco';
+import { getPrecoInfo, precoNoPagamento } from './preco';
 
 const base = { preco: 100, preco_pix: null, preco_promocional: null };
 
@@ -57,5 +57,19 @@ describe('getPrecoInfo', () => {
   it('variação sem preço próprio cai na regra do produto', () => {
     const info = getPrecoInfo({ preco: 100, preco_pix: 95, preco_promocional: 80 }, { preco: null });
     expect(info.precoFinal).toBe(80);
+  });
+});
+
+describe('precoNoPagamento', () => {
+  it('cartão paga o preço de venda; Pix paga o preço Pix', () => {
+    const item = { preco: 50, precoPix: 47 };
+    expect(precoNoPagamento(item, 'cartao')).toBe(50);
+    expect(precoNoPagamento(item, 'pix')).toBe(47);
+  });
+
+  it('sem preço Pix (ou Pix igual/maior) vale o preço de venda nos dois', () => {
+    expect(precoNoPagamento({ preco: 18 }, 'pix')).toBe(18);
+    expect(precoNoPagamento({ preco: 18, precoPix: 18 }, 'pix')).toBe(18);
+    expect(precoNoPagamento({ preco: 18, precoPix: 20 }, 'pix')).toBe(18);
   });
 });

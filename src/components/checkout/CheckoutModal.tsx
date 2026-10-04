@@ -9,6 +9,7 @@ import type { Pedido } from '../../types';
 import PixPayment from './PixPayment';
 import CardPayment from './CardPayment';
 import { formatCurrency as fmt } from '../../lib/format';
+import { precoNoPagamento } from '../../lib/preco';
 import styles from './CheckoutModal.module.css';
 import { supabase } from '../../lib/supabase';
 import { checkoutProvider } from '../../lib/checkout';
@@ -150,16 +151,21 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const usaProgramada = modalidade === 'programada' && programada !== null;
   const frete: FreteResult = usaProgramada ? programada : freteMotoboy;
 
-  const subtotal = items.reduce((acc, i) => acc + i.preco * i.qtd, 0);
-  const descontoPix = pagamento === 'pix' ? subtotal * 0.05 : 0;
+  // Cartão paga o preço de venda (a taxa do Mercado Pago sai dele); Pix paga
+  // o preço Pix de cada produto. Não há desconto de Pix por cima.
+  const itensCobrados = items.map((i) => ({ ...i, preco: precoNoPagamento(i, pagamento) }));
+  const subtotal = itensCobrados.reduce((acc, i) => acc + i.preco * i.qtd, 0);
+  const subtotalCartao = items.reduce((acc, i) => acc + precoNoPagamento(i, 'cartao') * i.qtd, 0);
+  const subtotalPix = items.reduce((acc, i) => acc + precoNoPagamento(i, 'pix') * i.qtd, 0);
+  const economiaPix = Math.max(0, subtotalCartao - subtotalPix);
   const freteValor = cupomAtivo?.tipo === 'frete' ? 0 : frete.valor;
   const descontoCupom = (() => {
     if (!cupomAtivo) return 0;
-    if (cupomAtivo.tipo === 'pct') return (subtotal - descontoPix) * (cupomAtivo.valor / 100);
-    if (cupomAtivo.tipo === 'fixo') return Math.min(cupomAtivo.valor, subtotal - descontoPix);
+    if (cupomAtivo.tipo === 'pct') return subtotal * (cupomAtivo.valor / 100);
+    if (cupomAtivo.tipo === 'fixo') return Math.min(cupomAtivo.valor, subtotal);
     return 0;
   })();
-  const totalSemPontos = Math.max(0, subtotal - descontoPix - descontoCupom + freteValor);
+  const totalSemPontos = Math.max(0, subtotal - descontoCupom + freteValor);
 
   // Alpha Club: os pontos do WhatsApp digitado pagam até o teto do programa
   // sobre os produtos fora de promoção, e não somam com cupom. O banco refaz
@@ -171,7 +177,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const [usarPontos, setUsarPontos] = useState(true);
   const [aniversario, setAniversario] = useState('');
   const [indicadoPor, setIndicadoPor] = useState('');
-  const valorElegivel = items
+  const valorElegivel = itensCobrados
     .filter((i) => !i.promocional)
     .reduce((acc, i) => acc + i.preco * i.qtd, 0);
   const pontosDisponiveis =
@@ -366,7 +372,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       complemento: complemento || undefined,
       pagamento, entrega: usaProgramada ? 'programada' : 'delivery',
       observacoes: obsPedido || undefined,
-      total, status: 'pendente', itens: items,
+      total, status: 'pendente', itens: itensCobrados,
     };
 
     if (clube) {
@@ -380,7 +386,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       if (clubeNoAr && whatsappValido(indicadoPor)) dadosPedido.indicadoPor = indicadoPor;
     }
 
-    const result = await submitPedido(dadosPedido, items);
+    const result = await submitPedido(dadosPedido, itensCobrados);
     setIsSubmitting(false);
 
     if (!result.success) {
@@ -408,7 +414,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       if (checkoutProvider.mode === 'pro') {
         setCardProcessing(true);
         const pedido_id = String(result.pedido?.id ?? pedidoId ?? '');
-        const checkoutItems = items.map(i => ({
+        const checkoutItems = itensCobrados.map(i => ({
             title: i.nome,
             quantity: i.qtd,
             unit_price: i.preco,
@@ -421,7 +427,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
               unit_price: freteValor,
             });
           }
-          // Com desconto (Pix, cupom, pontos) a soma dos itens passa do que o
+          // Com desconto (cupom, pontos) a soma dos itens passa do que o
           // cliente deve; o Mercado Pago não aceita item negativo, então vai
           // um item só com o valor do pedido.
           const somaItens = checkoutItems.reduce((acc, i) => acc + i.unit_price * i.quantity, 0);
@@ -671,7 +677,9 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                         </svg>
                         <span className={styles.optBoxText}><strong>Pix</strong></span>
-                        <span className={styles.badgeGold}>5% OFF</span>
+                        {economiaPix > 0 && (
+                          <span className={styles.badgeGold}>− {fmt(economiaPix)}</span>
+                        )}
                       </span>
                     </label>
                     <label className={styles.optLabel}>
@@ -692,16 +700,16 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                 {/* Resumo */}
                 <div className={styles.summary}>
                   <p className={styles.summaryTitle}>Resumo do pedido</p>
-                  {items.map((item) => (
+                  {itensCobrados.map((item) => (
                     <div key={item.cartKey} className={styles.summaryLine}>
                       <span>{item.nome}{item.qtd > 1 ? ` ×${item.qtd}` : ''}</span>
                       <strong>{fmt(item.preco * item.qtd)}</strong>
                     </div>
                   ))}
-                  {descontoPix > 0 && (
+                  {pagamento === 'pix' && economiaPix > 0 && (
                     <div className={`${styles.summaryLine} ${styles.summaryLineGold}`}>
-                      <span>Desconto PIX (5%)</span>
-                      <span>− {fmt(descontoPix)}</span>
+                      <span>Preços no Pix: você economiza</span>
+                      <span>{fmt(economiaPix)}</span>
                     </div>
                   )}
                   {freteValor > 0 && (

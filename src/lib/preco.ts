@@ -1,4 +1,6 @@
-import type { Produto, Variacao } from '../types';
+import type { ItemCarrinho, Produto, Variacao } from '../types';
+
+export type FormaPagamento = 'pix' | 'cartao';
 
 export interface PrecoInfo {
   /** Preço cheio, exibido riscado. `null` quando não há promoção. */
@@ -58,4 +60,18 @@ export function getPrecoInfo(
     desconto: emPromocao ? Math.round(((precoCheio - precoVenda) / precoCheio) * 100) : 0,
     emPromocao,
   };
+}
+
+/**
+ * Quanto o item custa na forma de pagamento escolhida. O cartão paga o preço
+ * de venda, porque a taxa do Mercado Pago sai dele; o Pix paga o preço Pix
+ * cadastrado na retaguarda — e só ele, sem outro desconto por cima.
+ */
+export function precoNoPagamento(
+  item: Pick<ItemCarrinho, 'preco' | 'precoPix'>,
+  pagamento: FormaPagamento
+): number {
+  const pix = item.precoPix;
+  if (pagamento === 'pix' && valido(pix) && pix < item.preco) return pix;
+  return item.preco;
 }

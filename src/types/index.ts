@@ -51,7 +51,13 @@ export interface ItemCarrinho {
   subcategoria?: string | null;
   /** Em promoção: pontos do Alpha Club não pagam este item. O banco confere. */
   promocional?: boolean;
+  /** Preço no cartão: o preço de venda (promocional, quando houver). */
   preco: number;
+  /**
+   * Preço no Pix (sem a taxa do cartão). Ausente em carrinhos montados antes
+   * dessa regra — aí vale `preco` nas duas formas de pagamento.
+   */
+  precoPix?: number;
   imagem: string | null;
   estoque: number | null;
   qtd: number;
