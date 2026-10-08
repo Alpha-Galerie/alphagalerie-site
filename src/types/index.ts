@@ -25,6 +25,8 @@ export interface Produto {
   preco_pix: number | null;
   /** Preço promocional ("por"). Quando menor que `preco`, o produto entra em promoção. */
   preco_promocional: number | null;
+  /** Selo livre exibido no card (ex.: "Últimas peças"). */
+  etiqueta?: string | null;
   categoria_id: number;
   subcategoria: string | null;
   estoque: number | null;

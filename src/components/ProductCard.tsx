@@ -79,6 +79,9 @@ const ProductCard: FC<ProductCardProps> = ({
           {produto.destaque && !hideDestaqueBadge && !preco.emPromocao && (
             <span className={`${styles.badge} ${styles.badgeDestaque}`}>Destaque</span>
           )}
+          {produto.etiqueta && !esgotado && (
+            <span className={`${styles.badge} ${styles.badgeEtiqueta}`}>{produto.etiqueta}</span>
+          )}
           {esgotado && (
             <span className={`${styles.badge} ${styles.badgeEsgotado}`}>Esgotado</span>
           )}

@@ -4,7 +4,7 @@ import { getPrecoInfo } from '../lib/preco';
 import type { Produto, Variacao } from '../types';
 
 const COLS =
-  'id,nome,marca,preco,preco_pix,preco_promocional,categoria_id,subcategoria,estoque,ativo,destaque,destaque_ordem,imagem_url,descricao,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em),categorias!produtos_categoria_id_fkey(*)';
+  'id,nome,marca,preco,preco_pix,preco_promocional,etiqueta,categoria_id,subcategoria,estoque,ativo,destaque,destaque_ordem,imagem_url,descricao,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em),categorias!produtos_categoria_id_fkey(*)';
 
 export const DESTAQUES_LIMIT = 8;
 

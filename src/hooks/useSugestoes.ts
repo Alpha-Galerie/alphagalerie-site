@@ -9,7 +9,7 @@ import {
 import type { Produto, Variacao } from '../types';
 
 const COLS =
-  'id,nome,marca,preco,preco_pix,preco_promocional,categoria_id,subcategoria,estoque,ativo,destaque,destaque_ordem,imagem_url,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo),categorias!produtos_categoria_id_fkey(*)';
+  'id,nome,marca,preco,preco_pix,preco_promocional,etiqueta,categoria_id,subcategoria,estoque,ativo,destaque,destaque_ordem,imagem_url,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo),categorias!produtos_categoria_id_fkey(*)';
 
 async function fetchCandidatos(subcategorias: string[]): Promise<Produto[]> {
   // Subcategorias vêm normalizadas (sem acento, minúsculas); o ilike sem
