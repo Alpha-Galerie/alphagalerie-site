@@ -30,7 +30,7 @@ async function fetchProducts(
 
   let query = supabase
     .from('produtos')
-    .select('id,nome,marca,preco,preco_pix,preco_promocional,categoria_id,subcategoria,estoque,ativo,destaque,imagem_url,descricao,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em),categorias!produtos_categoria_id_fkey(*)', { count: 'estimated' })
+    .select('id,nome,marca,preco,preco_pix,preco_promocional,etiqueta,categoria_id,subcategoria,estoque,ativo,destaque,imagem_url,descricao,variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em),categorias!produtos_categoria_id_fkey(*)', { count: 'estimated' })
     .eq('ativo', true)
     // Esgotado por último. Tem que ser aqui e não no navegador: a vitrine é
     // paginada de 24 em 24 no servidor, então ordenar depois de receber só
