@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import ProductGrid from './ProductGrid';
+import { buscarNaVitrine } from '../lib/busca';
 import type { Subcategoria } from '../hooks/useSubcategories';
 import type { Marca } from '../hooks/useMarcas';
 
@@ -234,5 +235,23 @@ describe('barra de marcas', () => {
     const nomes = within(barraMarcas()!).getAllByRole('button').map((b) => b.textContent ?? '');
     expect(nomes).toHaveLength(10);
     expect(nomes[nomes.length - 1]).toMatch(/\+ 29 marcas/);
+  });
+});
+
+describe('busca vinda do topo da home', () => {
+  it('em "Todos", preenche a busca da vitrine', () => {
+    render(<ProductGrid categoryId={null} onCategoryChange={vi.fn()} />);
+    act(() => buscarNaVitrine('tabaco'));
+    expect(screen.getByLabelText(/Buscar produtos/i)).toHaveValue('tabaco');
+  });
+
+  it('dentro de uma categoria, volta para "Todos" e mantém o termo', () => {
+    const onCategoryChange = vi.fn();
+    const { rerender } = render(<ProductGrid categoryId={1} onCategoryChange={onCategoryChange} />);
+    act(() => buscarNaVitrine('seda'));
+    expect(onCategoryChange).toHaveBeenCalledWith(null);
+    // A troca de categoria limpa a busca; o termo pendente tem que sobreviver.
+    rerender(<ProductGrid categoryId={null} onCategoryChange={onCategoryChange} />);
+    expect(screen.getByLabelText(/Buscar produtos/i)).toHaveValue('seda');
   });
 });
