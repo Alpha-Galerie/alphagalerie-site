@@ -16,6 +16,7 @@ import { useCartStore } from '../store/cart';
 import { useToastStore } from '../store/toast';
 import type { Produto, Variacao } from '../types';
 import styles from './ProductPage.module.css';
+import { registrarInteresse } from '../lib/interesse';
 
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
 
@@ -90,6 +91,12 @@ export default function ProductPage() {
   const addItem = useCartStore((s) => s.addItem);
   const showToast = useToastStore((s) => s.showToast);
   const { data: produto, isLoading, isError } = useProduct(produtoId);
+
+  // Produto aberto = interesse; o painel cruza com as vendas para achar o
+  // que muita gente olha e pouca gente compra (candidato a promoção).
+  useEffect(() => {
+    if (produto?.id) registrarInteresse({ tipo: 'produto', produto_id: produto.id });
+  }, [produto?.id]);
   const { adicionar } = useCarrinhoActions();
   const produtoComoItens = useMemo(() => (produto ? [produto] : []), [produto]);
 

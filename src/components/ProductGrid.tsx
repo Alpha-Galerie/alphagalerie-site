@@ -6,6 +6,7 @@ import { useMarcas, type Marca } from '../hooks/useMarcas';
 import { useSubcategoriasOcultas } from '../hooks/useSubcategoriasOcultas';
 import { useProducts } from '../hooks/useProducts';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
+import { registrarInteresse } from '../lib/interesse';
 import type { Produto, Variacao } from '../types';
 import ProductCard from './ProductCard';
 import VariacoesModal from './VariacoesModal';
@@ -171,6 +172,18 @@ export default function ProductGrid({
 
   const produtos = serverProdutos;
 
+  // Registra a busca quando o termo assenta e o resultado já chegou: o
+  // número de resultados mostra no painel o que o cliente procura e a loja
+  // não tem. A espera extra evita gravar "tab" no meio de "tabaco".
+  useEffect(() => {
+    const termo = search.trim();
+    if (termo.length < 2 || isFetching || !data) return;
+    const t = setTimeout(() => {
+      registrarInteresse({ tipo: 'busca', termo, resultados: data.total });
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [search, isFetching, data]);
+
   function handleSelectVariacao(produto: Produto, variacao: Variacao) {
     adicionarVariacao(produto, variacao);
     setVariacoesTarget(null);
@@ -217,7 +230,11 @@ export default function ProductGrid({
           <button
             key={cat.id}
             type="button"
-            onClick={() => { onCategoryChange(cat.id); setActiveSubcat(null); }}
+            onClick={() => {
+              onCategoryChange(cat.id);
+              setActiveSubcat(null);
+              registrarInteresse({ tipo: 'categoria', termo: cat.nome });
+            }}
             style={{
               ...btnBase,
               border: `1px solid ${categoryId === cat.id ? '#c9a961' : '#222'}`,
@@ -260,7 +277,12 @@ export default function ProductGrid({
               <button
                 key={s.nome}
                 type="button"
-                onClick={() => setActiveSubcat(s.nome)}
+                onClick={() => {
+                  setActiveSubcat(s.nome);
+                  // "Acessorios" sozinho não diz se é de arguile ou de charutaria.
+                  const cat = categorias.find((c) => c.id === categoryId);
+                  registrarInteresse({ tipo: 'subcategoria', termo: cat ? `${s.nome} (${cat.nome})` : s.nome });
+                }}
                 title={esgotada ? `${s.nome} — nada disponível no momento` : undefined}
                 style={{
                   ...btnBase,

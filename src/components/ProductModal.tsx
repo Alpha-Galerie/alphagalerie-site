@@ -8,6 +8,7 @@ import type { Produto, Variacao } from '../types';
 import { useProduct } from '../hooks/useProduct';
 import { buildProductPath } from '../lib/productPath';
 import VariacoesModal from './VariacoesModal';
+import { registrarInteresse } from '../lib/interesse';
 
 interface ProductModalProps {
   produtoId: number | null;
@@ -24,6 +25,12 @@ export default function ProductModal({ produtoId, onClose }: ProductModalProps) 
   const showToast = useToastStore((s) => s.showToast);
 
   const { data: produto, isLoading } = useProduct(produtoId);
+
+  // Produto aberto = interesse; o painel cruza com as vendas para achar o
+  // que muita gente olha e pouca gente compra (candidato a promoção).
+  useEffect(() => {
+    if (produto?.id) registrarInteresse({ tipo: 'produto', produto_id: produto.id });
+  }, [produto?.id]);
 
   useEffect(() => {
     if (!produtoId) return;
