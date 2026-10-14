@@ -1,12 +1,14 @@
 import heroArte from '../assets/banner-raw.jpg';
 import { useClubeRegras } from '../hooks/useClube';
 import { percentualDeVolta } from '../lib/clube';
+import { PEX_CORTE_TEXTO } from '../lib/frete';
 import styles from './HeroSection.module.css';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
 const WA_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20prazo%20de%20entrega.`;
 
-const PONTOS = ['Em até 24h', 'Todos os dias', 'Alphaville e região'];
+// Entrega Programada (Pex): R$ 15 na capital e Grande SP, grátis acima de R$ 200.
+const PONTOS = ['Capital e Grande SP · R$ 15', 'Grátis acima de R$ 200', 'Campinas e região em 2 dias'];
 
 export default function HeroSection() {
   const clube = useClubeRegras();
@@ -82,11 +84,11 @@ export default function HeroSection() {
           <p className={styles.entregaEyebrow}>Entrega</p>
 
           <h2 className={styles.entregaTitulo} id="entrega-titulo">
-            Peça com <em>antecedência</em>.
+            Pediu até {PEX_CORTE_TEXTO}, <em>chega hoje</em>.
           </h2>
 
           <p className={styles.entregaLead}>
-            Não é entrega expressa. Cada pedido sai por ordem de chegada.
+            Entrega Programada de segunda a sábado. Com pressa? Motoboy em Alphaville e região.
           </p>
 
           <ul className={styles.entregaPontos}>

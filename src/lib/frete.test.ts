@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularEntregaProgramada, calcularFrete } from './frete';
+import { calcularEntregaProgramada, calcularFrete, freteComBeneficio } from './frete';
 
 describe('calcularFrete', () => {
   it('returns zero and empty label for empty CEP', () => {
@@ -85,7 +85,7 @@ describe('calcularEntregaProgramada (Pex)', () => {
     expect(r?.label).toBe('Entrega Programada');
   });
 
-  it.each(['', '06545-000', '06725-000', '06750-000', '01000-000', '80010-010'])(
+  it.each(['', '14010-000', '80010-010'])(
     'fora das regiões contratadas: %s',
     (cep) => {
       expect(calcularEntregaProgramada(cep, sexta('10:00'))).toBeNull();
@@ -152,5 +152,54 @@ describe('calcularEntregaProgramada (Pex)', () => {
   it('observação para a loja diz coleta e chegada', () => {
     const r = calcularEntregaProgramada('06454-000', sexta('12:50'))!;
     expect(r.observacao).toBe('Entrega Programada (Pex) · coleta sáb. 26/09 12h · chega sáb. 26/09');
+  });
+});
+
+describe('Pex além da região do motoboy', () => {
+  const sextaManha = new Date('2026-09-25T10:00:00-03:00');
+
+  it('capital de SP, todas as zonas: R$ 15 e chega no mesmo dia', () => {
+    for (const cep of ['01310-100', '02012-000', '03163-000', '04538-133', '05402-000', '08230-030']) {
+      const r = calcularEntregaProgramada(cep, sextaManha)!;
+      expect(r.regiao).toBe('São Paulo (capital)');
+      expect(r.valor).toBe(15);
+      expect(r.prazo).toBe('Chega hoje (25/09)');
+    }
+  });
+
+  it('a capital não tem motoboy: o frete do motoboy segue a combinar', () => {
+    expect(calcularFrete('04538-133').valor).toBe(0);
+  });
+
+  it('a região do motoboy continua com a tabela antiga', () => {
+    expect(calcularEntregaProgramada('06454-000', sextaManha)!.regiao).toBe('Barueri');
+    expect(calcularEntregaProgramada('06650-000', sextaManha)!.regiao).toBe('Itapevi');
+  });
+
+  it('resto da Grande SP chega no dia seguinte', () => {
+    for (const cep of ['06760-000', '07010-000', '09010-000', '08700-000']) {
+      const r = calcularEntregaProgramada(cep, sextaManha)!;
+      expect(r.regiao).toBe('Grande São Paulo');
+      expect(r.prazo).toBe('Chega amanhã, sábado (26/09)');
+    }
+  });
+
+  it('Campinas, Valinhos e Vinhedo em 2 dias; resto do interior fora', () => {
+    expect(calcularEntregaProgramada('13010-000', sextaManha)!.prazo).toBe('Chega segunda-feira (28/09)');
+    expect(calcularEntregaProgramada('13280-000', sextaManha)!.regiao).toBe('Vinhedo');
+    expect(calcularEntregaProgramada('14010-000', sextaManha)).toBeNull();
+  });
+});
+
+describe('freteComBeneficio', () => {
+  it('abaixo de R$ 200 cobra cheio', () => {
+    expect(freteComBeneficio(15, 'programada', 199.99)).toBe(15);
+    expect(freteComBeneficio(50, 'motoboy', 150)).toBe(50);
+  });
+
+  it('a partir de R$ 200: Programada grátis, motoboy pela metade', () => {
+    expect(freteComBeneficio(15, 'programada', 200)).toBe(0);
+    expect(freteComBeneficio(50, 'motoboy', 200)).toBe(25);
+    expect(freteComBeneficio(35, 'motoboy', 320)).toBe(17.5);
   });
 });

@@ -46,8 +46,10 @@ export function calcularFrete(cep: string, bairro = ''): FreteResult {
 // Mais barata que o motoboy, mas não sai na hora: a Pex coleta na loja ao
 // meio-dia, de segunda a sábado, fora feriados. Pedido até 11h30 (tempo de
 // separar) entra na coleta do dia; depois disso, na próxima.
-// Faixas de CEP e prazo da tabela Pex Collect (jun/2026). Prazo = dias depois
-// da coleta: D+0 chega no dia da coleta, D+1 no dia seguinte.
+// Faixas de CEP e prazo da tabela Pex Collect (jun/2026), ampliadas em out/2026:
+// a Pex atende toda a capital (mesmo dia), a Grande SP e parte do interior
+// (Campinas, Valinhos, Vinhedo: 2 dias). Prazo = dias depois da coleta: D+0
+// chega no dia da coleta, D+1 no dia seguinte.
 
 export const PEX_COLETA_HORA = 12;
 const PEX_CORTE_HORA = 11;
@@ -65,7 +67,28 @@ const PEX_REGIOES: Array<{ regiao: string; de: number; ate: number; prazo: numbe
   { regiao: 'Jandira', de: 6600000, ate: 6649999, prazo: 0, valor: 15 },
   { regiao: 'Itapevi', de: 6650000, ate: 6699999, prazo: 1, valor: 15 },
   { regiao: 'Cotia', de: 6700000, ate: 6722999, prazo: 0, valor: 15 },
+  { regiao: 'São Paulo (capital)', de: 1000000, ate: 5999999, prazo: 0, valor: 15 },
+  { regiao: 'São Paulo (capital)', de: 8000000, ate: 8499999, prazo: 0, valor: 15 },
+  // Resto da Grande SP (Taboão, Embu, Guarulhos, Caieiras, ABC, Alto Tietê).
+  // Sem a tabela da Pex por cidade, promete D+1: chegar antes do prometido
+  // não frustra ninguém; o contrário, sim.
+  { regiao: 'Grande São Paulo', de: 6000000, ate: 6999999, prazo: 1, valor: 15 },
+  { regiao: 'Grande São Paulo', de: 7000000, ate: 7999999, prazo: 1, valor: 15 },
+  { regiao: 'Grande São Paulo', de: 8500000, ate: 9999999, prazo: 1, valor: 15 },
+  { regiao: 'Campinas', de: 13000000, ate: 13139999, prazo: 2, valor: 15 },
+  { regiao: 'Valinhos', de: 13270000, ate: 13279999, prazo: 2, valor: 15 },
+  { regiao: 'Vinhedo', de: 13280000, ate: 13289999, prazo: 2, valor: 15 },
 ];
+
+// Benefício de frete por valor de compra (produtos, depois do cupom). A Entrega
+// Programada custa R$ 15 para a loja e sai grátis; o motoboy custa R$ 30 a 50
+// de Uber, então a loja paga metade e não ele inteiro.
+export const FRETE_BENEFICIO_A_PARTIR = 200;
+
+export function freteComBeneficio(valor: number, modalidade: 'programada' | 'motoboy', subtotal: number): number {
+  if (subtotal < FRETE_BENEFICIO_A_PARTIR) return valor;
+  return modalidade === 'programada' ? 0 : Math.round((valor / 2) * 100) / 100;
+}
 
 // Feriado não tem coleta nem entrega: conta o próximo dia útil. Nacionais,
 // o estadual de SP (9/7) e os móveis em que a Pex não roda (Carnaval,

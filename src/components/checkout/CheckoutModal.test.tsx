@@ -293,14 +293,39 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     expect(await confirmar()).toMatchObject({ total: 135, entrega: 'delivery' });
   });
 
-  it('fora da área da Pex só aparece o motoboy', async () => {
+  it('capital de SP: só a Entrega Programada, sem motoboy', async () => {
     render(<CheckoutModal onClose={vi.fn()} />);
     fillRequiredFields();
-    fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '06725-000' } });
+    fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '04538-133' } });
+
+    expect(screen.queryByText(/Motoboy/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Entrega Programada · São Paulo \(capital\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Faltam/)).toBeInTheDocument();
+    // R$ 100 + R$ 15.
+    expect(await confirmar()).toMatchObject({ total: 115, entrega: 'programada' });
+  });
+
+  it('a partir de R$ 200: Programada grátis e motoboy pela metade', async () => {
+    useCartStore.setState({ items: [{ ...useCartStore.getState().items[0], qtd: 2 }] });
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+
+    expect(screen.queryByText(/Faltam/)).not.toBeInTheDocument();
+    const motoboy = screen.getByLabelText(/Motoboy · Gênesis/);
+    // Gênesis: motoboy R$ 50 vira R$ 25.
+    expect(motoboy.closest('label')!.textContent).toMatch(/R\$\s?25,00/);
+    expect(screen.getByText(/Frete grátis acima de/)).toBeInTheDocument();
+    expect(await confirmar()).toMatchObject({ total: 200, entrega: 'programada' });
+  });
+
+  it('fora da Pex e do motoboy: frete a combinar', async () => {
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '14010-000' } });
 
     expect(screen.queryByText(/Entrega Programada/)).not.toBeInTheDocument();
-    expect(screen.getAllByText('Motoboy · Região próxima').length).toBeGreaterThan(0);
-    expect(await confirmar()).toMatchObject({ total: 130, entrega: 'delivery' });
+    expect(screen.getAllByText(/Frete a combinar/).length).toBeGreaterThan(0);
+    expect(await confirmar()).toMatchObject({ total: 100, entrega: 'delivery' });
   });
 });
 
