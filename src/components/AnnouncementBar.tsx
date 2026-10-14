@@ -1,13 +1,14 @@
 import { useClubeRegras } from '../hooks/useClube';
 import { percentualDeVolta } from '../lib/clube';
+import { PEX_CORTE_TEXTO } from '../lib/frete';
 import styles from './AnnouncementBar.module.css';
 
 const ITEMS = [
-  'Alphaville · Barueri · SP',
+  `Pediu até ${PEX_CORTE_TEXTO}, chega hoje na capital e na região`,
+  'Entrega desde R$ 15 na capital e Grande SP · grátis acima de R$ 200',
   'Atendimento via WhatsApp',
-  '+10 anos no mercado',
   'Headshop · Charutaria · Arguile · Lifestyle',
-  'Entregas por ordem de chegada · peça com antecedência',
+  'Alphaville · Barueri · SP · +10 anos no mercado',
 ];
 
 export default function AnnouncementBar() {
