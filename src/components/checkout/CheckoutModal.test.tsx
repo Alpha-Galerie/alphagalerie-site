@@ -228,7 +228,7 @@ describe('CheckoutModal', () => {
 });
 
 describe('CheckoutModal: Entrega Programada (Pex)', () => {
-  // Sexta, 25/09/2026, 12:50 em São Paulo: já passou do corte das 11h30.
+  // Sexta, 25/09/2026, 12:50 em São Paulo: já passou do corte das 11h.
   beforeEach(() => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-09-25T12:50:00-03:00'));
@@ -299,7 +299,7 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '04538-133' } });
 
     expect(screen.queryByText(/Motoboy/)).not.toBeInTheDocument();
-    expect(screen.getByText(/Entrega Programada · São Paulo \(capital\)/)).toBeInTheDocument();
+    expect(screen.getByText(/Entrega Programada · São Paulo · Sul/)).toBeInTheDocument();
     expect(screen.getByText(/Faltam/)).toBeInTheDocument();
     // R$ 100 + R$ 15.
     expect(await confirmar()).toMatchObject({ total: 115, entrega: 'programada' });

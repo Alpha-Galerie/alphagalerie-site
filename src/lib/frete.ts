@@ -44,40 +44,94 @@ export function calcularFrete(cep: string, bairro = ''): FreteResult {
 
 // ── Entrega Programada (Pex) ────────────────────────────────────────────────
 // Mais barata que o motoboy, mas não sai na hora: a Pex coleta na loja ao
-// meio-dia, de segunda a sábado, fora feriados. Pedido até 11h30 (tempo de
-// separar) entra na coleta do dia; depois disso, na próxima.
-// Faixas de CEP e prazo da tabela Pex Collect (jun/2026), ampliadas em out/2026:
-// a Pex atende toda a capital (mesmo dia), a Grande SP e parte do interior
-// (Campinas, Valinhos, Vinhedo: 2 dias). Prazo = dias depois da coleta: D+0
-// chega no dia da coleta, D+1 no dia seguinte.
+// meio-dia, de segunda a sábado, fora feriados. Pedido até 11h entra na
+// coleta do dia; depois disso, na próxima.
+// Faixas de CEP e prazo da tabela Pex Collect (jun/2026, versão completa).
+// Prazo = dias depois da coleta: D+0 chega no dia da coleta, D+1 no dia
+// seguinte. O valor é o que a loja cobra, arredondado para cima do custo da
+// Pex: R$ 12,90 e R$ 14,99 viram R$ 15; R$ 15,90 (zonas D+1 da capital) e
+// R$ 17,90 (interior) viram R$ 20. CEP fora das faixas = a Pex não atende.
 
 export const PEX_COLETA_HORA = 12;
+// Corte às 11h: dá tempo de separar, embalar e chamar a Pex para a coleta.
 const PEX_CORTE_HORA = 11;
-const PEX_CORTE_MINUTO = 30;
+const PEX_CORTE_MINUTO = 0;
 export const PEX_CORTE_TEXTO = `${PEX_CORTE_HORA}h${PEX_CORTE_MINUTO ? String(PEX_CORTE_MINUTO).padStart(2, '0') : ''}`;
 
-// A primeira faixa que contém o CEP vale: Gênesis / CENIC antes de Barueri.
-const PEX_REGIOES: Array<{ regiao: string; de: number; ate: number; prazo: number; valor: number }> = [
-  { regiao: 'Osasco', de: 6000000, ate: 6299999, prazo: 0, valor: 15 },
-  { regiao: 'Carapicuíba', de: 6300000, ate: 6399999, prazo: 0, valor: 15 },
+interface FaixaPex {
+  regiao: string;
+  de: number;
+  ate: number;
+  prazo: number;
+  valor: number;
+  /** Interior: a Pex só entrega de segunda a sexta. */
+  semSabado?: boolean;
+}
+
+function faixa(regiao: string, de: string, ate: string, prazo: number, valor: number, semSabado = false): FaixaPex {
+  const n = (cep: string) => parseInt(cep.replace(/\D/g, ''), 10);
+  return { regiao, de: n(de), ate: n(ate), prazo, valor, ...(semSabado ? { semSabado } : {}) };
+}
+
+// A primeira faixa que contém o CEP vale: Gênesis / CENIC antes de Barueri, e
+// Perus (D+1) antes de Jaraguá, porque a tabela da Pex sobrepõe as duas.
+const PEX_REGIOES: FaixaPex[] = [
+  faixa('São Paulo · Centro', '01000-000', '01599-999', 0, 15),
+  faixa('São Paulo · Norte', '02000-000', '02999-999', 0, 15),
+  faixa('São Paulo · Leste', '03000-000', '03999-999', 0, 15),
+  faixa('São Paulo · Sul', '04000-000', '04399-999', 0, 15),
+  faixa('São Paulo · Sul', '04400-000', '04499-999', 1, 20),
+  faixa('São Paulo · Sul', '04500-000', '04809-999', 0, 15),
+  faixa('São Paulo · Sul', '04800-000', '04863-999', 1, 20),
+  faixa('São Paulo · Guarapiranga', '04900-000', '04941-000', 1, 20),
+  faixa('São Paulo · Oeste', '05000-000', '05179-999', 0, 15),
+  faixa('São Paulo · Perus', '05180-000', '05283-130', 1, 15),
+  faixa('São Paulo · Oeste', '05300-000', '05799-999', 0, 15),
+  faixa('São Paulo · Capão Redondo', '05800-000', '05899-999', 1, 20),
+  faixa('São Paulo · Leste', '08000-000', '08499-999', 0, 15),
+  faixa('Osasco', '06000-000', '06299-999', 0, 15),
+  faixa('Carapicuíba', '06300-000', '06399-999', 0, 15),
   // Dentro do condomínio é longe: a programada custa mais que no resto de Barueri.
-  { regiao: 'Gênesis / CENIC', de: 6454700, ate: 6454999, prazo: 0, valor: 20 },
-  { regiao: 'Barueri', de: 6400000, ate: 6499999, prazo: 0, valor: 15 },
-  { regiao: 'Santana de Parnaíba', de: 6500000, ate: 6544999, prazo: 0, valor: 15 },
-  { regiao: 'Jandira', de: 6600000, ate: 6649999, prazo: 0, valor: 15 },
-  { regiao: 'Itapevi', de: 6650000, ate: 6699999, prazo: 1, valor: 15 },
-  { regiao: 'Cotia', de: 6700000, ate: 6722999, prazo: 0, valor: 15 },
-  { regiao: 'São Paulo (capital)', de: 1000000, ate: 5999999, prazo: 0, valor: 15 },
-  { regiao: 'São Paulo (capital)', de: 8000000, ate: 8499999, prazo: 0, valor: 15 },
-  // Resto da Grande SP (Taboão, Embu, Guarulhos, Caieiras, ABC, Alto Tietê).
-  // Sem a tabela da Pex por cidade, promete D+1: chegar antes do prometido
-  // não frustra ninguém; o contrário, sim.
-  { regiao: 'Grande São Paulo', de: 6000000, ate: 6999999, prazo: 1, valor: 15 },
-  { regiao: 'Grande São Paulo', de: 7000000, ate: 7999999, prazo: 1, valor: 15 },
-  { regiao: 'Grande São Paulo', de: 8500000, ate: 9999999, prazo: 1, valor: 15 },
-  { regiao: 'Campinas', de: 13000000, ate: 13139999, prazo: 2, valor: 15 },
-  { regiao: 'Valinhos', de: 13270000, ate: 13279999, prazo: 2, valor: 15 },
-  { regiao: 'Vinhedo', de: 13280000, ate: 13289999, prazo: 2, valor: 15 },
+  faixa('Gênesis / CENIC', '06454-700', '06454-999', 0, 20),
+  faixa('Barueri', '06400-000', '06499-999', 0, 15),
+  faixa('Santana de Parnaíba', '06500-000', '06544-999', 0, 15),
+  faixa('Jandira', '06600-000', '06649-999', 0, 15),
+  faixa('Itapevi', '06650-000', '06699-999', 1, 15),
+  faixa('Cotia', '06700-000', '06729-999', 0, 15),
+  faixa('Taboão da Serra', '06750-000', '06799-999', 0, 15),
+  faixa('Embu das Artes', '06800-000', '06845-999', 0, 15),
+  faixa('Itapecerica da Serra', '06846-000', '06855-999', 0, 15),
+  faixa('Guarulhos', '07000-000', '07299-999', 0, 15),
+  faixa('Arujá', '07400-000', '07499-899', 0, 15),
+  faixa('Mairiporã', '07600-003', '07667-735', 0, 15),
+  faixa('Caieiras', '07700-001', '07749-505', 0, 15),
+  faixa('Cajamar', '07750-000', '07799-999', 0, 15),
+  faixa('Franco da Rocha', '07801-000', '07870-010', 0, 15),
+  faixa('Francisco Morato', '07901-000', '07998-070', 0, 15),
+  faixa('Ferraz de Vasconcelos', '08500-000', '08545-280', 0, 15),
+  faixa('Poá', '08550-000', '08569-999', 0, 15),
+  faixa('Itaquaquecetuba', '08570-000', '08599-999', 0, 15),
+  faixa('Suzano', '08610-000', '08616-999', 0, 15),
+  faixa('Suzano', '08650-000', '08696-999', 0, 15),
+  faixa('Mogi das Cruzes', '08710-000', '08850-380', 0, 15),
+  faixa('Santo André', '09000-000', '09132-999', 0, 15),
+  faixa('Santo André', '09139-000', '09139-999', 0, 15),
+  faixa('Santo André', '09169-000', '09299-999', 0, 15),
+  faixa('Mauá', '09300-000', '09322-999', 0, 15),
+  faixa('Mauá', '09330-000', '09336-999', 0, 15),
+  faixa('Mauá', '09340-000', '09341-999', 0, 15),
+  faixa('Mauá', '09350-000', '09372-999', 0, 15),
+  faixa('Mauá', '09380-000', '09399-999', 0, 15),
+  faixa('São Caetano do Sul', '09500-000', '09599-999', 0, 15),
+  faixa('São Bernardo do Campo', '09600-000', '09821-999', 0, 15),
+  faixa('São Bernardo do Campo', '09840-000', '09846-499', 0, 15),
+  faixa('São Bernardo do Campo', '09850-000', '09899-999', 0, 15),
+  faixa('Diadema', '09900-000', '09993-335', 0, 15),
+  faixa('Campinas', '13000-000', '13139-969', 2, 20, true),
+  faixa('Paulínia', '13140-001', '13149-969', 2, 20, true),
+  faixa('Sumaré', '13170-001', '13181-999', 2, 20, true),
+  faixa('Hortolândia', '13183-001', '13189-969', 2, 20, true),
+  faixa('Valinhos', '13270-000', '13279-969', 2, 20, true),
 ];
 
 // Benefício de frete por valor de compra (produtos, depois do cupom). A Entrega
@@ -170,10 +224,10 @@ function agoraEmSaoPaulo(agora: Date): { dia: Date; minutos: number } {
   };
 }
 
-function proximoDiaPex(dia: Date): Date {
+function proximoDiaPex(dia: Date, semSabado = false): Date {
   const d = new Date(dia);
   do d.setUTCDate(d.getUTCDate() + 1);
-  while (!temPex(d));
+  while (!temPex(d) || (semSabado && d.getUTCDay() === 6));
   return d;
 }
 
@@ -192,7 +246,7 @@ export function calcularEntregaProgramada(cep: string, agora: Date = new Date())
   let coleta = hoje;
   if (!temPex(hoje) || minutos >= PEX_CORTE_HORA * 60 + PEX_CORTE_MINUTO) coleta = proximoDiaPex(hoje);
   let chegada = coleta;
-  for (let i = 0; i < faixa.prazo; i++) chegada = proximoDiaPex(chegada);
+  for (let i = 0; i < faixa.prazo; i++) chegada = proximoDiaPex(chegada, faixa.semSabado);
 
   const diasAteChegar = Math.round((chegada.getTime() - hoje.getTime()) / 86400000);
   const prazo =

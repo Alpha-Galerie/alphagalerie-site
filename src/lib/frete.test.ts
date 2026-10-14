@@ -92,15 +92,15 @@ describe('calcularEntregaProgramada (Pex)', () => {
     }
   );
 
-  it('pedido até 11h29 chega no mesmo dia', () => {
-    const r = calcularEntregaProgramada('06454-000', sexta('11:29'))!;
+  it('pedido até 10h59 chega no mesmo dia', () => {
+    const r = calcularEntregaProgramada('06454-000', sexta('10:59'))!;
     expect(ddmm(r.coleta)).toBe('25/09');
     expect(ddmm(r.chegada)).toBe('25/09');
     expect(r.prazo).toBe('Chega hoje (25/09)');
   });
 
-  it('a partir das 11h30 vai na coleta do dia seguinte', () => {
-    expect(calcularEntregaProgramada('06454-000', sexta('11:30'))!.prazo).toBe('Chega amanhã, sábado (26/09)');
+  it('a partir das 11h vai na coleta do dia seguinte', () => {
+    expect(calcularEntregaProgramada('06454-000', sexta('11:00'))!.prazo).toBe('Chega amanhã, sábado (26/09)');
     expect(ddmm(calcularEntregaProgramada('06454-000', sexta('12:50'))!.chegada)).toBe('26/09');
   });
 
@@ -117,8 +117,8 @@ describe('calcularEntregaProgramada (Pex)', () => {
   });
 
   it('usa o horário de São Paulo, não o do aparelho', () => {
-    // 14:00 UTC = 11:00 em São Paulo: ainda entra na coleta do dia.
-    expect(calcularEntregaProgramada('06454-000', new Date('2026-09-25T14:00:00Z'))!.prazo).toBe('Chega hoje (25/09)');
+    // 13:30 UTC = 10:30 em São Paulo: ainda entra na coleta do dia.
+    expect(calcularEntregaProgramada('06454-000', new Date('2026-09-25T13:30:00Z'))!.prazo).toBe('Chega hoje (25/09)');
     // 02:00 UTC de sábado = 23:00 de sexta em São Paulo.
     expect(ddmm(calcularEntregaProgramada('06454-000', new Date('2026-09-26T02:00:00Z'))!.coleta)).toBe('26/09');
   });
@@ -155,39 +155,52 @@ describe('calcularEntregaProgramada (Pex)', () => {
   });
 });
 
-describe('Pex além da região do motoboy', () => {
+describe('Pex além da região do motoboy (tabela completa)', () => {
   const sextaManha = new Date('2026-09-25T10:00:00-03:00');
 
-  it('capital de SP, todas as zonas: R$ 15 e chega no mesmo dia', () => {
+  it('capital, zonas D+0: R$ 15 e chega no mesmo dia', () => {
     for (const cep of ['01310-100', '02012-000', '03163-000', '04538-133', '05402-000', '08230-030']) {
       const r = calcularEntregaProgramada(cep, sextaManha)!;
-      expect(r.regiao).toBe('São Paulo (capital)');
+      expect(r.regiao).toMatch(/^São Paulo/);
       expect(r.valor).toBe(15);
       expect(r.prazo).toBe('Chega hoje (25/09)');
     }
+  });
+
+  it('capital, zonas de risco (D+1): R$ 20 e chega no dia seguinte', () => {
+    for (const cep of ['04450-000', '04820-000', '04910-000', '05850-000']) {
+      const r = calcularEntregaProgramada(cep, sextaManha)!;
+      expect(r.valor).toBe(20);
+      expect(r.prazo).toBe('Chega amanhã, sábado (26/09)');
+    }
+    // Perus é D+1 a R$ 15, e vence a sobreposição com Jaraguá.
+    expect(calcularEntregaProgramada('05190-000', sextaManha)!.regiao).toBe('São Paulo · Perus');
   });
 
   it('a capital não tem motoboy: o frete do motoboy segue a combinar', () => {
     expect(calcularFrete('04538-133').valor).toBe(0);
   });
 
-  it('a região do motoboy continua com a tabela antiga', () => {
-    expect(calcularEntregaProgramada('06454-000', sextaManha)!.regiao).toBe('Barueri');
-    expect(calcularEntregaProgramada('06650-000', sextaManha)!.regiao).toBe('Itapevi');
-  });
-
-  it('resto da Grande SP chega no dia seguinte', () => {
-    for (const cep of ['06760-000', '07010-000', '09010-000', '08700-000']) {
+  it('Grande SP pela tabela: mesmo dia', () => {
+    for (const [cep, regiao] of [['06760-000', 'Taboão da Serra'], ['07010-000', 'Guarulhos'], ['09010-000', 'Santo André'], ['08780-000', 'Mogi das Cruzes']]) {
       const r = calcularEntregaProgramada(cep, sextaManha)!;
-      expect(r.regiao).toBe('Grande São Paulo');
-      expect(r.prazo).toBe('Chega amanhã, sábado (26/09)');
+      expect(r.regiao).toBe(regiao);
+      expect(r.prazo).toBe('Chega hoje (25/09)');
     }
   });
 
-  it('Campinas, Valinhos e Vinhedo em 2 dias; resto do interior fora', () => {
-    expect(calcularEntregaProgramada('13010-000', sextaManha)!.prazo).toBe('Chega segunda-feira (28/09)');
-    expect(calcularEntregaProgramada('13280-000', sextaManha)!.regiao).toBe('Vinhedo');
-    expect(calcularEntregaProgramada('14010-000', sextaManha)).toBeNull();
+  it('buracos da tabela ficam fora', () => {
+    for (const cep of ['06545-000', '07300-000', '09325-000', '13280-000']) {
+      expect(calcularEntregaProgramada(cep, sextaManha)).toBeNull();
+    }
+  });
+
+  it('interior é D+2, R$ 20, e não entrega sábado', () => {
+    const r = calcularEntregaProgramada('13010-000', sextaManha)!;
+    expect(r.valor).toBe(20);
+    // Coleta sex. 25/09 → pula sábado e domingo → seg. 28 (D+1) → ter. 29 (D+2).
+    expect(r.prazo).toBe('Chega terça-feira (29/09)');
+    expect(calcularEntregaProgramada('13183-500', sextaManha)!.regiao).toBe('Hortolândia');
   });
 });
 

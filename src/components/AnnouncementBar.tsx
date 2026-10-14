@@ -5,7 +5,7 @@ import styles from './AnnouncementBar.module.css';
 
 const ITEMS = [
   `Pediu até ${PEX_CORTE_TEXTO}, chega hoje na capital e na região`,
-  'Entrega R$ 15 na capital e Grande SP · grátis acima de R$ 200',
+  'Entrega desde R$ 15 na capital e Grande SP · grátis acima de R$ 200',
   'Atendimento via WhatsApp',
   'Headshop · Charutaria · Arguile · Lifestyle',
   'Alphaville · Barueri · SP · +10 anos no mercado',
