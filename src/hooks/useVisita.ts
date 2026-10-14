@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { guardarGeo } from '../lib/interesse';
 
 /** Classifica o aparelho a partir do user agent, para o painel saber se o
  *  público chega pelo celular ou pelo computador. */
@@ -56,6 +57,7 @@ export function useVisita() {
       let cidade: string | null = null;
       let estado: string | null = null;
       let pais: string | null = null;
+      let cep: string | null = null;
 
       try {
         const res = await fetch('https://ipapi.co/json/');
@@ -64,8 +66,12 @@ export function useVisita() {
           cidade = d.city ?? null;
           estado = d.region ?? null;
           pais = d.country_name ?? null;
+          // CEP aproximado do IP: não é o endereço da pessoa, mas o prefixo
+          // separa as zonas da capital no painel.
+          cep = typeof d.postal === 'string' ? d.postal.slice(0, 12) : null;
         }
       } catch { /* geo lookup is optional */ }
+      guardarGeo({ cidade, estado, cep });
 
       try {
         await supabase.from('visitas_site').insert({
@@ -75,6 +81,7 @@ export function useVisita() {
           cidade,
           estado,
           pais,
+          cep,
           dispositivo,
           origem,
         });
