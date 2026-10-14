@@ -7,6 +7,7 @@ import { useSubcategoriasOcultas } from '../hooks/useSubcategoriasOcultas';
 import { useProducts } from '../hooks/useProducts';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
 import { registrarInteresse } from '../lib/interesse';
+import { EVENTO_BUSCAR } from '../lib/busca';
 import type { Produto, Variacao } from '../types';
 import ProductCard from './ProductCard';
 import VariacoesModal from './VariacoesModal';
@@ -76,6 +77,9 @@ export default function ProductGrid({
   const cameFromUrl = useRef(initialSubcat !== null);
   const isFirstCatChange = useRef(true);
   const subcatOriginCatRef = useRef<number | null>(null);
+  // Busca vinda da home: se a vitrine estava numa categoria, a troca para
+  // "Todos" dispara o reset abaixo, que tem que usar este termo, não ''.
+  const buscaPendenteRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Record which category the URL subcat belongs to (once categoryId resolves)
@@ -88,8 +92,10 @@ export default function ProductGrid({
       return;
     }
     setPage(0);
-    setSearchInput('');
-    setSearch('');
+    const pendente = buscaPendenteRef.current ?? '';
+    buscaPendenteRef.current = null;
+    setSearchInput(pendente);
+    setSearch(pendente);
     setVerTodasSubcats(false);
     setActiveMarca(null);
     setVerTodasMarcas(false);
@@ -100,6 +106,24 @@ export default function ProductGrid({
     cameFromUrl.current = false;
   }, [categoryId]);
   useEffect(() => { setPage(0); }, [search, activeSubcat, activeMarca]);
+
+  useEffect(() => {
+    function aoBuscar(e: Event) {
+      const termo = (e as CustomEvent<string>).detail;
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      setActiveSubcat(null);
+      setActiveMarca(null);
+      if (categoryId !== null) {
+        buscaPendenteRef.current = termo;
+        onCategoryChange(null);
+      } else {
+        setSearchInput(termo);
+        setSearch(termo);
+      }
+    }
+    window.addEventListener(EVENTO_BUSCAR, aoBuscar);
+    return () => window.removeEventListener(EVENTO_BUSCAR, aoBuscar);
+  }, [categoryId, onCategoryChange]);
   useEffect(() => {
     // Trocar de subcategoria muda o conjunto de marcas. Manter a marca
     // anterior deixaria o cliente numa lista vazia sem entender por quê.

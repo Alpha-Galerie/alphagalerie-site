@@ -225,6 +225,98 @@
   50% { box-shadow: 0 0 22px rgba(201, 169, 97, 0.28); }
 }
 
+/* ── Busca no topo ── */
+/* A fileira de atalhos rola na horizontal; sem min-width: 0 ela estica a
+   coluna do grid e empurra a busca para fora da tela no celular. */
+.copy { min-width: 0; }
+
+.busca {
+  min-width: 0;
+  max-width: 580px;
+  margin: 0 0 32px;
+}
+
+.buscaLabel {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c9a961;
+  margin-bottom: 12px;
+}
+
+.buscaCampo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(10, 10, 10, 0.85);
+  border: 1px solid rgba(201, 169, 97, 0.55);
+  padding: 6px 6px 6px 16px;
+  color: #c9a961;
+}
+
+.buscaCampo:focus-within {
+  border-color: #c9a961;
+  box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.18);
+}
+
+.buscaCampo input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f4f4f4;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  padding: 12px 0;
+}
+
+.buscaCampo input::placeholder { color: rgba(244, 244, 244, 0.45); }
+
+.buscaCampo button {
+  background: #c9a961;
+  color: #000;
+  border: none;
+  padding: 12px 18px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.atalhos {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.atalhos::-webkit-scrollbar { display: none; }
+
+.atalhos button {
+  flex-shrink: 0;
+  background: rgba(10, 10, 10, 0.6);
+  border: 1px solid rgba(244, 244, 244, 0.18);
+  color: #f4f4f4;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.atalhos button:hover,
+.atalhos button:focus-visible {
+  border-color: #c9a961;
+  color: #c9a961;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cashbackTag { animation: none; }
 }
@@ -351,7 +443,8 @@
     margin-bottom: 20px;
     line-height: 1.05;
   }
-  .lead { font-size: 16px; margin-bottom: 32px; }
+  .lead { display: none; }
+  .busca { margin-bottom: 24px; }
   .eyebrow { font-size: 10px; margin-bottom: 24px; }
   .cta {
     width: 100%;

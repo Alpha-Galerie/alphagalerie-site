@@ -1,14 +1,127 @@
-import type { FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
+import { Link } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { EVENTO_BUSCOU } from '../lib/interesse';
+import { getPrecoInfo } from '../lib/preco';
+import { formatCurrency } from '../lib/format';
+import { buildProductPath } from '../lib/productPath';
+import type { Produto } from '../types';
 import styles from './FloatingWhatsApp.module.css';
 
 const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
-const WA_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20Alpha%20Galerie.`;
+
+function linkWhatsApp(texto: string): string {
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(texto)}`;
+}
+
+const TEXTO_PADRAO = 'Olá! Vim pelo site da Alpha Galerie.';
+
+// Depois de uma busca, o balão espera um pouco: a pessoa ainda está olhando
+// o resultado. Aparece no máximo duas vezes por visita, uma por termo.
+const ESPERA_MS = 3500;
+const MAX_POR_VISITA = 2;
+const CHAVE_VISTOS = 'ag_assistente';
+
+type Oferta = Pick<Produto, 'id' | 'nome' | 'preco' | 'preco_pix' | 'preco_promocional' | 'imagem_url'>;
+
+function lerVistos(): string[] {
+  try { return JSON.parse(sessionStorage.getItem(CHAVE_VISTOS) ?? '[]'); } catch { return []; }
+}
+
+function marcarVisto(termo: string) {
+  try { sessionStorage.setItem(CHAVE_VISTOS, JSON.stringify([...lerVistos(), termo])); } catch { /* sem storage */ }
+}
+
+/** Os produtos em promoção primeiro; sem promoção, os em destaque. Só o
+ *  que tem estoque: oferecer o que não dá para comprar frustra. */
+async function buscarOfertas(termo: string): Promise<Oferta[]> {
+  // Vírgula e parênteses quebram o filtro `or` do PostgREST.
+  const t = termo.replace(/[^\p{L}\p{N} ]/gu, ' ').trim();
+  if (t.length < 2) return [];
+  const { data } = await supabase
+    .from('produtos')
+    .select('id,nome,preco,preco_pix,preco_promocional,imagem_url')
+    .eq('ativo', true)
+    .gt('estoque', 0)
+    .or(`nome.ilike.%${t}%,subcategoria.ilike.%${t}%,marca.ilike.%${t}%`)
+    .order('preco_promocional', { ascending: true, nullsFirst: false })
+    .order('destaque', { ascending: false })
+    .limit(3);
+  return (data ?? []) as Oferta[];
+}
 
 const FloatingWhatsApp: FC = () => {
+  const [termo, setTermo] = useState<string | null>(null);
+  const [ofertas, setOfertas] = useState<Oferta[]>([]);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    function aoBuscar(e: Event) {
+      const t = (e as CustomEvent<string>).detail.trim().toLowerCase();
+      const vistos = lerVistos();
+      if (vistos.length >= MAX_POR_VISITA || vistos.includes(t)) return;
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(async () => {
+        const encontradas = await buscarOfertas(t);
+        if (!encontradas.length) return;
+        marcarVisto(t);
+        setOfertas(encontradas);
+        setTermo(t);
+      }, ESPERA_MS);
+    }
+    window.addEventListener(EVENTO_BUSCOU, aoBuscar);
+    return () => {
+      window.removeEventListener(EVENTO_BUSCOU, aoBuscar);
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
+
+  const fechar = () => setTermo(null);
+  const textoWhats = termo
+    ? `Olá! Estou procurando ${termo} no site da Alpha Galerie. Pode me ajudar a fechar o pedido?`
+    : TEXTO_PADRAO;
+
   return (
     <div className={styles.wrapper}>
+      {termo && (
+        <div className={styles.balao} role="dialog" aria-labelledby="assistente-titulo">
+          <button type="button" className={styles.fechar} onClick={fechar} aria-label="Fechar">×</button>
+          <p className={styles.balaoTitulo} id="assistente-titulo">
+            Procurando <em>{termo}</em>?
+          </p>
+          <p className={styles.balaoTexto}>Separei as ofertas. Quer ajuda para fechar o pedido?</p>
+          <ul className={styles.ofertas}>
+            {ofertas.map((o) => {
+              const p = getPrecoInfo(o);
+              return (
+                <li key={o.id}>
+                  <Link to={buildProductPath(o)} className={styles.oferta} onClick={fechar}>
+                    {o.imagem_url
+                      ? <img src={o.imagem_url} alt="" loading="lazy" />
+                      : <span className={styles.semFoto} aria-hidden="true" />}
+                    <span className={styles.ofertaNome}>{o.nome}</span>
+                    <span className={styles.ofertaPreco}>
+                      {p.desconto > 0 && <small>-{p.desconto}%</small>}
+                      {formatCurrency(p.precoFinal)}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+          <a
+            className={styles.balaoBotao}
+            href={linkWhatsApp(textoWhats)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={fechar}
+          >
+            Falar no WhatsApp
+          </a>
+        </div>
+      )}
       <a
-        href={WA_URL}
+        href={linkWhatsApp(textoWhats)}
         target="_blank"
         rel="noopener noreferrer"
         className={styles.link}

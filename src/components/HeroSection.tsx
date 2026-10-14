@@ -1,6 +1,8 @@
 import heroArte from '../assets/banner-raw.jpg';
 import { useClubeRegras } from '../hooks/useClube';
 import { percentualDeVolta } from '../lib/clube';
+import { useState } from 'react';
+import { buscarNaVitrine } from '../lib/busca';
 import { PEX_CORTE_TEXTO } from '../lib/frete';
 import styles from './HeroSection.module.css';
 
@@ -10,8 +12,24 @@ const WA_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Tenho%20uma%20
 // Entrega Programada (Pex): desde R$ 15 na capital e Grande SP, grátis acima de R$ 200.
 const PONTOS = ['Capital e Grande SP · desde R$ 15', 'Grátis acima de R$ 200', 'Campinas e região em 2 dias'];
 
+// O que mais se busca no site. Um toque já busca na vitrine.
+const ATALHOS = [
+  { rotulo: 'Tabaco', termo: 'tabaco' },
+  { rotulo: 'Seda', termo: 'seda' },
+  { rotulo: 'Piteira', termo: 'piteira' },
+  { rotulo: 'Essência', termo: 'essencia' },
+  { rotulo: 'Isqueiro', termo: 'isqueiro' },
+  { rotulo: 'Kits', termo: 'kit' },
+];
+
 export default function HeroSection() {
   const clube = useClubeRegras();
+  const [termo, setTermo] = useState('');
+
+  function buscar(e: React.FormEvent) {
+    e.preventDefault();
+    buscarNaVitrine(termo);
+  }
 
   return (
     <section className={styles.hero} aria-label="Bem-vindo à Alpha Galerie">
@@ -35,6 +53,33 @@ export default function HeroSection() {
             <br />
             de Alphaville.
           </h1>
+
+          {/* Quem chega sabendo o que quer não precisa rolar a vitrine. */}
+          <form className={styles.busca} role="search" onSubmit={buscar}>
+            <label htmlFor="hero-busca" className={styles.buscaLabel}>O que você procura?</label>
+            <div className={styles.buscaCampo}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                id="hero-busca"
+                type="search"
+                enterKeyHint="search"
+                value={termo}
+                onChange={(e) => setTermo(e.target.value)}
+                placeholder="Tabaco, seda, essência…"
+                autoComplete="off"
+              />
+              <button type="submit">Buscar</button>
+            </div>
+            <div className={styles.atalhos}>
+              {ATALHOS.map((a) => (
+                <button key={a.termo} type="button" onClick={() => buscarNaVitrine(a.termo)}>
+                  {a.rotulo}
+                </button>
+              ))}
+            </div>
+          </form>
 
           <p className={styles.lead}>
             Headshop, charutaria, arguile e lifestyle reunidos numa curadoria

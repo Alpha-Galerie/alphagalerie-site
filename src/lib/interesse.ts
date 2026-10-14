@@ -54,10 +54,18 @@ function lerGeo(): GeoVisita {
   return { cidade: null, estado: null, cep: null };
 }
 
+/** Busca com resultado, avisada ao assistente do WhatsApp para oferecer
+ *  ajuda e as ofertas daquele tipo de produto. */
+export const EVENTO_BUSCOU = 'ag:buscou';
+
 export function registrarInteresse(i: Interesse) {
   const termo = i.termo?.trim().slice(0, 80) || null;
   if (i.tipo !== 'produto' && (!termo || termo.length < 2)) return;
   if (i.tipo === 'produto' && !i.produto_id) return;
+
+  if (i.tipo === 'busca' && termo && (i.resultados ?? 0) > 0) {
+    window.dispatchEvent(new CustomEvent<string>(EVENTO_BUSCOU, { detail: termo }));
+  }
 
   // A mesma coisa vista duas vezes na mesma visita conta uma só: voltar
   // para a categoria ou reabrir o produto não é interesse novo.
