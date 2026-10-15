@@ -116,12 +116,12 @@
 
 .heroFundo {
   position: absolute;
-  right: -2%;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 0;
+  bottom: 2%;
   font-family: var(--display);
-  font-size: clamp(220px, 34vw, 520px);
+  font-size: clamp(110px, 17vw, 280px);
   line-height: 0.8;
+  text-transform: uppercase;
   color: transparent;
   -webkit-text-stroke: 1px rgba(201, 169, 97, 0.18);
   z-index: -1;
@@ -487,6 +487,15 @@
   flex: 1;
 }
 
+.kitLinha {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(10, 10, 10, 0.6);
+  margin-bottom: 4px;
+}
+
 .kitNome {
   font-family: var(--display);
   font-weight: 400;
@@ -546,6 +555,34 @@
   transition: transform 0.2s ease;
 }
 
+.kitBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.comoCompra {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 24px;
+  margin-top: 24px;
+  font-size: 15px;
+  color: rgba(244, 244, 244, 0.75);
+}
+
+.comoCompra b {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold);
+  color: var(--tinta);
+  font-size: 13px;
+  margin-right: 8px;
+}
+
 .kitBtn:hover {
   transform: scale(1.02);
 }
@@ -602,7 +639,8 @@
   }
 
   .heroFundo {
-    top: 22%;
+    bottom: auto;
+    top: 26%;
     right: -8%;
   }
 

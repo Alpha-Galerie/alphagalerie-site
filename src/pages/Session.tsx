@@ -4,70 +4,69 @@ import Header from '../components/Header';
 import CartDrawer from '../components/CartDrawer';
 import AddedToCartToast from '../components/AddedToCartToast';
 import Footer from '../components/Footer';
-import { useZipKits } from '../hooks/useKits';
-import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
+import CompraRapida, { type KitCompraRapida } from '../components/CompraRapida';
+import { useSessionKits } from '../hooks/useKits';
 import { useVisita } from '../hooks/useVisita';
 import { getPrecoInfo } from '../lib/preco';
 import { entregaAgora, NOTURNA_ACRESCIMO, PEX_CORTE_TEXTO, ROTA_CORTE_TEXTO, ROTA_SAIDA_HORA, ROTA_VALOR } from '../lib/frete';
-import type { Produto } from '../types';
-import styles from './ZipAlpha.module.css';
+import styles from './Session.module.css';
 
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
 
-function linkWhatsApp(texto: string): string {
-  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(texto)}`;
-}
+/** Nome da linha. Trocar aqui troca na página toda. */
+const LINHA = 'Session';
 
 function brl(valor: number): string {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 /**
- * Os kits da campanha. O preço e o botão de carrinho vêm do produto cadastrado
- * (nome igual a `produto`); sem ele ligado no banco, o pedido vai pelo WhatsApp
- * com o preço de lançamento daqui.
+ * As edições da linha. Preço vem do produto cadastrado (nome igual a
+ * `produto`); sem ele no banco, vale o preço de lançamento daqui.
  */
-const KITS = [
+const EDICOES = [
   {
-    produto: 'ZIP ALPHA DUO PAY-PAY',
-    nome: 'Duo',
+    produto: 'SESSION 01 LIMA',
+    numero: 'Nº01',
+    cor: 'Lima',
     frase: 'O básico que salva a noite.',
     itens: ['2 sedas Pay-Pay Go Green', 'Tesoura dobrável de brinde'],
-    foto: 'zip-duo',
+    foto: 'session-01',
     tema: styles.temaLima,
     preco: 21.9,
     cheio: 26,
   },
   {
-    produto: 'ZIP ALPHA ESSENCIAL',
-    nome: 'Essencial',
+    produto: 'SESSION 02 KRAFT',
+    numero: 'Nº02',
+    cor: 'Kraft',
     frase: 'Duas sedas, uma piteira, zero perrengue.',
     itens: ['Seda Alpha Hemp', 'Seda Mascotte Slim', 'Piteira Papelito Mega Longa'],
-    foto: 'zip-essencial',
+    foto: 'session-02',
     tema: styles.temaKraft,
     preco: 33.9,
     cheio: 41,
   },
   {
-    produto: 'ZIP ALPHA PRONTO',
-    nome: 'Pronto',
-    frase: 'Tem até o fogo. É só abrir.',
+    produto: 'SESSION 03 CEU',
+    numero: 'Nº03',
+    cor: 'Céu',
+    frase: 'Completo. Tem até o fogo.',
     itens: ['Seda Alpha Hemp', 'Seda King Size Slim', 'Piteira Nowdays', 'Isqueiro BIC'],
-    foto: 'zip-pronto',
+    foto: 'session-03',
     tema: styles.temaCeu,
     preco: 46.9,
     cheio: 55.9,
   },
 ];
 
-const FAIXA = ['Seda', 'Piteira', 'Isqueiro', 'Zip de brinde', 'Chega hoje', 'Até de madrugada'];
+const FAIXA = ['Kits exclusivos', 'Seda', 'Piteira', 'Isqueiro', 'Embalagem exclusiva', 'Paga no Pix', 'Chega hoje', 'Até de madrugada'];
 
 function Foto({ nome, alt, eager = false, className }: { nome: string; alt: string; eager?: boolean; className?: string }) {
   return (
     <img
-      src={`/kits/zip/${nome}.webp`}
-      srcSet={`/kits/zip/${nome}-sm.webp 640w, /kits/zip/${nome}.webp 1200w`}
+      src={`/kits/session/${nome}.webp`}
+      srcSet={`/kits/session/${nome}-sm.webp 640w, /kits/session/${nome}.webp 1200w`}
       sizes="(max-width: 860px) 92vw, 50vw"
       alt={alt}
       className={className}
@@ -126,12 +125,16 @@ function DaTempo() {
   );
 }
 
-/** Página da campanha do Zip Alpha: alphagalerie.com/zip (o QR code do saquinho aponta pra cá). */
-export default function ZipAlpha() {
+/**
+ * Página da linha Session, os kits exclusivos da Alpha Galerie para o rolê:
+ * alphagalerie.com/session (e /zip, para onde aponta o QR code da embalagem).
+ * A compra é rápida: "Quero essa" abre o Pix e o pedido vai pelo WhatsApp.
+ */
+export default function Session() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const { data: cadastrados = [] } = useZipKits();
-  const { adicionar } = useCarrinhoActions();
+  const [comprando, setComprando] = useState<KitCompraRapida | null>(null);
+  const { data: cadastrados = [] } = useSessionKits();
   const heroRef = useRef<HTMLElement>(null);
   const barraRef = useRef<HTMLAnchorElement>(null);
 
@@ -140,7 +143,7 @@ export default function ZipAlpha() {
 
   useEffect(() => {
     const anterior = document.title;
-    document.title = 'Zip Alpha — acabou a seda? Chama a Alpha. | ALPHA GALERIE';
+    document.title = `${LINHA} by Alpha Galerie · kits exclusivos pro rolê`;
     // Fonte de pôster só nesta página, para o resto do site não pagar o peso.
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -152,8 +155,8 @@ export default function ZipAlpha() {
     };
   }, []);
 
-  // O zip do hero gira e sobe de leve com a rolagem (só transform: não pesa),
-  // e a barra "Quero meu Zip" do celular só aparece depois do hero.
+  // O kit do hero gira e sobe de leve com a rolagem (só transform: não pesa),
+  // e a barra de compra do celular só aparece depois do hero.
   useEffect(() => {
     const animar = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let raf = 0;
@@ -172,9 +175,15 @@ export default function ZipAlpha() {
     };
   }, []);
 
-  function produtoDo(nome: string): Produto | undefined {
-    return cadastrados.find((p) => p.nome.toUpperCase() === nome);
-  }
+  const edicoes = EDICOES.map((e) => {
+    const produto = cadastrados.find((p) => p.nome.toUpperCase() === e.produto);
+    return {
+      ...e,
+      preco: produto ? getPrecoInfo(produto).precoFinal : e.preco,
+      cheio: produto ? Number(produto.preco) : e.cheio,
+      esgotado: produto ? (produto.estoque ?? 0) <= 0 : false,
+    };
+  });
 
   return (
     <div className={styles.page}>
@@ -183,23 +192,24 @@ export default function ZipAlpha() {
       <main id="main-content">
         {/* 1. Hero */}
         <section className={styles.hero} ref={heroRef}>
-          <span className={styles.heroFundo} aria-hidden="true">ZIP</span>
+          <span className={styles.heroFundo} aria-hidden="true">{LINHA}</span>
           <div className={styles.heroTexto}>
-            <p className={styles.selo}>Novo · só na Alpha</p>
+            <p className={styles.selo}>Nova linha · {LINHA}</p>
             <h1 className={styles.heroTitulo}>
               Acabou a seda?
               <span>Chama a Alpha.</span>
             </h1>
             <p className={styles.heroLead}>
-              Tudo pro rolê num zip com a nossa marca. Você pede, a gente leva. E o zip fica com você.
+              {LINHA} é a nossa linha de kits exclusivos pro rolê. Tudo montado, fechado numa embalagem exclusiva e
+              entregue onde você estiver. Paga no Pix, chega hoje.
             </p>
             <div className={styles.ctas}>
-              <a href="#kits" className={styles.btn}>Quero meu Zip</a>
+              <a href="#edicoes" className={styles.btn}>Ver as edições</a>
               <a href="#da-tempo" className={styles.btnGhost}>Dá tempo de chegar?</a>
             </div>
           </div>
           <div className={styles.heroProduto}>
-            <Foto nome="zip-pronto" alt="Zip Alpha Pronto: duas sedas, piteira Nowdays e isqueiro BIC num zip transparente" eager className={styles.heroFoto} />
+            <Foto nome="session-03" alt={`${LINHA} Nº03 Céu: duas sedas, piteira Nowdays e isqueiro BIC na embalagem exclusiva`} eager className={styles.heroFoto} />
           </div>
         </section>
 
@@ -222,43 +232,93 @@ export default function ZipAlpha() {
         {/* 4. O que vem */}
         <section className={styles.dentro}>
           <div data-reveal className={`${styles.reveal} ${styles.dentroFoto}`}>
-            <Foto nome="zip-essencial" alt="Zip Alpha Essencial aberto: seda Alpha Hemp, seda Mascotte e piteira Papelito" />
+            <Foto nome="session-02" alt={`${LINHA} Nº02 Kraft: seda Alpha Hemp, seda Mascotte e piteira Papelito`} />
           </div>
           <div className={styles.dentroTexto}>
-            <p className={styles.selo}>O que vem no zip</p>
+            <p className={styles.selo}>Kit exclusivo</p>
             <h2 className={styles.h2}>Não é um kit.<br />É o rolê resolvido.</h2>
             <ul className={styles.chips}>
               <li>Seda</li>
               <li>Piteira</li>
               <li>Isqueiro</li>
-              <li>Zip reutilizável</li>
+              <li>Embalagem exclusiva</li>
             </ul>
             <p className={styles.texto}>
-              A gente escolhe o que combina, monta, fecha no zip e manda. Sai mais em conta do que comprar cada item
-              separado, e ninguém mais no Brasil entrega assim.
+              Cada edição é montada por quem entende: as sedas certas, a piteira que combina, e o que mais o rolê pedir.
+              Sai mais em conta do que comprar cada item separado.
             </p>
           </div>
         </section>
 
-        {/* 5. O zip é seu */}
+        {/* 5. Embalagem */}
         <section className={styles.seu}>
           <div className={styles.seuTexto} data-reveal>
-            <p className={styles.seloEscuro}>O zip é seu</p>
+            <p className={styles.seloEscuro}>Embalagem exclusiva</p>
             <h2 className={styles.seuTitulo}>Guarde<br />o rolê.</h2>
-            <p>Acabou o kit? O zip continua. Ele é transparente, resistente e vai com você pra todo lado.</p>
+            <p>
+              Toda {LINHA} vem numa embalagem transparente com a marca Alpha Galerie. O kit acaba, ela continua com você.
+            </p>
             <ul className={styles.usos}>
-              <li><strong>01</strong> O kit da próxima</li>
+              <li><strong>01</strong> A próxima edição</li>
               <li><strong>02</strong> A chave e o fone</li>
               <li><strong>03</strong> O ingresso do show</li>
               <li><strong>04</strong> As lembranças da noite</li>
             </ul>
           </div>
           <div className={styles.seuFoto} data-reveal>
-            <Foto nome="zip-duo" alt="Zip Alpha Duo: duas sedas Pay-Pay e tesoura dobrável" />
+            <Foto nome="session-01" alt={`${LINHA} Nº01 Lima: duas sedas Pay-Pay e tesoura dobrável`} />
           </div>
         </section>
 
-        {/* 6. Dá tempo de chegar? */}
+        {/* 6. Edições */}
+        <section id="edicoes" className={styles.kits}>
+          <div className={styles.kitsTopo}>
+            <p className={styles.selo}>As edições</p>
+            <h2 className={styles.h2}>Escolhe a sua<br />{LINHA}.</h2>
+            <ol className={styles.comoCompra}>
+              <li><b>1</b> Escolhe</li>
+              <li><b>2</b> Paga no Pix</li>
+              <li><b>3</b> Manda o endereço no WhatsApp</li>
+            </ol>
+          </div>
+          <div className={styles.kitsTrilho}>
+            {edicoes.map((k) => (
+              <article key={k.produto} className={`${styles.kit} ${k.tema}`}>
+                <div className={styles.kitFoto}>
+                  <Foto nome={k.foto} alt={`${LINHA} ${k.numero} ${k.cor}`} />
+                </div>
+                <div className={styles.kitInfo}>
+                  <p className={styles.kitLinha}>{LINHA} {k.numero}</p>
+                  <h3 className={styles.kitNome}>{k.cor}</h3>
+                  <p className={styles.kitFrase}>{k.frase}</p>
+                  <ul className={styles.kitItens}>
+                    {k.itens.map((i) => <li key={i}>{i}</li>)}
+                    <li>Acompanha embalagem exclusiva</li>
+                  </ul>
+                  <p className={styles.kitPreco}>
+                    {k.cheio > k.preco && <s>{brl(k.cheio)}</s>}
+                    <strong>{brl(k.preco)}</strong>
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.kitBtn}
+                    disabled={k.esgotado}
+                    onClick={() => setComprando({
+                      nome: `${LINHA} ${k.numero} ${k.cor}`,
+                      itens: k.itens,
+                      foto: `/kits/session/${k.foto}-sm.webp`,
+                      preco: k.preco,
+                    })}
+                  >
+                    {k.esgotado ? 'Esgotada' : 'Quero essa'}
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* 7. Dá tempo de chegar? */}
         <section id="da-tempo" className={styles.tempo}>
           <h2 className={styles.h2}>Dá tempo<br />de chegar?</h2>
           <DaTempo />
@@ -270,62 +330,23 @@ export default function ZipAlpha() {
           </ol>
         </section>
 
-        {/* 7. Kits */}
-        <section id="kits" className={styles.kits}>
-          <div className={styles.kitsTopo}>
-            <p className={styles.selo}>Escolhe o seu</p>
-            <h2 className={styles.h2}>Três zips.<br />Um pra cada rolê.</h2>
-          </div>
-          <div className={styles.kitsTrilho}>
-            {KITS.map((k) => {
-              const produto = produtoDo(k.produto);
-              const preco = produto ? getPrecoInfo(produto).precoFinal : k.preco;
-              const cheio = produto ? Number(produto.preco) : k.cheio;
-              return (
-                <article key={k.produto} className={`${styles.kit} ${k.tema}`}>
-                  <div className={styles.kitFoto}>
-                    <Foto nome={k.foto} alt={`Zip Alpha ${k.nome}`} />
-                  </div>
-                  <div className={styles.kitInfo}>
-                    <h3 className={styles.kitNome}>Zip {k.nome}</h3>
-                    <p className={styles.kitFrase}>{k.frase}</p>
-                    <ul className={styles.kitItens}>
-                      {k.itens.map((i) => <li key={i}>{i}</li>)}
-                      <li>+ o zip, que fica com você</li>
-                    </ul>
-                    <p className={styles.kitPreco}>
-                      {cheio > preco && <s>{brl(cheio)}</s>}
-                      <strong>{brl(preco)}</strong>
-                    </p>
-                    {produto && (produto.estoque ?? 0) > 0 ? (
-                      <button type="button" className={styles.kitBtn} onClick={() => adicionar(produto)}>
-                        Quero esse
-                      </button>
-                    ) : (
-                      <a className={styles.kitBtn} href={linkWhatsApp(`Oi! Quero o Zip Alpha ${k.nome} 🔥`)} target="_blank" rel="noopener noreferrer">
-                        Quero esse
-                      </a>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
         {/* 8. Fechamento */}
         <section className={styles.final}>
           <h2 className={styles.finalTitulo} data-reveal>O rolê<br />não espera.</h2>
-          <a href="#kits" className={styles.btn}>Quero meu Zip</a>
+          <a href="#edicoes" className={styles.btn}>Escolher minha {LINHA}</a>
           <p className={styles.aviso}>
             Venda proibida para menores de 18 anos. <Link to="/">Ver a loja completa →</Link>
           </p>
         </section>
       </main>
 
-      <a href="#kits" ref={barraRef} className={styles.barraMobile}>Quero meu Zip · a partir de {brl(KITS[0].preco)}</a>
+      <a href="#edicoes" ref={barraRef} className={styles.barraMobile}>
+        Quero minha {LINHA} · a partir de {brl(Math.min(...edicoes.map((e) => e.preco)))}
+      </a>
 
       <Footer />
+
+      {comprando && <CompraRapida kit={comprando} onClose={() => setComprando(null)} />}
 
       <CartDrawer
         isOpen={cartOpen}

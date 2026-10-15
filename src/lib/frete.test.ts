@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularEntregaProgramada, calcularFrete, calcularMotoboyAgora, calcularRotaNoite, ehHorarioNoturno, entregaAgora, freteComBeneficio } from './frete';
+import { calcularEntregaProgramada, calcularFrete, calcularMotoboyAgora, calcularRotaNoite, ehHorarioNoturno, entregaAgora, entregaCompraRapida, freteComBeneficio } from './frete';
 
 describe('calcularFrete', () => {
   it('returns zero and empty label for empty CEP', () => {
@@ -291,5 +291,22 @@ describe('entregaAgora (página /zip)', () => {
     expect(entregaAgora(as('2026-10-15T20:00:00')).detalhe).toMatch(/^Motoboy/);
     expect(entregaAgora(as('2026-10-15T23:00:00')).detalhe).toMatch(/^Expressa noturna/);
     expect(entregaAgora(as('2026-10-16T03:00:00')).detalhe).toMatch(/^Expressa noturna/);
+  });
+});
+
+describe('entregaCompraRapida', () => {
+  const as = (iso: string) => new Date(`${iso}-03:00`);
+
+  it('até 18h30 vai na rota das 19h por R$ 20', () => {
+    expect(entregaCompraRapida(as('2026-10-15T15:00:00')).valor).toBe(20);
+  });
+
+  it('18h30 às 22h: motoboy R$ 30', () => {
+    expect(entregaCompraRapida(as('2026-10-15T19:00:00'))).toEqual({ valor: 30, label: 'Motoboy · sai na hora' });
+  });
+
+  it('depois das 22h e de madrugada: Expressa noturna R$ 45', () => {
+    expect(entregaCompraRapida(as('2026-10-15T23:30:00')).valor).toBe(45);
+    expect(entregaCompraRapida(as('2026-10-16T02:00:00')).valor).toBe(45);
   });
 });

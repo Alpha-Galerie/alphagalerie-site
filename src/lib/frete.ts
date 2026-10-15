@@ -365,3 +365,20 @@ export function entregaAgora(agora: Date = new Date()): EntregaAgora {
   }
   return { titulo: 'Sai agora', detalhe: 'Motoboy na hora · preço da sua região', faltam: null };
 }
+
+// ── Compra rápida (página da linha Session) ─────────────────────────────────
+// Quem compra pelo botão "Quero essa" paga kit + entrega num Pix só, antes de
+// dizer o endereço. Por isso a entrega sai pela hora, com o preço de
+// Alphaville / Barueri: rota das 19h até 18h30, motoboy até 22h e Expressa
+// noturna depois. Gênesis e outras regiões a loja acerta no WhatsApp.
+
+export function entregaCompraRapida(agora: Date = new Date()): FreteResult {
+  const { minutos } = agoraEmSaoPaulo(agora);
+  const motoboy = calcularMotoboyAgora('06454-600', '', agora);
+  if (!ehHorarioNoturno(agora) && minutos < ROTA_CORTE_MINUTOS) {
+    return { valor: ROTA_VALOR, label: `Rota das ${ROTA_SAIDA_HORA}h · chega hoje à noite` };
+  }
+  return ehHorarioNoturno(agora)
+    ? { valor: motoboy.valor, label: 'Expressa noturna · moto ou carro, na hora' }
+    : { valor: motoboy.valor, label: 'Motoboy · sai na hora' };
+}
