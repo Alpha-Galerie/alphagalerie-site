@@ -38,3 +38,9 @@ export function useKits() {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+/** Edições da linha Session: os Kits Exclusivos cujo nome começa com "SESSION ". */
+export function useSessionKits() {
+  const query = useKits();
+  return { ...query, data: (query.data ?? []).filter((k) => k.nome.toUpperCase().startsWith('SESSION ')) };
+}

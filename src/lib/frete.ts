@@ -268,3 +268,203 @@ export function calcularEntregaProgramada(cep: string, agora: Date = new Date())
       ` · chega ${DIAS_CURTOS[chegada.getUTCDay()]} ${ddmm(chegada)}`,
   };
 }
+
+// ── Rota das 19h (Lalamove) ─────────────────────────────────────────────────
+// Os pedidos de Alphaville e Barueri que entram até 18h30 saem juntos às 19h,
+// numa corrida só do Lalamove com várias paradas. Cotação da loja (out/2026):
+// 6 endereços saíram R$ 90 no regular e R$ 118 na prioridade, uns R$ 15 a 20
+// por cliente; com 4 ou mais pedidos na rota, R$ 20 paga a entrega.
+// Todos os dias. Depois das 18h30 a rota não aparece: fica o motoboy.
+// Gênesis / CENIC fica de fora (é longe lá dentro, o motoboy sai R$ 50) e os
+// bairros afastados de Santana também.
+
+export const ROTA_VALOR = 20;
+export const ROTA_SAIDA_HORA = 19;
+const ROTA_CORTE_MINUTOS = 18 * 60 + 30;
+export const ROTA_CORTE_TEXTO = '18h30';
+
+function naRegiaoDaRota(n: number, bairro: string): boolean {
+  if (n >= 6454700 && n <= 6454999) return false;
+  if (n >= 6400000 && n <= 6499999) return true;
+  return n >= 6500000 && n <= 6549999 && !SANTANA_AFASTADO.test(semAcento(bairro));
+}
+
+export interface RotaNoite extends FreteResult {
+  prazo: string;
+  observacao: string;
+}
+
+/** null = fora de Alphaville/Barueri ou já passou das 18h30. */
+export function calcularRotaNoite(cep: string, bairro = '', agora: Date = new Date()): RotaNoite | null {
+  const n = cepNumero(cep);
+  if (n === null || !naRegiaoDaRota(n, bairro)) return null;
+  const { dia, minutos } = agoraEmSaoPaulo(agora);
+  if (minutos >= ROTA_CORTE_MINUTOS) return null;
+  return {
+    valor: ROTA_VALOR,
+    label: `Hoje à noite · rota das ${ROTA_SAIDA_HORA}h`,
+    prazo: `Sai hoje às ${ROTA_SAIDA_HORA}h e chega à noite (${ddmm(dia)})`,
+    observacao: `Rota das ${ROTA_SAIDA_HORA}h (Lalamove) · sai ${DIAS_CURTOS[dia.getUTCDay()]} ${ddmm(dia)} ${ROTA_SAIDA_HORA}h`,
+  };
+}
+
+// ── Expressa noturna ────────────────────────────────────────────────────────
+// Até as 22h o motoboy custa o preço do Uber da região (calcularFrete). Depois
+// disso moto é difícil de achar e muitas vezes vai de carro: soma R$ 15.
+// Vale das 22h às 6h.
+
+export const NOTURNA_ACRESCIMO = 15;
+const NOTURNA_INICIO_MINUTOS = 22 * 60;
+const NOTURNA_FIM_MINUTOS = 6 * 60;
+
+export function ehHorarioNoturno(agora: Date = new Date()): boolean {
+  const { minutos } = agoraEmSaoPaulo(agora);
+  return minutos >= NOTURNA_INICIO_MINUTOS || minutos < NOTURNA_FIM_MINUTOS;
+}
+
+/** O motoboy da hora: depois das 22h vira a Expressa noturna, mais cara. */
+export function calcularMotoboyAgora(cep: string, bairro = '', agora: Date = new Date()): FreteResult {
+  const base = calcularFrete(cep, bairro);
+  if (base.valor === 0 || !ehHorarioNoturno(agora)) return base;
+  return {
+    valor: base.valor + NOTURNA_ACRESCIMO,
+    label: `Expressa noturna · ${base.label.replace(/^Motoboy · /, '')}`,
+  };
+}
+
+// ── "Dá tempo de chegar?" (página /zip) ─────────────────────────────────────
+// Qual entrega vale agora e quanto falta para o próximo corte.
+
+export interface EntregaAgora {
+  titulo: string;
+  detalhe: string;
+  /** Minutos até o corte desta entrega; null quando não tem corte. */
+  faltam: number | null;
+}
+
+export function entregaAgora(agora: Date = new Date()): EntregaAgora {
+  const { dia, minutos } = agoraEmSaoPaulo(agora);
+  // De madrugada quem pede quer agora: a Expressa vem antes da Programada.
+  if (ehHorarioNoturno(agora)) {
+    return { titulo: 'Sai agora', detalhe: 'Expressa noturna · moto ou carro, até de madrugada', faltam: null };
+  }
+  const corteProgramada = PEX_CORTE_HORA * 60 + PEX_CORTE_MINUTO;
+  if (temPex(dia) && minutos < corteProgramada) {
+    return {
+      titulo: 'Chega hoje',
+      detalhe: `Entrega Programada · Grande SP · R$ 15`,
+      faltam: corteProgramada - minutos,
+    };
+  }
+  if (minutos < ROTA_CORTE_MINUTOS) {
+    return {
+      titulo: `Sai hoje às ${ROTA_SAIDA_HORA}h`,
+      detalhe: `Rota das ${ROTA_SAIDA_HORA}h · Alphaville e Barueri · R$ ${ROTA_VALOR}`,
+      faltam: ROTA_CORTE_MINUTOS - minutos,
+    };
+  }
+  return { titulo: 'Sai agora', detalhe: 'Motoboy na hora · preço da sua região', faltam: null };
+}
+
+// ── Compra rápida (página da linha Session) ─────────────────────────────────
+// Quem compra pelo botão "Quero essa" paga kit + entrega num Pix só. A entrega
+// sai pela localização do celular (distância até a loja) ou, sem ela, pelo
+// CEP. Depois das 18h30 é corrida na hora, de moto ou de carro, com o preço
+// do Uber Flash: moto mais barata, carro para chuva ou pressa (à noite moto é
+// difícil de achar, então o carro vem recomendado).
+
+/** Centro Comercial Alphaville (aproximado: alguns metros não mudam o preço). */
+export const LOJA_COORDS = { lat: -23.5003, lng: -46.8487 };
+// Rua não é linha reta: a distância de carro dá uns 35% a mais que a reta.
+const FATOR_RUA = 1.35;
+// Mais longe que isso não vale corrida na hora: combina no WhatsApp.
+export const RAIO_MAX_KM = 30;
+// Até onde vale a rota das 19h pela localização (Alphaville e Barueri).
+const RAIO_ROTA_KM = 9;
+
+// Preço que a loja cobra, calibrado na tabela do motoboy (R$ 30 em Barueri,
+// R$ 45 depois das 22h): base + por km de rua, com mínimo, arredondado para
+// cima em R$ 5. Carro sai uns R$ 5 a 10 acima da moto.
+const TARIFA = {
+  moto: { base: 10, porKm: 2.0, minimo: 25 },
+  carro: { base: 14, porKm: 2.4, minimo: 30 },
+} as const;
+const CARRO_ACIMA_DA_TABELA = 10;
+
+export type Veiculo = 'moto' | 'carro';
+
+export function distanciaKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
+  const rad = (g: number) => (g * Math.PI) / 180;
+  const dLat = rad(b.lat - a.lat);
+  const dLng = rad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.sqrt(h));
+}
+
+function arredonda5(valor: number): number {
+  return Math.ceil(valor / 5) * 5;
+}
+
+/** Corrida na hora pela distância em linha reta. null = longe demais. */
+export function freteNaHora(distanciaRetaKm: number, veiculo: Veiculo, agora: Date = new Date()): number | null {
+  if (distanciaRetaKm > RAIO_MAX_KM) return null;
+  const t = TARIFA[veiculo];
+  const valor = arredonda5(Math.max(t.minimo, t.base + t.porKm * distanciaRetaKm * FATOR_RUA));
+  return ehHorarioNoturno(agora) ? valor + NOTURNA_ACRESCIMO : valor;
+}
+
+/** Corrida na hora pelo CEP (sem localização): tabela do motoboy. null = a combinar. */
+export function freteNaHoraPorCep(cep: string, bairro: string, veiculo: Veiculo, agora: Date = new Date()): number | null {
+  const moto = calcularMotoboyAgora(cep, bairro, agora).valor;
+  if (moto === 0) return null;
+  return veiculo === 'moto' ? moto : moto + CARRO_ACIMA_DA_TABELA;
+}
+
+export interface OpcaoEntrega {
+  id: 'rota' | Veiculo;
+  titulo: string;
+  detalhe: string;
+  valor: number;
+  recomendada?: boolean;
+}
+
+export type OndeEsta = { coords: { lat: number; lng: number } } | { cep: string; bairro?: string };
+
+/** As entregas que valem agora para quem está ali. Vazio = combinar no WhatsApp. */
+export function opcoesEntregaRapida(onde: OndeEsta, agora: Date = new Date()): OpcaoEntrega[] {
+  const noturna = ehHorarioNoturno(agora);
+  const { minutos } = agoraEmSaoPaulo(agora);
+  const opcoes: OpcaoEntrega[] = [];
+
+  let moto: number | null;
+  let carro: number | null;
+  let pertoDaLoja: boolean;
+  if ('coords' in onde) {
+    const km = distanciaKm(LOJA_COORDS, onde.coords);
+    moto = freteNaHora(km, 'moto', agora);
+    carro = freteNaHora(km, 'carro', agora);
+    pertoDaLoja = km <= RAIO_ROTA_KM;
+  } else {
+    const n = cepNumero(onde.cep);
+    moto = freteNaHoraPorCep(onde.cep, onde.bairro ?? '', 'moto', agora);
+    carro = freteNaHoraPorCep(onde.cep, onde.bairro ?? '', 'carro', agora);
+    pertoDaLoja = n !== null && naRegiaoDaRota(n, onde.bairro ?? '');
+  }
+
+  if (pertoDaLoja && !noturna && minutos < ROTA_CORTE_MINUTOS) {
+    opcoes.push({ id: 'rota', titulo: `Rota das ${ROTA_SAIDA_HORA}h`, detalhe: 'Junto com os outros pedidos · chega hoje à noite', valor: ROTA_VALOR });
+  }
+  if (moto !== null) {
+    opcoes.push({ id: 'moto', titulo: 'Moto agora', detalhe: noturna ? 'Mais em conta, mas à noite pode demorar a achar' : 'Sai na hora · mais em conta', valor: moto });
+  }
+  if (carro !== null) {
+    opcoes.push({
+      id: 'carro',
+      titulo: 'Carro agora',
+      detalhe: noturna ? 'À noite carro sempre tem, com chuva também' : 'Pra chuva ou pressa: carro sempre tem',
+      valor: carro,
+      recomendada: noturna,
+    });
+  }
+  return opcoes;
+}

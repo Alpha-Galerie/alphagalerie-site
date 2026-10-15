@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularEntregaProgramada, calcularFrete, freteComBeneficio } from './frete';
+import { calcularEntregaProgramada, calcularFrete, calcularMotoboyAgora, calcularRotaNoite, distanciaKm, ehHorarioNoturno, entregaAgora, freteComBeneficio, freteNaHora, freteNaHoraPorCep, LOJA_COORDS, opcoesEntregaRapida } from './frete';
 
 describe('calcularFrete', () => {
   it('returns zero and empty label for empty CEP', () => {
@@ -214,5 +214,134 @@ describe('freteComBeneficio', () => {
     expect(freteComBeneficio(15, 'programada', 200)).toBe(0);
     expect(freteComBeneficio(50, 'motoboy', 200)).toBe(25);
     expect(freteComBeneficio(35, 'motoboy', 320)).toBe(17.5);
+  });
+});
+
+describe('calcularRotaNoite (rota das 19h)', () => {
+  const as = (hora: string) => new Date(`2026-10-15T${hora}:00-03:00`);
+
+  it('Alphaville até 18h30: R$ 20, sai hoje às 19h', () => {
+    const r = calcularRotaNoite('06454-600', '', as('18:29'))!;
+    expect(r.valor).toBe(20);
+    expect(r.prazo).toBe('Sai hoje às 19h e chega à noite (15/10)');
+    expect(r.observacao).toBe('Rota das 19h (Lalamove) · sai qui. 15/10 19h');
+  });
+
+  it('fecha às 18h30', () => {
+    expect(calcularRotaNoite('06454-600', '', as('18:30'))).toBeNull();
+  });
+
+  it.each([
+    ['06541-005', 'Alphaville'],
+    ['06401-000', 'Centro'],
+  ])('atende %s (%s)', (cep, bairro) => {
+    expect(calcularRotaNoite(cep, bairro, as('10:00'))).not.toBeNull();
+  });
+
+  it.each([
+    ['06454-700', ''], // Gênesis / CENIC
+    ['06543-340', 'Paiol Velho'], // Santana afastado
+    ['06010-000', 'Centro'], // Osasco
+    ['01310-100', ''], // capital
+  ])('não atende %s (%s)', (cep, bairro) => {
+    expect(calcularRotaNoite(cep, bairro, as('10:00'))).toBeNull();
+  });
+});
+
+describe('Expressa noturna', () => {
+  const as = (hora: string) => new Date(`2026-10-15T${hora}:00-03:00`);
+
+  it('vale das 22h às 6h', () => {
+    expect(ehHorarioNoturno(as('21:59'))).toBe(false);
+    expect(ehHorarioNoturno(as('22:00'))).toBe(true);
+    expect(ehHorarioNoturno(as('03:00'))).toBe(true);
+    expect(ehHorarioNoturno(as('06:00'))).toBe(false);
+  });
+
+  it('até 22h é o motoboy normal', () => {
+    expect(calcularMotoboyAgora('06454-600', '', as('21:00'))).toEqual({ valor: 30, label: 'Motoboy · Região Barueri' });
+  });
+
+  it('depois das 22h soma R$ 15', () => {
+    expect(calcularMotoboyAgora('06454-600', '', as('23:00'))).toEqual({ valor: 45, label: 'Expressa noturna · Região Barueri' });
+    expect(calcularMotoboyAgora('06454-700', '', as('23:00')).valor).toBe(65);
+  });
+
+  it('frete a combinar segue a combinar', () => {
+    expect(calcularMotoboyAgora('80010-010', '', as('23:00')).valor).toBe(0);
+  });
+});
+
+describe('entregaAgora (página /zip)', () => {
+  const as = (iso: string) => new Date(`${iso}-03:00`);
+
+  it('quinta 10h: Programada, faltam 60 min', () => {
+    expect(entregaAgora(as('2026-10-15T10:00:00'))).toMatchObject({ titulo: 'Chega hoje', faltam: 60 });
+  });
+
+  it('quinta 17h: rota das 19h, faltam 90 min', () => {
+    expect(entregaAgora(as('2026-10-15T17:00:00'))).toMatchObject({ titulo: 'Sai hoje às 19h', faltam: 90 });
+  });
+
+  it('domingo 10h: sem Pex, vale a rota', () => {
+    expect(entregaAgora(as('2026-10-18T10:00:00')).titulo).toBe('Sai hoje às 19h');
+  });
+
+  it('20h motoboy, 23h e 3h Expressa noturna', () => {
+    expect(entregaAgora(as('2026-10-15T20:00:00')).detalhe).toMatch(/^Motoboy/);
+    expect(entregaAgora(as('2026-10-15T23:00:00')).detalhe).toMatch(/^Expressa noturna/);
+    expect(entregaAgora(as('2026-10-16T03:00:00')).detalhe).toMatch(/^Expressa noturna/);
+  });
+});
+
+describe('frete da compra rápida', () => {
+  const as = (iso: string) => new Date(`${iso}-03:00`);
+  const pertinho = { lat: -23.51, lng: -46.85 }; // ~1 km da loja
+  const santana = { lat: -23.4985, lng: -46.6255 }; // Zona Norte, ~23 km
+
+  it('distância em linha reta', () => {
+    expect(distanciaKm(LOJA_COORDS, santana)).toBeGreaterThan(20);
+    expect(distanciaKm(LOJA_COORDS, pertinho)).toBeLessThan(2);
+  });
+
+  it('perto da loja de dia: mínimo R$ 25 de moto e R$ 30 de carro', () => {
+    expect(freteNaHora(1, 'moto', as('2026-10-15T20:00:00'))).toBe(25);
+    expect(freteNaHora(1, 'carro', as('2026-10-15T20:00:00'))).toBe(30);
+  });
+
+  it('cresce com a distância e arredonda em R$ 5', () => {
+    // 23 km de reta = 31 km de rua: moto 10 + 2 × 31 = 72 → 75; carro 14 + 2,4 × 31 = 88,5 → 90
+    expect(freteNaHora(23, 'moto', as('2026-10-15T20:00:00'))).toBe(75);
+    expect(freteNaHora(23, 'carro', as('2026-10-15T20:00:00'))).toBe(90);
+  });
+
+  it('depois das 22h soma R$ 15; longe demais é a combinar', () => {
+    expect(freteNaHora(1, 'moto', as('2026-10-15T23:00:00'))).toBe(40);
+    expect(freteNaHora(31, 'moto', as('2026-10-15T20:00:00'))).toBeNull();
+  });
+
+  it('pelo CEP usa a tabela do motoboy; carro R$ 10 acima', () => {
+    expect(freteNaHoraPorCep('06454-600', '', 'moto', as('2026-10-15T20:00:00'))).toBe(30);
+    expect(freteNaHoraPorCep('06454-600', '', 'carro', as('2026-10-15T23:00:00'))).toBe(55);
+    expect(freteNaHoraPorCep('01310-100', '', 'moto', as('2026-10-15T20:00:00'))).toBeNull();
+  });
+
+  it('perto da loja até 18h30: rota das 19h, moto e carro', () => {
+    const ids = opcoesEntregaRapida({ coords: pertinho }, as('2026-10-15T15:00:00')).map((o) => o.id);
+    expect(ids).toEqual(['rota', 'moto', 'carro']);
+  });
+
+  it('à noite: só moto e carro, com o carro recomendado', () => {
+    const op = opcoesEntregaRapida({ coords: pertinho }, as('2026-10-15T23:30:00'));
+    expect(op.map((o) => [o.id, o.valor, o.recomendada ?? false])).toEqual([['moto', 40, false], ['carro', 45, true]]);
+  });
+
+  it('Zona Norte não tem rota, mas tem corrida na hora', () => {
+    const ids = opcoesEntregaRapida({ coords: santana }, as('2026-10-15T15:00:00')).map((o) => o.id);
+    expect(ids).toEqual(['moto', 'carro']);
+  });
+
+  it('CEP fora da área: nenhuma opção (combina no WhatsApp)', () => {
+    expect(opcoesEntregaRapida({ cep: '80010-010' }, as('2026-10-15T15:00:00'))).toEqual([]);
   });
 });
