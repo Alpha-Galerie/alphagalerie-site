@@ -32,6 +32,7 @@ export default function App() {
             <Route path="/alpha-club" element={<ClubeRegulamento />} />
             <Route path="/session" element={<Session />} />
             <Route path="/zip" element={<Session />} />
+            <Route path="/kit" element={<Session />} />
             <Route path="*" element={<Home />} />
           </Routes>
         </Suspense>
