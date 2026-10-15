@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useCartStore } from '../../store/cart';
 import { useCheckout } from '../../hooks/useCheckout';
 import { loadMercadoPago } from '../../lib/mercadopago';
-import { calcularEntregaProgramada, calcularFrete, FRETE_BENEFICIO_A_PARTIR, freteComBeneficio, PEX_CORTE_TEXTO } from '../../lib/frete';
+import { calcularEntregaProgramada, calcularMotoboyAgora, calcularRotaNoite, ehHorarioNoturno, FRETE_BENEFICIO_A_PARTIR, freteComBeneficio, NOTURNA_ACRESCIMO, PEX_CORTE_TEXTO, ROTA_CORTE_TEXTO } from '../../lib/frete';
 import type { FreteResult } from '../../lib/frete';
 import type { Pedido } from '../../types';
 import PixPayment from './PixPayment';
@@ -144,15 +144,20 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const numeroRef = useRef<HTMLInputElement>(null);
 
   // Onde a Pex atende, o cliente escolhe: Entrega Programada (mais barata,
-  // sai na coleta do meio-dia) ou motoboy. A programada vem marcada.
-  const [modalidade, setModalidade] = useState<'programada' | 'motoboy'>('programada');
+  // sai na coleta do meio-dia), a rota das 19h (Alphaville e Barueri, até
+  // 18h30) ou motoboy, que depois das 22h vira a Expressa noturna. A
+  // programada vem marcada.
+  const [modalidade, setModalidade] = useState<'programada' | 'rota' | 'motoboy'>('programada');
   // A Pex vai além da região do motoboy (capital, Grande SP, Campinas): lá
   // ela é a única opção, e o motoboy fica "a combinar" fora da tela.
-  const freteMotoboy = calcularFrete(cep, bairro);
+  const freteMotoboy = calcularMotoboyAgora(cep, bairro);
+  const noturna = ehHorarioNoturno();
   const programada = calcularEntregaProgramada(cep);
   const temMotoboy = freteMotoboy.valor > 0;
-  const usaProgramada = programada !== null && (modalidade === 'programada' || !temMotoboy);
-  const frete: FreteResult = usaProgramada ? programada : freteMotoboy;
+  const rota = temMotoboy ? calcularRotaNoite(cep, bairro) : null;
+  const usaRota = modalidade === 'rota' && rota !== null;
+  const usaProgramada = !usaRota && programada !== null && (modalidade !== 'motoboy' || !temMotoboy);
+  const frete: FreteResult = usaRota ? rota : usaProgramada ? programada : freteMotoboy;
 
   // Cartão paga o preço de venda (a taxa do Mercado Pago sai dele); Pix paga
   // o preço Pix de cada produto. Não há desconto de Pix por cima.
@@ -167,11 +172,12 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     if (cupomAtivo.tipo === 'fixo') return Math.min(cupomAtivo.valor, subtotal);
     return 0;
   })();
-  // Acima de R$ 200 em produtos: Entrega Programada grátis, motoboy pela metade.
+  // Acima de R$ 200 em produtos: Entrega Programada e rota das 19h grátis,
+  // motoboy (e Expressa noturna) pela metade.
   const subtotalBeneficio = subtotal - descontoCupom;
   const precoEntrega = (valor: number, m: 'programada' | 'motoboy') =>
     cupomAtivo?.tipo === 'frete' ? 0 : freteComBeneficio(valor, m, subtotalBeneficio);
-  const freteValor = precoEntrega(frete.valor, usaProgramada ? 'programada' : 'motoboy');
+  const freteValor = precoEntrega(frete.valor, usaProgramada || usaRota ? 'programada' : 'motoboy');
   const descontoFrete = cupomAtivo?.tipo === 'frete' ? 0 : frete.valor - freteValor;
   const faltaParaBeneficio = FRETE_BENEFICIO_A_PARTIR - subtotalBeneficio;
   const totalSemPontos = Math.max(0, subtotal - descontoCupom + freteValor);
@@ -367,8 +373,17 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     // A loja vê nas observações que o pedido vai na coleta da Pex, e qual.
     // Recalcula na hora do envio: a tela pode ter aberto antes das 12h.
     const pex = usaProgramada ? calcularEntregaProgramada(cep) : null;
-    const obsPedido = pex
-      ? [pex.observacao, observacoes.trim()].filter(Boolean).join(' | ')
+    // A rota fecha às 18h30: se a tela ficou aberta além disso, não promete.
+    const rotaAgora = usaRota ? calcularRotaNoite(cep, bairro) : null;
+    if (usaRota && !rotaAgora) {
+      setIsSubmitting(false);
+      setModalidade('motoboy');
+      setSubmitError(`A rota das 19h fecha às ${ROTA_CORTE_TEXTO}. Escolha outra entrega.`);
+      return;
+    }
+    const avisoEntrega = pex?.observacao ?? rotaAgora?.observacao ?? (!usaProgramada && noturna ? freteMotoboy.label : '');
+    const obsPedido = avisoEntrega
+      ? [avisoEntrega, observacoes.trim()].filter(Boolean).join(' | ')
       : observacoes;
 
     const dadosPedido: Pedido = {
@@ -589,10 +604,11 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                     </span>
                   )}
                 </div>
-                {programada && temMotoboy ? (
+                {(programada || rota) && temMotoboy ? (
                   <div className={styles.field}>
                     <label className={styles.label}>Entrega *</label>
                     <div className={styles.options}>
+                      {programada && (
                       <label className={styles.optLabel}>
                         <input type="radio" name="entrega" value="programada" checked={usaProgramada} onChange={() => setModalidade('programada')} />
                         <span className={styles.optBox}>
@@ -604,12 +620,26 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                           <span className={styles.optPreco}>{fmt(precoEntrega(programada.valor, 'programada'))}</span>
                         </span>
                       </label>
+                      )}
+                      {rota && (
+                        <label className={styles.optLabel}>
+                          <input type="radio" name="entrega" value="rota" checked={usaRota} onChange={() => setModalidade('rota')} />
+                          <span className={styles.optBox}>
+                            <span className={styles.optBoxText}>
+                              <strong>{rota.label}</strong>
+                              <small className={styles.optPrazo}>{rota.prazo}</small>
+                              <small>Pedidos até {ROTA_CORTE_TEXTO} · Alphaville e Barueri · todos os dias</small>
+                            </span>
+                            <span className={styles.optPreco}>{fmt(precoEntrega(rota.valor, 'programada'))}</span>
+                          </span>
+                        </label>
+                      )}
                       <label className={styles.optLabel}>
-                        <input type="radio" name="entrega" value="motoboy" checked={!usaProgramada} onChange={() => setModalidade('motoboy')} />
+                        <input type="radio" name="entrega" value="motoboy" checked={!usaProgramada && !usaRota} onChange={() => setModalidade('motoboy')} />
                         <span className={styles.optBox}>
                           <span className={styles.optBoxText}>
                             <strong>{freteMotoboy.label}</strong>
-                            <small>Mais rápida · todos os dias</small>
+                            <small>{noturna ? `Moto ou carro, na hora · depois das 22h soma R$ ${NOTURNA_ACRESCIMO}` : 'Mais rápida · todos os dias'}</small>
                           </span>
                           <span className={styles.optPreco}>{fmt(precoEntrega(freteMotoboy.valor, 'motoboy'))}</span>
                         </span>

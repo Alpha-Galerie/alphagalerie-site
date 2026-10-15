@@ -1,0 +1,289 @@
+.page {
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+}
+
+.hero {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 48px 24px 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.titulo {
+  font-size: clamp(36px, 5.5vw, 68px);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+}
+
+.titulo span {
+  color: var(--gold);
+  display: block;
+}
+
+.lead {
+  margin-top: 20px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: rgba(244, 244, 244, 0.75);
+  max-width: 520px;
+}
+
+.lead strong {
+  color: var(--text);
+}
+
+.ctas {
+  margin-top: 28px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ctaPrincipal,
+.ctaSecundario {
+  display: inline-block;
+  padding: 15px 26px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.ctaPrincipal {
+  background: var(--gold);
+  color: #0a0a0a;
+}
+
+.ctaSecundario {
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+.ctaPrincipal:hover,
+.ctaSecundario:hover {
+  transform: translateY(-2px);
+}
+
+.heroFoto {
+  width: 100%;
+  height: auto;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 30px 80px var(--gold-glow);
+}
+
+.faixa {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px 48px;
+  padding: 22px 24px;
+  font-size: 15px;
+  color: var(--text-dim);
+}
+
+.faixa strong {
+  color: var(--text);
+}
+
+.bloco {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 64px 24px 0;
+}
+
+.h2 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 28px;
+}
+
+.passos {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.passos li {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 26px;
+}
+
+.passos span {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: var(--gold);
+  color: #0a0a0a;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.passos strong {
+  display: block;
+  font-size: 19px;
+  margin-bottom: 6px;
+}
+
+.passos p {
+  color: var(--text-dim);
+  font-size: 15px;
+}
+
+.zipSeu {
+  max-width: var(--maxw);
+  margin: 64px auto 0;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.zipSeu p {
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgba(244, 244, 244, 0.75);
+}
+
+.zipSeuFoto {
+  width: 100%;
+  height: auto;
+  border-radius: 28px;
+  background: #fff;
+}
+
+.grid {
+  margin-top: 8px;
+}
+
+.vitrine {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  background: #fff;
+}
+
+.cardTexto {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.cardTexto h3 {
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.cardTexto p {
+  color: var(--text-dim);
+  font-size: 14px;
+  flex: 1;
+}
+
+.cardTexto .ctaPrincipal {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.horarios {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.horarios div {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.horarios strong {
+  display: block;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+.horarios p {
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+.aviso {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.aviso a {
+  color: var(--gold);
+  margin-left: 8px;
+}
+
+@media (max-width: 860px) {
+  .hero,
+  .zipSeu {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .hero {
+    padding-top: 28px;
+  }
+
+  .passos,
+  .vitrine {
+    grid-template-columns: 1fr;
+  }
+
+  .horarios {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .faixa {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

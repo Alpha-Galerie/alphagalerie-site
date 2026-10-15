@@ -268,3 +268,66 @@ export function calcularEntregaProgramada(cep: string, agora: Date = new Date())
       ` · chega ${DIAS_CURTOS[chegada.getUTCDay()]} ${ddmm(chegada)}`,
   };
 }
+
+// ── Rota das 19h (Lalamove) ─────────────────────────────────────────────────
+// Os pedidos de Alphaville e Barueri que entram até 18h30 saem juntos às 19h,
+// numa corrida só do Lalamove com várias paradas. Cotação da loja (out/2026):
+// 6 endereços saíram R$ 90 no regular e R$ 118 na prioridade, uns R$ 15 a 20
+// por cliente; com 4 ou mais pedidos na rota, R$ 20 paga a entrega.
+// Todos os dias. Depois das 18h30 a rota não aparece: fica o motoboy.
+// Gênesis / CENIC fica de fora (é longe lá dentro, o motoboy sai R$ 50) e os
+// bairros afastados de Santana também.
+
+export const ROTA_VALOR = 20;
+export const ROTA_SAIDA_HORA = 19;
+const ROTA_CORTE_MINUTOS = 18 * 60 + 30;
+export const ROTA_CORTE_TEXTO = '18h30';
+
+function naRegiaoDaRota(n: number, bairro: string): boolean {
+  if (n >= 6454700 && n <= 6454999) return false;
+  if (n >= 6400000 && n <= 6499999) return true;
+  return n >= 6500000 && n <= 6549999 && !SANTANA_AFASTADO.test(semAcento(bairro));
+}
+
+export interface RotaNoite extends FreteResult {
+  prazo: string;
+  observacao: string;
+}
+
+/** null = fora de Alphaville/Barueri ou já passou das 18h30. */
+export function calcularRotaNoite(cep: string, bairro = '', agora: Date = new Date()): RotaNoite | null {
+  const n = cepNumero(cep);
+  if (n === null || !naRegiaoDaRota(n, bairro)) return null;
+  const { dia, minutos } = agoraEmSaoPaulo(agora);
+  if (minutos >= ROTA_CORTE_MINUTOS) return null;
+  return {
+    valor: ROTA_VALOR,
+    label: `Hoje à noite · rota das ${ROTA_SAIDA_HORA}h`,
+    prazo: `Sai hoje às ${ROTA_SAIDA_HORA}h e chega à noite (${ddmm(dia)})`,
+    observacao: `Rota das ${ROTA_SAIDA_HORA}h (Lalamove) · sai ${DIAS_CURTOS[dia.getUTCDay()]} ${ddmm(dia)} ${ROTA_SAIDA_HORA}h`,
+  };
+}
+
+// ── Expressa noturna ────────────────────────────────────────────────────────
+// Até as 22h o motoboy custa o preço do Uber da região (calcularFrete). Depois
+// disso moto é difícil de achar e muitas vezes vai de carro: soma R$ 15.
+// Vale das 22h às 6h.
+
+export const NOTURNA_ACRESCIMO = 15;
+const NOTURNA_INICIO_MINUTOS = 22 * 60;
+const NOTURNA_FIM_MINUTOS = 6 * 60;
+
+export function ehHorarioNoturno(agora: Date = new Date()): boolean {
+  const { minutos } = agoraEmSaoPaulo(agora);
+  return minutos >= NOTURNA_INICIO_MINUTOS || minutos < NOTURNA_FIM_MINUTOS;
+}
+
+/** O motoboy da hora: depois das 22h vira a Expressa noturna, mais cara. */
+export function calcularMotoboyAgora(cep: string, bairro = '', agora: Date = new Date()): FreteResult {
+  const base = calcularFrete(cep, bairro);
+  if (base.valor === 0 || !ehHorarioNoturno(agora)) return base;
+  return {
+    valor: base.valor + NOTURNA_ACRESCIMO,
+    label: `Expressa noturna · ${base.label.replace(/^Motoboy · /, '')}`,
+  };
+}

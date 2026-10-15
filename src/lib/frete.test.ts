@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularEntregaProgramada, calcularFrete, freteComBeneficio } from './frete';
+import { calcularEntregaProgramada, calcularFrete, calcularMotoboyAgora, calcularRotaNoite, ehHorarioNoturno, freteComBeneficio } from './frete';
 
 describe('calcularFrete', () => {
   it('returns zero and empty label for empty CEP', () => {
@@ -214,5 +214,60 @@ describe('freteComBeneficio', () => {
     expect(freteComBeneficio(15, 'programada', 200)).toBe(0);
     expect(freteComBeneficio(50, 'motoboy', 200)).toBe(25);
     expect(freteComBeneficio(35, 'motoboy', 320)).toBe(17.5);
+  });
+});
+
+describe('calcularRotaNoite (rota das 19h)', () => {
+  const as = (hora: string) => new Date(`2026-10-15T${hora}:00-03:00`);
+
+  it('Alphaville até 18h30: R$ 20, sai hoje às 19h', () => {
+    const r = calcularRotaNoite('06454-600', '', as('18:29'))!;
+    expect(r.valor).toBe(20);
+    expect(r.prazo).toBe('Sai hoje às 19h e chega à noite (15/10)');
+    expect(r.observacao).toBe('Rota das 19h (Lalamove) · sai qui. 15/10 19h');
+  });
+
+  it('fecha às 18h30', () => {
+    expect(calcularRotaNoite('06454-600', '', as('18:30'))).toBeNull();
+  });
+
+  it.each([
+    ['06541-005', 'Alphaville'],
+    ['06401-000', 'Centro'],
+  ])('atende %s (%s)', (cep, bairro) => {
+    expect(calcularRotaNoite(cep, bairro, as('10:00'))).not.toBeNull();
+  });
+
+  it.each([
+    ['06454-700', ''], // Gênesis / CENIC
+    ['06543-340', 'Paiol Velho'], // Santana afastado
+    ['06010-000', 'Centro'], // Osasco
+    ['01310-100', ''], // capital
+  ])('não atende %s (%s)', (cep, bairro) => {
+    expect(calcularRotaNoite(cep, bairro, as('10:00'))).toBeNull();
+  });
+});
+
+describe('Expressa noturna', () => {
+  const as = (hora: string) => new Date(`2026-10-15T${hora}:00-03:00`);
+
+  it('vale das 22h às 6h', () => {
+    expect(ehHorarioNoturno(as('21:59'))).toBe(false);
+    expect(ehHorarioNoturno(as('22:00'))).toBe(true);
+    expect(ehHorarioNoturno(as('03:00'))).toBe(true);
+    expect(ehHorarioNoturno(as('06:00'))).toBe(false);
+  });
+
+  it('até 22h é o motoboy normal', () => {
+    expect(calcularMotoboyAgora('06454-600', '', as('21:00'))).toEqual({ valor: 30, label: 'Motoboy · Região Barueri' });
+  });
+
+  it('depois das 22h soma R$ 15', () => {
+    expect(calcularMotoboyAgora('06454-600', '', as('23:00'))).toEqual({ valor: 45, label: 'Expressa noturna · Região Barueri' });
+    expect(calcularMotoboyAgora('06454-700', '', as('23:00')).valor).toBe(65);
+  });
+
+  it('frete a combinar segue a combinar', () => {
+    expect(calcularMotoboyAgora('80010-010', '', as('23:00')).valor).toBe(0);
   });
 });

@@ -8,6 +8,7 @@ const CheckoutSucesso = lazy(() => import('./pages/CheckoutSucesso'));
 const CheckoutErro = lazy(() => import('./pages/CheckoutErro'));
 const CheckoutPendente = lazy(() => import('./pages/CheckoutPendente'));
 const ClubeRegulamento = lazy(() => import('./pages/ClubeRegulamento'));
+const ZipAlpha = lazy(() => import('./pages/ZipAlpha'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="/checkout/erro" element={<CheckoutErro />} />
             <Route path="/checkout/pendente" element={<CheckoutPendente />} />
             <Route path="/alpha-club" element={<ClubeRegulamento />} />
+            <Route path="/zip" element={<ZipAlpha />} />
             <Route path="*" element={<Home />} />
           </Routes>
         </Suspense>

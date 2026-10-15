@@ -329,6 +329,55 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
   });
 });
 
+describe('CheckoutModal: rota das 19h e Expressa noturna', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  async function confirmar() {
+    fireEvent.click(screen.getByRole('button', { name: /Confirmar pedido/i }));
+    await waitFor(() => expect(submitPedidoMock).toHaveBeenCalledTimes(1));
+    return submitPedidoMock.mock.calls[0][0];
+  }
+
+  it('Alphaville antes das 18h30: rota das 19h por R$ 20, avisada nas observações', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-15T15:00:00-03:00'));
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '06454-600' } });
+
+    fireEvent.click(screen.getByLabelText(/rota das 19h/));
+    expect(await confirmar()).toMatchObject({
+      total: 120,
+      entrega: 'delivery',
+      observacoes: 'Rota das 19h (Lalamove) · sai qui. 15/10 19h',
+    });
+  });
+
+  it('depois das 18h30 a rota some', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-15T18:45:00-03:00'));
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '06454-600' } });
+    expect(screen.queryByLabelText(/rota das 19h/)).not.toBeInTheDocument();
+  });
+
+  it('depois das 22h o motoboy vira Expressa noturna (+ R$ 15)', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-10-15T23:00:00-03:00'));
+    render(<CheckoutModal onClose={vi.fn()} />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '06454-600' } });
+
+    fireEvent.click(screen.getByLabelText(/Expressa noturna · Região Barueri/));
+    const pedido = await confirmar();
+    expect(pedido).toMatchObject({ total: 145, entrega: 'delivery' });
+    expect(pedido.observacoes).toBe('Expressa noturna · Região Barueri');
+  });
+});
+
 // Cartão paga o preço de venda (a taxa do Mercado Pago sai dele); Pix paga o
 // preço Pix cadastrado — e só ele, sem 5% por cima.
 describe('CheckoutModal: preço por forma de pagamento', () => {

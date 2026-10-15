@@ -38,3 +38,9 @@ export function useKits() {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+/** Kits do saquinho zip: os Kits Exclusivos cujo nome começa com "ZIP ALPHA". */
+export function useZipKits() {
+  const query = useKits();
+  return { ...query, data: (query.data ?? []).filter((k) => k.nome.toUpperCase().startsWith('ZIP ALPHA')) };
+}
