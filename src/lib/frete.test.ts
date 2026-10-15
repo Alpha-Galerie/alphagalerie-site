@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularEntregaProgramada, calcularFrete, calcularMotoboyAgora, calcularRotaNoite, ehHorarioNoturno, entregaAgora, entregaCompraRapida, freteComBeneficio } from './frete';
+import { calcularEntregaProgramada, calcularFrete, calcularMotoboyAgora, calcularRotaNoite, distanciaKm, ehHorarioNoturno, entregaAgora, freteComBeneficio, freteNaHora, freteNaHoraPorCep, LOJA_COORDS, opcoesEntregaRapida } from './frete';
 
 describe('calcularFrete', () => {
   it('returns zero and empty label for empty CEP', () => {
@@ -294,19 +294,54 @@ describe('entregaAgora (página /zip)', () => {
   });
 });
 
-describe('entregaCompraRapida', () => {
+describe('frete da compra rápida', () => {
   const as = (iso: string) => new Date(`${iso}-03:00`);
+  const pertinho = { lat: -23.51, lng: -46.85 }; // ~1 km da loja
+  const santana = { lat: -23.4985, lng: -46.6255 }; // Zona Norte, ~23 km
 
-  it('até 18h30 vai na rota das 19h por R$ 20', () => {
-    expect(entregaCompraRapida(as('2026-10-15T15:00:00')).valor).toBe(20);
+  it('distância em linha reta', () => {
+    expect(distanciaKm(LOJA_COORDS, santana)).toBeGreaterThan(20);
+    expect(distanciaKm(LOJA_COORDS, pertinho)).toBeLessThan(2);
   });
 
-  it('18h30 às 22h: motoboy R$ 30', () => {
-    expect(entregaCompraRapida(as('2026-10-15T19:00:00'))).toEqual({ valor: 30, label: 'Motoboy · sai na hora' });
+  it('perto da loja de dia: mínimo R$ 25 de moto e R$ 30 de carro', () => {
+    expect(freteNaHora(1, 'moto', as('2026-10-15T20:00:00'))).toBe(25);
+    expect(freteNaHora(1, 'carro', as('2026-10-15T20:00:00'))).toBe(30);
   });
 
-  it('depois das 22h e de madrugada: Expressa noturna R$ 45', () => {
-    expect(entregaCompraRapida(as('2026-10-15T23:30:00')).valor).toBe(45);
-    expect(entregaCompraRapida(as('2026-10-16T02:00:00')).valor).toBe(45);
+  it('cresce com a distância e arredonda em R$ 5', () => {
+    // 23 km de reta = 31 km de rua: moto 10 + 2 × 31 = 72 → 75; carro 14 + 2,4 × 31 = 88,5 → 90
+    expect(freteNaHora(23, 'moto', as('2026-10-15T20:00:00'))).toBe(75);
+    expect(freteNaHora(23, 'carro', as('2026-10-15T20:00:00'))).toBe(90);
+  });
+
+  it('depois das 22h soma R$ 15; longe demais é a combinar', () => {
+    expect(freteNaHora(1, 'moto', as('2026-10-15T23:00:00'))).toBe(40);
+    expect(freteNaHora(31, 'moto', as('2026-10-15T20:00:00'))).toBeNull();
+  });
+
+  it('pelo CEP usa a tabela do motoboy; carro R$ 10 acima', () => {
+    expect(freteNaHoraPorCep('06454-600', '', 'moto', as('2026-10-15T20:00:00'))).toBe(30);
+    expect(freteNaHoraPorCep('06454-600', '', 'carro', as('2026-10-15T23:00:00'))).toBe(55);
+    expect(freteNaHoraPorCep('01310-100', '', 'moto', as('2026-10-15T20:00:00'))).toBeNull();
+  });
+
+  it('perto da loja até 18h30: rota das 19h, moto e carro', () => {
+    const ids = opcoesEntregaRapida({ coords: pertinho }, as('2026-10-15T15:00:00')).map((o) => o.id);
+    expect(ids).toEqual(['rota', 'moto', 'carro']);
+  });
+
+  it('à noite: só moto e carro, com o carro recomendado', () => {
+    const op = opcoesEntregaRapida({ coords: pertinho }, as('2026-10-15T23:30:00'));
+    expect(op.map((o) => [o.id, o.valor, o.recomendada ?? false])).toEqual([['moto', 40, false], ['carro', 45, true]]);
+  });
+
+  it('Zona Norte não tem rota, mas tem corrida na hora', () => {
+    const ids = opcoesEntregaRapida({ coords: santana }, as('2026-10-15T15:00:00')).map((o) => o.id);
+    expect(ids).toEqual(['moto', 'carro']);
+  });
+
+  it('CEP fora da área: nenhuma opção (combina no WhatsApp)', () => {
+    expect(opcoesEntregaRapida({ cep: '80010-010' }, as('2026-10-15T15:00:00'))).toEqual([]);
   });
 });

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { entregaCompraRapida } from '../lib/frete';
+import { opcoesEntregaRapida, type OndeEsta, type OpcaoEntrega } from '../lib/frete';
 import { gerarPayloadPix } from '../lib/pix';
 import styles from './CompraRapida.module.css';
 
@@ -22,26 +22,36 @@ function brl(valor: number): string {
   return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+function soDigitos(txt: string): string {
+  return txt.replace(/\D/g, '').slice(0, 8);
+}
+
 /**
- * Compra em 3 passos, sem carrinho nem cadastro: paga o Pix (kit + entrega),
- * diz onde está e manda tudo no WhatsApp da loja. Feita para quem está no
- * bar ou no show e quer resolver em um minuto.
+ * Compra sem carrinho nem cadastro, para quem está no bar ou no show:
+ * diz onde está (localização do celular ou CEP), escolhe moto, carro ou a
+ * rota das 19h, paga kit + entrega num Pix só e manda o pedido pronto no
+ * WhatsApp da loja.
  */
 export default function CompraRapida({ kit, onClose }: Props) {
-  const [regiao, setRegiao] = useState<'alphaville' | 'outra'>('alphaville');
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [localStatus, setLocalStatus] = useState<'' | 'buscando' | 'erro'>('');
+  const [cep, setCep] = useState('');
+  const [escolhida, setEscolhida] = useState<OpcaoEntrega['id'] | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [nome, setNome] = useState('');
   const [endereco, setEndereco] = useState('');
   const [obs, setObs] = useState('');
-  const [local, setLocal] = useState<string | null>(null);
-  const [localStatus, setLocalStatus] = useState<'' | 'buscando' | 'erro'>('');
 
-  const entrega = useMemo(() => entregaCompraRapida(), []);
-  const freteValor = regiao === 'alphaville' ? entrega.valor : 0;
+  const onde: OndeEsta | null = coords ? { coords } : cep.length === 8 ? { cep } : null;
+  const opcoes = onde ? opcoesEntregaRapida(onde) : [];
+  const opcao = opcoes.find((o) => o.id === escolhida) ?? opcoes.find((o) => o.recomendada) ?? opcoes[0] ?? null;
+  const combinar = onde !== null && opcoes.length === 0;
+  const freteValor = opcao?.valor ?? 0;
   const total = kit.preco + freteValor;
   const txid = useMemo(() => `SESSION${Date.now().toString(36).toUpperCase()}`, []);
   const pix = useMemo(() => gerarPayloadPix(total, txid), [total, txid]);
-  const podeEnviar = endereco.trim().length > 3 || local !== null;
+  const podePagar = opcao !== null || combinar;
+  const podeEnviar = podePagar && (coords !== null || endereco.trim().length > 3);
 
   useEffect(() => {
     const anterior = document.body.style.overflow;
@@ -56,14 +66,8 @@ export default function CompraRapida({ kit, onClose }: Props) {
     };
   }, [onClose]);
 
-  async function copiarPix() {
-    try {
-      await navigator.clipboard.writeText(pix);
-    } catch {
-      // Navegador sem clipboard: o código fica selecionável na tela.
-    }
-    setCopiado(true);
-  }
+  // Mudou o lugar ou a entrega: o Pix copiado antes não vale mais.
+  useEffect(() => setCopiado(false), [total]);
 
   function usarLocalizacao() {
     if (!navigator.geolocation) {
@@ -73,8 +77,7 @@ export default function CompraRapida({ kit, onClose }: Props) {
     setLocalStatus('buscando');
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setLocal(`https://maps.google.com/?q=${latitude.toFixed(6)},${longitude.toFixed(6)}`);
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocalStatus('');
       },
       () => setLocalStatus('erro'),
@@ -82,15 +85,24 @@ export default function CompraRapida({ kit, onClose }: Props) {
     );
   }
 
+  async function copiarPix() {
+    try {
+      await navigator.clipboard.writeText(pix);
+    } catch {
+      // Navegador sem clipboard: o código fica selecionável na tela.
+    }
+    setCopiado(true);
+  }
+
   function enviarWhatsApp() {
-    const pagamento =
-      regiao === 'alphaville'
-        ? `💸 Paguei no Pix: *${brl(total)}* (kit ${brl(kit.preco)} + entrega ${brl(freteValor)} · ${entrega.label})`
-        : `💸 Paguei no Pix: *${brl(total)}* (só o kit; estou fora de Alphaville/Barueri, combinar a entrega)`;
+    const pagamento = opcao
+      ? `💸 Paguei no Pix: *${brl(total)}* (kit ${brl(kit.preco)} + ${opcao.titulo.toLowerCase()} ${brl(freteValor)})`
+      : `💸 Paguei no Pix: *${brl(total)}* (só o kit; a entrega a gente combina aqui)`;
     const entregaEm = [
       nome.trim() && `👤 ${nome.trim()}`,
       endereco.trim() && `📍 ${endereco.trim()}`,
-      local && `🗺️ Minha localização: ${local}`,
+      !coords && cep.length === 8 && `CEP ${cep.slice(0, 5)}-${cep.slice(5)}`,
+      coords && `🗺️ Localização: https://maps.google.com/?q=${coords.lat.toFixed(6)},${coords.lng.toFixed(6)}`,
       obs.trim() && `📝 ${obs.trim()}`,
     ].filter(Boolean).join('\n');
     const texto = [
@@ -112,56 +124,88 @@ export default function CompraRapida({ kit, onClose }: Props) {
           <div>
             <p className={styles.nome}>{kit.nome}</p>
             <p className={styles.itens}>{kit.itens.join(' · ')} · embalagem exclusiva</p>
+            <p className={styles.precoKit}>{brl(kit.preco)}</p>
           </div>
         </div>
 
-        <div className={styles.regiao} role="radiogroup" aria-label="Onde você está">
-          <button type="button" role="radio" aria-checked={regiao === 'alphaville'} className={regiao === 'alphaville' ? styles.chipAtivo : styles.chip} onClick={() => setRegiao('alphaville')}>
-            Alphaville / Barueri
+        <section className={styles.passo}>
+          <p className={styles.passoNum}>1 · Onde você está?</p>
+          <button type="button" className={coords ? styles.btnLocalOk : styles.btnLocal} onClick={usarLocalizacao}>
+            {coords ? '📍 Localização pronta ✓' : localStatus === 'buscando' ? 'Buscando sua localização…' : '📍 Usar minha localização'}
           </button>
-          <button type="button" role="radio" aria-checked={regiao === 'outra'} className={regiao === 'outra' ? styles.chipAtivo : styles.chip} onClick={() => setRegiao('outra')}>
-            Outro lugar
-          </button>
-        </div>
-
-        <dl className={styles.conta}>
-          <div><dt>Kit</dt><dd>{brl(kit.preco)}</dd></div>
-          {regiao === 'alphaville' ? (
-            <div><dt>Entrega · {entrega.label}</dt><dd>{brl(freteValor)}</dd></div>
-          ) : (
-            <div><dt>Entrega</dt><dd className={styles.combinar}>combinamos no WhatsApp</dd></div>
+          {localStatus === 'erro' && <p className={styles.erro}>Não deu para pegar a localização. Digite o CEP.</p>}
+          {!coords && (
+            <input
+              className={styles.input}
+              value={cep.length > 5 ? `${cep.slice(0, 5)}-${cep.slice(5)}` : cep}
+              onChange={(e) => setCep(soDigitos(e.target.value))}
+              placeholder="ou digite o CEP"
+              inputMode="numeric"
+              autoComplete="postal-code"
+              aria-label="CEP"
+            />
           )}
-          <div className={styles.total}><dt>Total no Pix</dt><dd>{brl(total)}</dd></div>
-        </dl>
-
-        <section className={styles.passo}>
-          <p className={styles.passoNum}>1 · Paga no Pix</p>
-          <button type="button" className={copiado ? styles.btnCopiado : styles.btn} onClick={copiarPix}>
-            {copiado ? 'Pix copiado ✓ cola no app do banco' : `Copiar Pix · ${brl(total)}`}
-          </button>
-          <code className={styles.codigo}>{pix}</code>
         </section>
 
-        <section className={styles.passo}>
-          <p className={styles.passoNum}>2 · Onde a gente entrega?</p>
-          <button type="button" className={styles.btnLocal} onClick={usarLocalizacao}>
-            {local ? '📍 Localização pronta ✓' : localStatus === 'buscando' ? 'Buscando sua localização…' : '📍 Usar minha localização'}
-          </button>
-          {localStatus === 'erro' && <p className={styles.erro}>Não deu para pegar a localização. Digite o endereço.</p>}
-          <input className={styles.input} value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder="Endereço ou CEP" autoComplete="street-address" />
-          <input className={styles.input} value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Observação · ex.: estou no Bar do Zé, mesa 12" />
-          <input className={styles.input} value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" autoComplete="given-name" />
-        </section>
+        {opcoes.length > 0 && (
+          <section className={styles.passo}>
+            <p className={styles.passoNum}>2 · Como chega</p>
+            <div className={styles.opcoes} role="radiogroup" aria-label="Entrega">
+              {opcoes.map((o) => (
+                <button
+                  key={o.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={opcao?.id === o.id}
+                  className={opcao?.id === o.id ? styles.opcaoAtiva : styles.opcao}
+                  onClick={() => setEscolhida(o.id)}
+                >
+                  <span className={styles.opcaoTexto}>
+                    <strong>{o.titulo}{o.recomendada && <em className={styles.recomendada}>recomendado</em>}</strong>
+                    <small>{o.detalhe}</small>
+                  </span>
+                  <span className={styles.opcaoPreco}>{brl(o.valor)}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
+        {combinar && (
+          <p className={styles.combinarAviso}>
+            Esse endereço é longe pra corrida na hora. Paga o kit e a gente combina a entrega no WhatsApp.
+          </p>
+        )}
 
-        <section className={styles.passo}>
-          <p className={styles.passoNum}>3 · Manda pra gente</p>
-          <button type="button" className={styles.btnZap} onClick={enviarWhatsApp} disabled={!podeEnviar}>
-            Já paguei · enviar no WhatsApp
-          </button>
-          {!podeEnviar && <p className={styles.dica}>Coloca o endereço ou a localização para liberar.</p>}
-        </section>
+        {podePagar && (
+          <>
+            <dl className={styles.conta}>
+              <div><dt>Kit</dt><dd>{brl(kit.preco)}</dd></div>
+              <div><dt>Entrega{opcao ? ` · ${opcao.titulo}` : ''}</dt><dd>{opcao ? brl(freteValor) : 'a combinar'}</dd></div>
+              <div className={styles.total}><dt>Total no Pix</dt><dd>{brl(total)}</dd></div>
+            </dl>
 
-        <p className={styles.aviso}>Venda proibida para menores de 18 anos.</p>
+            <section className={styles.passo}>
+              <p className={styles.passoNum}>3 · Paga no Pix</p>
+              <button type="button" className={copiado ? styles.btnCopiado : styles.btn} onClick={copiarPix}>
+                {copiado ? 'Pix copiado ✓ cola no app do banco' : `Copiar Pix · ${brl(total)}`}
+              </button>
+              <code className={styles.codigo}>{pix}</code>
+            </section>
+
+            <section className={styles.passo}>
+              <p className={styles.passoNum}>4 · Manda pra gente</p>
+              <input className={styles.input} value={endereco} onChange={(e) => setEndereco(e.target.value)} placeholder={coords ? 'Endereço (opcional, já temos a localização)' : 'Rua e número'} autoComplete="street-address" />
+              <input className={styles.input} value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Observação · ex.: estou no Bar do Zé, mesa 12" />
+              <input className={styles.input} value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Seu nome" autoComplete="given-name" />
+              <button type="button" className={styles.btnZap} onClick={enviarWhatsApp} disabled={!podeEnviar}>
+                Já paguei · enviar no WhatsApp
+              </button>
+              {!podeEnviar && <p className={styles.dica}>Coloca a rua e o número para liberar.</p>}
+            </section>
+          </>
+        )}
+
+        <p className={styles.aviso}>Valores de entrega estimados pela distância até a loja · venda proibida para menores de 18 anos.</p>
       </div>
     </div>
   );
