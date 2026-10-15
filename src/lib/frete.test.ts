@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularEntregaProgramada, calcularFrete, calcularMotoboyAgora, calcularRotaNoite, ehHorarioNoturno, freteComBeneficio } from './frete';
+import { calcularEntregaProgramada, calcularFrete, calcularMotoboyAgora, calcularRotaNoite, ehHorarioNoturno, entregaAgora, freteComBeneficio } from './frete';
 
 describe('calcularFrete', () => {
   it('returns zero and empty label for empty CEP', () => {
@@ -269,5 +269,27 @@ describe('Expressa noturna', () => {
 
   it('frete a combinar segue a combinar', () => {
     expect(calcularMotoboyAgora('80010-010', '', as('23:00')).valor).toBe(0);
+  });
+});
+
+describe('entregaAgora (página /zip)', () => {
+  const as = (iso: string) => new Date(`${iso}-03:00`);
+
+  it('quinta 10h: Programada, faltam 60 min', () => {
+    expect(entregaAgora(as('2026-10-15T10:00:00'))).toMatchObject({ titulo: 'Chega hoje', faltam: 60 });
+  });
+
+  it('quinta 17h: rota das 19h, faltam 90 min', () => {
+    expect(entregaAgora(as('2026-10-15T17:00:00'))).toMatchObject({ titulo: 'Sai hoje às 19h', faltam: 90 });
+  });
+
+  it('domingo 10h: sem Pex, vale a rota', () => {
+    expect(entregaAgora(as('2026-10-18T10:00:00')).titulo).toBe('Sai hoje às 19h');
+  });
+
+  it('20h motoboy, 23h e 3h Expressa noturna', () => {
+    expect(entregaAgora(as('2026-10-15T20:00:00')).detalhe).toMatch(/^Motoboy/);
+    expect(entregaAgora(as('2026-10-15T23:00:00')).detalhe).toMatch(/^Expressa noturna/);
+    expect(entregaAgora(as('2026-10-16T03:00:00')).detalhe).toMatch(/^Expressa noturna/);
   });
 });

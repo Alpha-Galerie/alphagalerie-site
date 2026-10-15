@@ -33,7 +33,7 @@ SELECT v.nome, 'ALPHA', v.descricao,
        'Kits Exclusivos', v.preco, v.kit, v.kit,
        'https://www.alphagalerie.com/kits/zip/' || v.foto, v.estoque, false, false, v.ordem
 FROM (VALUES
-  (0, 'ZIP ALPHA DUO PAY-PAY', 'zip-duo-pay-pay.webp', 26.00, 21.90, 10,
+  (0, 'ZIP ALPHA DUO PAY-PAY', 'zip-duo.webp', 26.00, 21.90, 10,
    'Vem no zip: 2 sedas Pay-Pay Go Green Slim + tesoura dobrável prata de brinde. Separado sai R$ 26,00. E o zip transparente com a marca Alpha fica com você.'),
   (0, 'ZIP ALPHA ESSENCIAL', 'zip-essencial.webp', 41.00, 33.90, 3,
    'Vem no zip: seda Alpha Hemp Slim Brown + seda Mascotte Slim + piteira Papelito Mega Longa. Separado sai R$ 41,00. E o zip transparente com a marca Alpha fica com você.'),

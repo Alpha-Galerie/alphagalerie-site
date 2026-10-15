@@ -331,3 +331,37 @@ export function calcularMotoboyAgora(cep: string, bairro = '', agora: Date = new
     label: `Expressa noturna · ${base.label.replace(/^Motoboy · /, '')}`,
   };
 }
+
+// ── "Dá tempo de chegar?" (página /zip) ─────────────────────────────────────
+// Qual entrega vale agora e quanto falta para o próximo corte.
+
+export interface EntregaAgora {
+  titulo: string;
+  detalhe: string;
+  /** Minutos até o corte desta entrega; null quando não tem corte. */
+  faltam: number | null;
+}
+
+export function entregaAgora(agora: Date = new Date()): EntregaAgora {
+  const { dia, minutos } = agoraEmSaoPaulo(agora);
+  // De madrugada quem pede quer agora: a Expressa vem antes da Programada.
+  if (ehHorarioNoturno(agora)) {
+    return { titulo: 'Sai agora', detalhe: 'Expressa noturna · moto ou carro, até de madrugada', faltam: null };
+  }
+  const corteProgramada = PEX_CORTE_HORA * 60 + PEX_CORTE_MINUTO;
+  if (temPex(dia) && minutos < corteProgramada) {
+    return {
+      titulo: 'Chega hoje',
+      detalhe: `Entrega Programada · Grande SP · R$ 15`,
+      faltam: corteProgramada - minutos,
+    };
+  }
+  if (minutos < ROTA_CORTE_MINUTOS) {
+    return {
+      titulo: `Sai hoje às ${ROTA_SAIDA_HORA}h`,
+      detalhe: `Rota das ${ROTA_SAIDA_HORA}h · Alphaville e Barueri · R$ ${ROTA_VALOR}`,
+      faltam: ROTA_CORTE_MINUTOS - minutos,
+    };
+  }
+  return { titulo: 'Sai agora', detalhe: 'Motoboy na hora · preço da sua região', faltam: null };
+}
