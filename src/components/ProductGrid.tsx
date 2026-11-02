@@ -7,7 +7,7 @@ import { useSubcategoriasOcultas } from '../hooks/useSubcategoriasOcultas';
 import { useProducts } from '../hooks/useProducts';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
 import { registrarInteresse } from '../lib/interesse';
-import { EVENTO_BUSCAR } from '../lib/busca';
+import { EVENTO_BUSCAR, normalizarBusca } from '../lib/busca';
 import type { Produto, Variacao } from '../types';
 import ProductCard from './ProductCard';
 import VariacoesModal from './VariacoesModal';
@@ -182,7 +182,7 @@ export default function ProductGrid({
   const extraCategoryIds = useMemo(() =>
     categoryId === null && search.trim().length > 0
       ? categorias
-          .filter((c) => c.nome.toLowerCase().includes(search.trim().toLowerCase()))
+          .filter((c) => normalizarBusca(c.nome).includes(normalizarBusca(search)))
           .map((c) => c.id)
       : []
   , [categoryId, search, categorias]);

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
+import { palavrasBusca } from '../lib/busca';
 import type { Produto, Variacao } from '../types';
 
 const PAGE_SIZE = 24;
@@ -57,14 +58,13 @@ async function fetchProducts(
     query = query.ilike('marca', escaparCuringa(marca));
   }
 
-  if (search.trim()) {
-    // FULLTEXT search available after migration 20260508110000_fulltext_search_phase2.sql
-    // Uncomment when migration is applied for 30x faster search:
-    // query = query.textSearch('search_doc', search.trim(), { config: 'portuguese' });
-
-    // LIKE fallback — name, brand and subcategory. Category is handled via extraCategoryIds.
-    if (extraCategoryIds.length === 0) {
-      query = query.or(`nome.ilike.%${search.trim()}%,marca.ilike.%${search.trim()}%,subcategoria.ilike.%${search.trim()}%`);
+  // Busca sem acento: cada palavra precisa estar em `busca_texto` (nome,
+  // marca, subcategoria e categoria em minúsculas e sem acento). Antes era
+  // `ilike` no texto cru, e "carvão" não achava a subcategoria "Carvao".
+  // Categoria é tratada à parte via extraCategoryIds.
+  if (extraCategoryIds.length === 0) {
+    for (const palavra of palavrasBusca(search)) {
+      query = query.ilike('busca_texto', `%${palavra}%`);
     }
   }
 
