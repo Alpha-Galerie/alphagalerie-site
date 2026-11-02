@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FC } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { EVENTO_BUSCOU } from '../lib/interesse';
+import { palavrasBusca } from '../lib/busca';
 import { getPrecoInfo } from '../lib/preco';
 import { formatCurrency } from '../lib/format';
 import { buildProductPath } from '../lib/productPath';
@@ -35,15 +36,16 @@ function marcarVisto(termo: string) {
 /** Os produtos em promoção primeiro; sem promoção, os em destaque. Só o
  *  que tem estoque: oferecer o que não dá para comprar frustra. */
 async function buscarOfertas(termo: string): Promise<Oferta[]> {
-  // Vírgula e parênteses quebram o filtro `or` do PostgREST.
-  const t = termo.replace(/[^\p{L}\p{N} ]/gu, ' ').trim();
-  if (t.length < 2) return [];
-  const { data } = await supabase
+  const palavras = palavrasBusca(termo.replace(/[^\p{L}\p{N} ]/gu, ' '));
+  if (palavras.join('').length < 2) return [];
+  let consulta = supabase
     .from('produtos')
     .select('id,nome,preco,preco_pix,preco_promocional,imagem_url')
     .eq('ativo', true)
-    .gt('estoque', 0)
-    .or(`nome.ilike.%${t}%,subcategoria.ilike.%${t}%,marca.ilike.%${t}%`)
+    .gt('estoque', 0);
+  // Sem acento, como a vitrine: "carvão" acha a subcategoria "Carvao".
+  for (const palavra of palavras) consulta = consulta.ilike('busca_texto', `%${palavra}%`);
+  const { data } = await consulta
     .order('preco_promocional', { ascending: true, nullsFirst: false })
     .order('destaque', { ascending: false })
     .limit(3);

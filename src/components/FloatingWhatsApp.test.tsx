@@ -10,12 +10,12 @@ import { EVENTO_BUSCOU } from '../lib/interesse';
 const ofertas = [
   { id: 498, nome: 'DORA GRAPE 20G', preco: 37.63, preco_pix: 35, preco_promocional: 30, imagem_url: null },
 ];
-let filtroOr = '';
+let filtros: string[] = [];
 
 vi.mock('../lib/supabase', () => {
   const q: Record<string, unknown> = {};
   for (const m of ['select', 'eq', 'gt', 'order']) q[m] = () => q;
-  q.or = (f: string) => { filtroOr = f; return q; };
+  q.ilike = (coluna: string, padrao: string) => { filtros.push(`${coluna}:${padrao}`); return q; };
   q.limit = () => Promise.resolve({ data: ofertas });
   return { supabase: { from: () => q } };
 });
@@ -31,7 +31,7 @@ async function esperar() {
 beforeEach(() => {
   vi.useFakeTimers();
   sessionStorage.clear();
-  filtroOr = '';
+  filtros = [];
 });
 afterEach(() => vi.useRealTimers());
 
@@ -56,7 +56,7 @@ describe('assistente do WhatsApp', () => {
     expect(screen.getByText('-20%')).toBeInTheDocument();
     const whats = screen.getByRole('link', { name: /Falar no WhatsApp/ });
     expect(decodeURIComponent(whats.getAttribute('href')!)).toContain('Estou procurando tabaco');
-    expect(filtroOr).toContain('nome.ilike.%tabaco%');
+    expect(filtros).toEqual(['busca_texto:%tabaco%']);
   });
 
   it('o mesmo termo não aparece de novo na visita', async () => {
@@ -69,11 +69,10 @@ describe('assistente do WhatsApp', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('caracteres que quebram o filtro saem do termo', async () => {
+  it('procura cada palavra sem acento e sem pontuação', async () => {
     montar();
-    buscou('seda (raw), king');
+    buscou('Carvão (coco), kanara');
     await esperar();
-    expect(filtroOr).not.toMatch(/[(),]raw|king\)/);
-    expect(filtroOr).toContain('%seda  raw   king%');
+    expect(filtros).toEqual(['busca_texto:%carvao%', 'busca_texto:%coco%', 'busca_texto:%kanara%']);
   });
 });

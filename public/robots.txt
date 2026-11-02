@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+Disallow: /operador
 Sitemap: https://alphagalerie.com/sitemap.xml
