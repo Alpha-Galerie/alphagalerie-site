@@ -4,7 +4,7 @@ import type { Produto } from '../types';
 import { formatCurrency } from '../lib/format';
 import { getPrecoInfo } from '../lib/preco';
 import { buildProductPath } from '../lib/productPath';
-import { itensDoKit, temFotoDeCenario } from '../lib/kits';
+import { KITS_SUBCATEGORIA, itensDoKit, temFotoDeCenario } from '../lib/kits';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
@@ -44,6 +44,9 @@ const ProductCard: FC<ProductCardProps> = ({
   const preco = getPrecoInfo(produto);
   const fotoCheia = Boolean(produto.imagem_url) && temFotoDeCenario(produto);
   const itensKit = itensDoKit(produto);
+  // Kit mostra um preço só (o do Pix): a diferença do cartão aparece no
+  // checkout, quando o cliente escolhe a forma de pagamento.
+  const precoUnico = produto.subcategoria === KITS_SUBCATEGORIA;
 
   const handleCta = () => {
     if (esgotado) return;
@@ -125,9 +128,9 @@ const ProductCard: FC<ProductCardProps> = ({
           <span className={styles.priceValue}>
             {formatCurrency(preco.precoPix ?? preco.precoVenda)}
           </span>
-          {preco.precoPix !== null && <span className={styles.priceLabel}>no pix</span>}
+          {preco.precoPix !== null && !precoUnico && <span className={styles.priceLabel}>no pix</span>}
         </div>
-        {preco.precoPix !== null && (
+        {preco.precoPix !== null && !precoUnico && (
           <p className={styles.priceCartao}>ou {formatCurrency(preco.precoVenda)} no cartão</p>
         )}
 

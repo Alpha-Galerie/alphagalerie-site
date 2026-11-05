@@ -55,3 +55,20 @@ describe('ProductCard — foto de cenário', () => {
     expect(el.className).not.toMatch(/fotoCheia/);
   });
 });
+
+describe('ProductCard — preço do kit', () => {
+  it('kit mostra só o preço do Pix, sem "no pix" nem "no cartão"', () => {
+    render(
+      <MemoryRouter>
+        <ProductCard
+          produto={produto({ nome: 'RAW KIT ALPHA', subcategoria: 'Kits Exclusivos', preco: 38.9, preco_pix: 36.9 })}
+          onAddToCart={vi.fn()}
+          onOpenVariacoes={vi.fn()}
+        />
+      </MemoryRouter>
+    );
+    expect(screen.getByText(/36,90/)).toBeTruthy();
+    expect(screen.queryByText(/no pix/i)).toBeNull();
+    expect(screen.queryByText(/no cartão/i)).toBeNull();
+  });
+});
