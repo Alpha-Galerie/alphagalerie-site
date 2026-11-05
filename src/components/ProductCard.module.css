@@ -157,7 +157,7 @@
 .kitItensTitulo {
   margin: 0 0 6px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #c9a961;
@@ -172,7 +172,7 @@
 .kitItens li {
   position: relative;
   padding-left: 14px;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   color: rgba(244, 244, 244, 0.82);
 }
