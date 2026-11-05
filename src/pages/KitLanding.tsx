@@ -19,23 +19,23 @@ const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'))
 const BENEFICIOS = [
   {
     icone: '◇',
-    titulo: 'Pensado no conjunto',
-    texto: 'Seda, piteira e estojo escolhidos para funcionar juntos. O produto é o kit inteiro, não cada item solto.',
+    titulo: 'Criado por quem usa',
+    texto: 'Desenvolvido a partir da experiência real de quem vive a cultura, para quem exige qualidade em cada detalhe.',
   },
   {
     icone: '✦',
-    titulo: 'Exclusivo',
-    texto: 'Desenvolvido pela Alpha Galerie. Você não encontra esse kit em nenhuma outra loja.',
+    titulo: 'Inédito no mercado',
+    texto: 'Um kit que não existia até agora. Exclusivo Alpha Galerie, você não encontra em nenhuma outra loja.',
   },
   {
     icone: '▭',
-    titulo: 'Tudo num lugar só',
-    texto: 'Esqueceu o case em casa? Tá no escritório, no rolê? Nada solto no bolso: a seda não amassa e a piteira não se perde.',
+    titulo: 'Pronto para sair com você',
+    texto: 'Seda e piteira de qualidade sempre juntas, protegidas e organizadas no estojo. É só pegar e ir.',
   },
   {
     icone: '◎',
-    titulo: 'Todo mundo vai perguntar',
-    texto: '"Que kit é esse? Onde você comprou?" Bonito, organizado e com a nossa marca. É o kit que puxa conversa.',
+    titulo: 'Assinatura Alpha Galerie',
+    texto: 'Estojo com design próprio, feito para durar e para ser notado onde você estiver.',
   },
 ];
 
@@ -93,8 +93,8 @@ export default function KitLanding() {
               Pensado, desenvolvido e exclusivo para quem <em>realmente entende</em>.
             </h1>
             <p className={styles.lead}>
-              Não é só a seda. Não é só a piteira. É o conjunto: cada item escolhido para
-              funcionar junto, guardado no estojo exclusivo Alpha Galerie.
+              Não é só a seda. Não é só a piteira. É o conjunto: um kit criado para o seu dia a
+              dia, completo e pronto para sair com você, no estojo exclusivo Alpha Galerie.
             </p>
             <div className={styles.ctas}>
               <a href="#kits" className={styles.ctaPrimario}>Ver os kits</a>
