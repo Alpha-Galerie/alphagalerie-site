@@ -35,7 +35,7 @@ const BENEFICIOS = [
   {
     icone: '◎',
     titulo: 'Assinatura Alpha Galerie',
-    texto: 'Design próprio que chama atenção. Onde você abrir, alguém vai perguntar de onde é.',
+    texto: 'Design próprio e inovador, desenvolvido para atender a real necessidade de quem usa.',
   },
 ];
 
@@ -86,20 +86,41 @@ export default function KitLanding() {
 
       <main id="main-content" className={styles.page}>
         <section className={styles.hero}>
-          <p className={styles.eyebrow}>✦ Kits exclusivos Alpha Galerie</p>
-          <h1 className={styles.titulo}>
-            Desenvolvido para <em>nunca mais te deixar na mão</em>.
-          </h1>
-          <p className={styles.lead}>
-            Criado por quem vive a cultura, para quem vive a cultura. Tudo o que não pode
-            faltar, com produtos das melhores marcas, pra você não ter dor de cabeça. Um kit
-            exclusivo.
-          </p>
-          <a href="#kits" className={styles.ctaPrimario}>Escolha o seu kit</a>
+          <div className={styles.heroFundo} aria-hidden="true">
+            <span className={`${styles.brilho} ${styles.brilho1}`} />
+            <span className={`${styles.brilho} ${styles.brilho2}`} />
+            <span className={`${styles.brilho} ${styles.brilho3}`} />
+            <span className={styles.selo}>ag</span>
+            <span className={styles.grao} />
+          </div>
+
+          <div className={styles.heroConteudo}>
+            <p className={`${styles.eyebrow} ${styles.entra}`}>✦ Kits exclusivos Alpha Galerie</p>
+            <h1 className={`${styles.titulo} ${styles.entra} ${styles.entra2}`}>
+              Desenvolvido para <em>nunca mais te deixar na mão</em>.
+            </h1>
+            <p className={`${styles.lead} ${styles.entra} ${styles.entra3}`}>
+              Criado por quem vive a cultura, feito para quem é da cultura. Tudo o que não pode
+              faltar, com produtos selecionados, pra você não ter dor de cabeça.
+              <strong> Um kit exclusivo.</strong>
+            </p>
+            <a href="#kits" className={`${styles.ctaPrimario} ${styles.ctaBrilho} ${styles.entra} ${styles.entra4}`}>
+              Escolha o seu kit
+            </a>
+          </div>
+
+          <div className={styles.faixa} aria-hidden="true">
+            <div className={styles.faixaTrilho}>
+              {Array.from({ length: 2 }).map((_, i) => (
+                <span key={i}>
+                  Exclusivo Alpha Galerie ✦ Feito para a cultura ✦ Nunca mais na mão ✦ Só aqui ✦&nbsp;
+                </span>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section id="kits" className={styles.bloco}>
-          <p className={styles.eyebrow}>Escolha o seu</p>
           <h2 className={styles.subtitulo}>Kits Alpha <em>exclusivos</em>.</h2>
           <p className={styles.texto}>
             Veja o que vem em cada um e escolha o seu. Compra 100% online e entrega no seu
@@ -115,7 +136,6 @@ export default function KitLanding() {
         </section>
 
         <section className={styles.bloco} aria-label="Por que os Kits Alpha">
-          <p className={styles.eyebrow}>Por que é diferente</p>
           <h2 className={styles.subtitulo}>Um kit que <em>te entende</em>.</h2>
           <p className={styles.texto}>Desenvolvido para atender a sua necessidade.</p>
           <div className={styles.beneficios}>
@@ -131,18 +151,16 @@ export default function KitLanding() {
 
         {kitsCase.length > 0 && (
           <section className={`${styles.bloco} ${styles.blocoCase}`}>
-            <p className={styles.eyebrow}>Linha Case Alpha</p>
-            <h2 className={styles.subtitulo}>Quer o <em>setup completo</em>?</h2>
+            <h2 className={styles.subtitulo}>Case Alpha, <em>o seu setup completo</em>.</h2>
             <p className={styles.texto}>
-              O Case Alpha leva o mesmo cuidado a outro nível: tabaco, sedas, piteira, tesoura e
-              acessórios num case rígido, montado peça por peça.
+              Tabaco, sedas, piteira, tesoura e acessórios organizados no case rígido Alpha. Tudo
+              o que você precisa, num só lugar, pronto para ir com você.
             </p>
             <div className={`products-grid-responsive ${styles.grid}`}>{renderCards(kitsCase)}</div>
           </section>
         )}
 
         <section className={styles.fecho}>
-          <p className={styles.eyebrow}>Edição limitada</p>
           <h2 className={styles.subtitulo}>Quem entende, <em>já tem o seu</em>.</h2>
           <p className={styles.texto}>
             Estoque limitado. Garanta o seu antes que acabe.
