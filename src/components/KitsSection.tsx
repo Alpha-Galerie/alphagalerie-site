@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useKits } from '../hooks/useKits';
+import { ehKitCase } from '../lib/kits';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
 import type { Produto, Variacao } from '../types';
 import ProductCard from './ProductCard';
@@ -18,9 +19,26 @@ export default function KitsSection() {
 
   if (isLoading || kits.length === 0) return null;
 
+  // Mesma ordem da página /kit: primeiro os kits do dia a dia, depois a linha
+  // Case Alpha 2.0, cada grupo na sua fileira.
+  const kitsDiaADia = kits.filter((k) => !ehKitCase(k));
+  const kitsCase = kits.filter(ehKitCase);
+
   function handleSelectVariacao(produto: Produto, variacao: Variacao) {
     adicionarVariacao(produto, variacao);
     setVariacoesTarget(null);
+  }
+
+  function renderCard(kit: Produto) {
+    return (
+      <ProductCard
+        key={kit.id}
+        produto={kit}
+        onAddToCart={adicionar}
+        onOpenVariacoes={setVariacoesTarget}
+        hideDestaqueBadge
+      />
+    );
   }
 
   return (
@@ -40,17 +58,22 @@ export default function KitsSection() {
           </p>
         </div>
 
-        <div className={`products-grid-responsive ${styles.grid}`}>
-          {kits.map((kit) => (
-            <ProductCard
-              key={kit.id}
-              produto={kit}
-              onAddToCart={adicionar}
-              onOpenVariacoes={setVariacoesTarget}
-              hideDestaqueBadge
-            />
-          ))}
-        </div>
+        {kitsDiaADia.length > 0 && (
+          <div className={`products-grid-responsive ${styles.grid}`}>
+            {kitsDiaADia.map(renderCard)}
+          </div>
+        )}
+
+        {kitsCase.length > 0 && (
+          <>
+            <h3 className={styles.grupo}>
+              Case Alpha 2.0, <em>o seu setup completo</em>.
+            </h3>
+            <div className={`products-grid-responsive ${styles.grid}`}>
+              {kitsCase.map(renderCard)}
+            </div>
+          </>
+        )}
       </div>
 
       <VariacoesModal

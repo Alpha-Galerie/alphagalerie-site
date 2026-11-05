@@ -154,7 +154,7 @@ export default function KitLanding() {
 
         {kitsCase.length > 0 && (
           <section className={`${styles.bloco} ${styles.blocoCase}`}>
-            <h2 className={styles.subtitulo}>Case Alpha, <em>o seu setup completo</em>.</h2>
+            <h2 className={styles.subtitulo}>Case Alpha 2.0, <em>o seu setup completo</em>.</h2>
             <p className={styles.texto}>
               Tabaco, sedas, piteira, tesoura e acessórios organizados no case rígido Alpha. Tudo
               o que você precisa, num só lugar, pronto para ir com você.

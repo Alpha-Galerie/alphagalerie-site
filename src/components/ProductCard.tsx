@@ -47,9 +47,6 @@ const ProductCard: FC<ProductCardProps> = ({
   // Kit mostra um preço só (o do Pix): a diferença do cartão aparece no
   // checkout, quando o cliente escolhe a forma de pagamento.
   const precoUnico = produto.subcategoria === KITS_SUBCATEGORIA;
-  // Kit do dia a dia: foto de estúdio deitada, o card mostra a foto larga
-  // em vez do quadrado branco.
-  const fotoLarga = precoUnico && !fotoCheia;
 
   const handleCta = () => {
     if (esgotado) return;
@@ -62,7 +59,7 @@ const ProductCard: FC<ProductCardProps> = ({
 
   return (
     <article
-      className={`${styles.product}${fotoLarga ? ` ${styles.kitLargo}` : ''}${esgotado ? ` ${styles.esgotado}` : ''}`}
+      className={`${styles.product}${itensKit.length > 0 ? ` ${styles.kitCard}` : ''}${esgotado ? ` ${styles.esgotado}` : ''}`}
     >
       <Link to={productPath} className={styles.imageLink} aria-label={`Ver detalhes de ${produto.nome}`}>
         <div className={fotoCheia ? `${styles.imageWrapper} ${styles.fotoCheia}` : styles.imageWrapper}>
