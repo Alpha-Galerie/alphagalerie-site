@@ -4,7 +4,7 @@ import type { Produto } from '../types';
 import { formatCurrency } from '../lib/format';
 import { getPrecoInfo } from '../lib/preco';
 import { buildProductPath } from '../lib/productPath';
-import { temFotoDeCenario } from '../lib/kits';
+import { itensDoKit, temFotoDeCenario } from '../lib/kits';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
@@ -43,6 +43,7 @@ const ProductCard: FC<ProductCardProps> = ({
   const productPath = buildProductPath(produto);
   const preco = getPrecoInfo(produto);
   const fotoCheia = Boolean(produto.imagem_url) && temFotoDeCenario(produto);
+  const itensKit = itensDoKit(produto);
 
   const handleCta = () => {
     if (esgotado) return;
@@ -97,10 +98,21 @@ const ProductCard: FC<ProductCardProps> = ({
           </Link>
         </h3>
 
-        {produto.descricao && (
-          <p className={styles.productDescription}>
-            {produto.descricao}
-          </p>
+        {itensKit.length > 0 ? (
+          <div className={styles.kitItens}>
+            <p className={styles.kitItensTitulo}>Vem no kit</p>
+            <ul>
+              {itensKit.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          produto.descricao && (
+            <p className={styles.productDescription}>
+              {produto.descricao}
+            </p>
+          )
         )}
 
         <div className={styles.productPrice}>

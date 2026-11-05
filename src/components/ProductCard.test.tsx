@@ -43,7 +43,7 @@ describe('ProductCard — foto de cenário', () => {
     expect(el.className).toMatch(/fotoCheia/);
   });
 
-  it('kit do Alpha Pocket (foto de estúdio, fundo branco) aparece inteiro, sem corte', () => {
+  it('kit do dia a dia (foto de estúdio, fundo branco) aparece inteiro, sem corte', () => {
     const el = wrapperDaFoto(
       produto({ nome: 'PAY-PAY KIT ALPHA', subcategoria: 'Kits Exclusivos', imagem_url: '/kits/kit-pay-pay-alpha-v2.jpg' })
     );
