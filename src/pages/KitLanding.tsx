@@ -25,7 +25,7 @@ const BENEFICIOS = [
   {
     icone: '▭',
     titulo: 'Nunca mais na mão',
-    texto: 'O essencial sempre junto, protegido e pronto. Pegou o Alpha Pocket, está tudo ali.',
+    texto: 'O essencial sempre junto, protegido e pronto para sair com você a qualquer momento.',
   },
   {
     icone: '✦',
@@ -41,8 +41,8 @@ const BENEFICIOS = [
 
 /**
  * alphagalerie.com/kit — página de entrada do QR Code que vai nos kits
- * vendidos em bares e pontos parceiros. Apresenta os kits do dia a dia (no
- * Alpha Pocket, embalagem exclusiva), vende pelo site e leva para a linha Case Alpha e
+ * vendidos em bares e pontos parceiros. Apresenta os kits do dia a dia (na
+ * embalagem exclusiva Alpha Galerie), vende pelo site e leva para a linha Case Alpha e
  * para a loja. Venda 100% online: o rodapé não mostra endereço da loja.
  */
 export default function KitLanding() {
@@ -92,17 +92,18 @@ export default function KitLanding() {
           </h1>
           <p className={styles.lead}>
             Criado por quem vive a cultura, para quem vive a cultura. Tudo o que não pode
-            faltar, selecionado a dedo e reunido no Alpha Pocket. Você não vai encontrar em
-            nenhum outro lugar.
+            faltar, com produtos das melhores marcas, pra você não ter dor de cabeça. Um kit
+            exclusivo.
           </p>
           <a href="#kits" className={styles.ctaPrimario}>Escolha o seu kit</a>
         </section>
 
         <section id="kits" className={styles.bloco}>
           <p className={styles.eyebrow}>Escolha o seu</p>
-          <h2 className={styles.subtitulo}>Os <em>Kits Alpha</em>.</h2>
+          <h2 className={styles.subtitulo}>Kits Alpha <em>exclusivos</em>.</h2>
           <p className={styles.texto}>
-            Lotes pequenos, montados à mão. Compra 100% online e entrega no seu endereço.
+            Veja o que vem em cada um e escolha o seu. Compra 100% online e entrega no seu
+            endereço.
           </p>
           {isLoading ? (
             <p className={styles.texto}>Carregando os kits…</p>
@@ -115,7 +116,8 @@ export default function KitLanding() {
 
         <section className={styles.bloco} aria-label="Por que os Kits Alpha">
           <p className={styles.eyebrow}>Por que é diferente</p>
-          <h2 className={styles.subtitulo}>Não é só a seda. <em>É o conjunto.</em></h2>
+          <h2 className={styles.subtitulo}>Um kit que <em>te entende</em>.</h2>
+          <p className={styles.texto}>Desenvolvido para atender a sua necessidade.</p>
           <div className={styles.beneficios}>
             {BENEFICIOS.map((b) => (
               <div key={b.titulo} className={styles.beneficio}>
@@ -143,7 +145,7 @@ export default function KitLanding() {
           <p className={styles.eyebrow}>Edição limitada</p>
           <h2 className={styles.subtitulo}>Quem entende, <em>já tem o seu</em>.</h2>
           <p className={styles.texto}>
-            Os kits saem em lotes pequenos. Garanta o seu antes que acabe.
+            Estoque limitado. Garanta o seu antes que acabe.
           </p>
           <a href="#kits" className={styles.ctaPrimario}>Adquira o seu agora</a>
           <p className={styles.linkLoja}>

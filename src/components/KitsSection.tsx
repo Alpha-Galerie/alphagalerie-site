@@ -36,8 +36,7 @@ export default function KitsSection() {
             </h2>
           </div>
           <p className={styles.sub}>
-            Pensados e desenvolvidos para quem realmente entende: do kit do dia a dia, no Alpha
-            Pocket, ao <strong>Case Alpha</strong> completo. <strong>Só aqui.</strong>
+            Pensados e desenvolvidos para quem realmente entende: do kit do dia a dia ao <strong>Case Alpha</strong> completo. <strong>Só aqui.</strong>
           </p>
         </div>
 
