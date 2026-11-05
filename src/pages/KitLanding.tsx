@@ -29,8 +29,8 @@ const BENEFICIOS = [
   },
   {
     icone: '✦',
-    titulo: 'Exclusivo de verdade',
-    texto: 'Um kit que não existia no mercado. Você só encontra na Alpha Galerie.',
+    titulo: 'Único e inovador',
+    texto: 'Ninguém no mercado faz um kit assim. Criado e desenvolvido pela Alpha Galerie.',
   },
   {
     icone: '◎',
@@ -95,14 +95,18 @@ export default function KitLanding() {
           </div>
 
           <div className={styles.heroConteudo}>
-            <p className={`${styles.eyebrow} ${styles.entra}`}>✦ Kits exclusivos Alpha Galerie</p>
+            <p className={`${styles.eyebrow} ${styles.entra}`}>✦ Kits Alpha Galerie</p>
             <h1 className={`${styles.titulo} ${styles.entra} ${styles.entra2}`}>
               Desenvolvido para <em>nunca mais te deixar na mão</em>.
             </h1>
+            <ul className={`${styles.selos} ${styles.entra} ${styles.entra2}`} aria-label="Kit único, exclusivo e inovador">
+              <li>Único</li>
+              <li>Exclusivo</li>
+              <li>Inovador</li>
+            </ul>
             <p className={`${styles.lead} ${styles.entra} ${styles.entra3}`}>
               Criado por quem vive a cultura, feito para quem é da cultura. Tudo o que não pode
-              faltar, com produtos selecionados, pra você não ter dor de cabeça.
-              <strong> Um kit exclusivo.</strong>
+              faltar, com produtos selecionados. Ninguém no mercado faz um kit assim.
             </p>
             <a href="#kits" className={`${styles.ctaPrimario} ${styles.ctaBrilho} ${styles.entra} ${styles.entra4}`}>
               Escolha o seu kit
@@ -113,7 +117,7 @@ export default function KitLanding() {
             <div className={styles.faixaTrilho}>
               {Array.from({ length: 2 }).map((_, i) => (
                 <span key={i}>
-                  Exclusivo Alpha Galerie ✦ Feito para a cultura ✦ Nunca mais na mão ✦ Só aqui ✦&nbsp;
+                  Kit único ✦ Exclusivo ✦ Inovador ✦ Só na Alpha Galerie ✦ Compre no site e receba em casa ✦&nbsp;
                 </span>
               ))}
             </div>
@@ -123,8 +127,7 @@ export default function KitLanding() {
         <section id="kits" className={styles.bloco}>
           <h2 className={styles.subtitulo}>Kits Alpha <em>exclusivos</em>.</h2>
           <p className={styles.texto}>
-            Veja o que vem em cada um e escolha o seu. Compra 100% online e entrega no seu
-            endereço.
+            Escolha o seu. <strong className={styles.destaque}>Compre no site e receba em casa.</strong>
           </p>
           {isLoading ? (
             <p className={styles.texto}>Carregando os kits…</p>
