@@ -187,7 +187,7 @@ export default function ProductModal({ produtoId, onClose }: ProductModalProps) 
               </div>
 
               {produto.descricao && (
-                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'rgba(244,244,244,0.6)', lineHeight: 1.7, margin: 0 }}>
+                <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: 'rgba(244,244,244,0.6)', lineHeight: 1.7, margin: 0, whiteSpace: 'pre-line' }}>
                   {produto.descricao}
                 </p>
               )}

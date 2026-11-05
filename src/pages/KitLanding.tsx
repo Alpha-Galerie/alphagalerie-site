@@ -19,30 +19,30 @@ const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'))
 const BENEFICIOS = [
   {
     icone: '◇',
-    titulo: 'Criado por quem usa',
-    texto: 'Desenvolvido a partir da experiência real de quem vive a cultura, para quem exige qualidade em cada detalhe.',
+    titulo: 'Inovação na cena',
+    texto: 'Desenvolvido para atender uma carência real do mercado: um kit com o básico que não pode faltar.',
   },
   {
     icone: '✦',
-    titulo: 'Inédito no mercado',
-    texto: 'Um kit que não existia até agora. Exclusivo Alpha Galerie, você não encontra em nenhuma outra loja.',
+    titulo: 'Exclusivo Alpha Galerie',
+    texto: 'Um kit que não existia até agora. Você não encontra em nenhuma outra loja.',
   },
   {
     icone: '▭',
-    titulo: 'Pronto para sair com você',
-    texto: 'Seda e piteira de qualidade sempre juntas, protegidas e organizadas no estojo. É só pegar e ir.',
+    titulo: 'Pronto a qualquer momento',
+    texto: 'Produtos de qualidade, protegidos e prontos para sair com você a qualquer momento.',
   },
   {
     icone: '◎',
-    titulo: 'Assinatura Alpha Galerie',
-    texto: 'Estojo com design próprio, feito para durar e para ser notado onde você estiver.',
+    titulo: 'Alpha Pocket',
+    texto: 'O pocket com design próprio Alpha Galerie que acompanha o kit: feito para ir com você e ser notado onde você estiver.',
   },
 ];
 
 /**
  * alphagalerie.com/kit — página de entrada do QR Code que vai nos kits
  * vendidos em bares e pontos parceiros. Apresenta os kits do dia a dia (no
- * estojo exclusivo Alpha), vende pelo site e leva para a linha Case Alpha e
+ * Alpha Pocket, embalagem exclusiva), vende pelo site e leva para a linha Case Alpha e
  * para a loja. Venda 100% online: o rodapé não mostra endereço da loja.
  */
 export default function KitLanding() {
@@ -93,8 +93,9 @@ export default function KitLanding() {
               Pensado, desenvolvido e exclusivo para quem <em>realmente entende</em>.
             </h1>
             <p className={styles.lead}>
-              Não é só a seda. Não é só a piteira. É o conjunto: um kit criado para o seu dia a
-              dia, completo e pronto para sair com você, no estojo exclusivo Alpha Galerie.
+              Não é só a seda. Não é só a piteira. É o conjunto: o básico que não pode faltar,
+              com produtos de qualidade, no Alpha Pocket, pronto para sair com você a qualquer
+              momento.
             </p>
             <div className={styles.ctas}>
               <a href="#kits" className={styles.ctaPrimario}>Ver os kits</a>
@@ -102,7 +103,7 @@ export default function KitLanding() {
             </div>
           </div>
           <div className={styles.heroFoto}>
-            <img src={fotoCapa} alt="Kit Alpha: sedas e piteira no estojo exclusivo Alpha Galerie" />
+            <img src={fotoCapa} alt="Pay-Pay Kit Alpha: sedas e piteira no Alpha Pocket" />
           </div>
         </section>
 
