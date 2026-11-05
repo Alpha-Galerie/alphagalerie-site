@@ -443,32 +443,11 @@
   object-fit: cover;
 }
 
-/* Kit do dia a dia: card em coluna com a foto larga (as fotos de estúdio dos
-   kits são deitadas, ~2:1). Vale em qualquer largura de tela. */
-.product.kitLargo {
-  flex-direction: column;
-}
-
-.product.kitLargo .imageWrapper {
-  width: 100%;
-  min-width: 0;
-  height: auto;
-  aspect-ratio: 16 / 9;
-  border-right: none;
-  border-bottom: 1px solid #1a1a1a;
-  padding: 12px;
-}
-
-.product.kitLargo .productImg {
-  max-height: none;
-  padding: 0;
-}
-
 /* Itens do kit logo abaixo do nome; preço e botão descem para a base. */
-.product.kitLargo .productInfo {
+.product.kitCard .productInfo {
   justify-content: flex-start;
 }
 
-.product.kitLargo .productPrice {
+.product.kitCard .productPrice {
   margin-top: auto;
 }
