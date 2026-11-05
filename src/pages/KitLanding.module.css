@@ -7,13 +7,15 @@
 }
 
 .hero {
-  max-width: 1200px;
+  max-width: 760px;
   margin: 0 auto;
-  padding: 48px 24px 32px;
-  display: grid;
-  grid-template-columns: 1fr 1.1fr;
-  gap: 40px;
-  align-items: center;
+  padding: 56px 24px 40px;
+  text-align: center;
+}
+
+.hero .lead {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .eyebrow {
@@ -47,14 +49,7 @@
   margin: 0 0 28px;
 }
 
-.ctas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.ctaPrimario,
-.ctaSecundario {
+.ctaPrimario {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -73,24 +68,9 @@
   color: #0a0a0a;
 }
 
-.ctaSecundario {
-  border: 1px solid rgba(201, 169, 97, 0.5);
-  color: #f4f4f4;
-}
-
-.heroFoto img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 6px;
-  border: 1px solid rgba(201, 169, 97, 0.3);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
-}
 
 .beneficios {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 8px 24px 40px;
+  margin-top: 24px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
@@ -166,15 +146,19 @@
   margin: 0 auto 24px;
 }
 
+.linkLoja {
+  margin: 20px 0 0;
+  font-size: 13px;
+}
+
+.linkLoja a {
+  color: rgba(244, 244, 244, 0.6);
+  text-decoration: none;
+}
+
 @media (max-width: 860px) {
   .hero {
-    grid-template-columns: 1fr;
-    padding-top: 28px;
-    gap: 24px;
-  }
-
-  .heroFoto {
-    order: -1;
+    padding-top: 36px;
   }
 
   .beneficios {
@@ -183,7 +167,7 @@
 }
 
 @media (max-width: 420px) {
-  .ctas > * {
-    flex: 1 1 100%;
+  .ctaPrimario {
+    width: 100%;
   }
 }

@@ -19,23 +19,23 @@ const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'))
 const BENEFICIOS = [
   {
     icone: '◇',
-    titulo: 'Inovação na cena',
-    texto: 'Desenvolvido para atender uma carência real do mercado: um kit com o básico que não pode faltar.',
-  },
-  {
-    icone: '✦',
-    titulo: 'Exclusivo Alpha Galerie',
-    texto: 'Um kit que não existia até agora. Você não encontra em nenhuma outra loja.',
+    titulo: 'De quem vive a cultura',
+    texto: 'Cada kit nasceu da experiência de quem usa. Nada genérico: só o que faz diferença na hora.',
   },
   {
     icone: '▭',
-    titulo: 'Pronto a qualquer momento',
-    texto: 'Produtos de qualidade, protegidos e prontos para sair com você a qualquer momento.',
+    titulo: 'Nunca mais na mão',
+    texto: 'O essencial sempre junto, protegido e pronto. Pegou o Alpha Pocket, está tudo ali.',
+  },
+  {
+    icone: '✦',
+    titulo: 'Exclusivo de verdade',
+    texto: 'Um kit que não existia no mercado. Você só encontra na Alpha Galerie.',
   },
   {
     icone: '◎',
-    titulo: 'Alpha Pocket',
-    texto: 'O pocket com design próprio Alpha Galerie que acompanha o kit: feito para ir com você e ser notado onde você estiver.',
+    titulo: 'Assinatura Alpha Galerie',
+    texto: 'Design próprio que chama atenção. Onde você abrir, alguém vai perguntar de onde é.',
   },
 ];
 
@@ -56,11 +56,10 @@ export default function KitLanding() {
 
   const kitsDiaADia = kits.filter((k) => !ehKitCase(k));
   const kitsCase = kits.filter(ehKitCase);
-  const fotoCapa = kitsDiaADia[0]?.imagem_url ?? '/kits/kit-pay-pay-alpha-v2.jpg';
 
   useEffect(() => {
     const anterior = document.title;
-    document.title = 'Kits Alpha — pensados para quem entende | ALPHA GALERIE';
+    document.title = 'Kits exclusivos Alpha — adquira o seu | ALPHA GALERIE';
     return () => { document.title = anterior; };
   }, []);
 
@@ -87,41 +86,23 @@ export default function KitLanding() {
 
       <main id="main-content" className={styles.page}>
         <section className={styles.hero}>
-          <div className={styles.heroTexto}>
-            <p className={styles.eyebrow}>✦ Exclusivo Alpha Galerie</p>
-            <h1 className={styles.titulo}>
-              Pensado, desenvolvido e exclusivo para quem <em>realmente entende</em>.
-            </h1>
-            <p className={styles.lead}>
-              Não é só a seda. Não é só a piteira. É o conjunto: o básico que não pode faltar,
-              com produtos de qualidade, no Alpha Pocket, pronto para sair com você a qualquer
-              momento.
-            </p>
-            <div className={styles.ctas}>
-              <a href="#kits" className={styles.ctaPrimario}>Ver os kits</a>
-              <Link to="/" className={styles.ctaSecundario}>Conhecer a loja</Link>
-            </div>
-          </div>
-          <div className={styles.heroFoto}>
-            <img src={fotoCapa} alt="Pay-Pay Kit Alpha: sedas e piteira no Alpha Pocket" />
-          </div>
-        </section>
-
-        <section className={styles.beneficios} aria-label="Por que o Kit Alpha">
-          {BENEFICIOS.map((b) => (
-            <div key={b.titulo} className={styles.beneficio}>
-              <span className={styles.beneficioIcone} aria-hidden="true">{b.icone}</span>
-              <strong>{b.titulo}</strong>
-              <span>{b.texto}</span>
-            </div>
-          ))}
+          <p className={styles.eyebrow}>✦ Kits exclusivos Alpha Galerie</p>
+          <h1 className={styles.titulo}>
+            Desenvolvido para <em>nunca mais te deixar na mão</em>.
+          </h1>
+          <p className={styles.lead}>
+            Criado por quem vive a cultura, para quem vive a cultura. Tudo o que não pode
+            faltar, selecionado a dedo e reunido no Alpha Pocket. Você não vai encontrar em
+            nenhum outro lugar.
+          </p>
+          <a href="#kits" className={styles.ctaPrimario}>Escolha o seu kit</a>
         </section>
 
         <section id="kits" className={styles.bloco}>
-          <p className={styles.eyebrow}>Kits do dia a dia</p>
-          <h2 className={styles.subtitulo}>Gostou? <em>Garanta o seu</em> pelo site.</h2>
+          <p className={styles.eyebrow}>Escolha o seu</p>
+          <h2 className={styles.subtitulo}>Os <em>Kits Alpha</em>.</h2>
           <p className={styles.texto}>
-            Compra 100% online, em poucos cliques, e entrega no seu endereço.
+            Lotes pequenos, montados à mão. Compra 100% online e entrega no seu endereço.
           </p>
           {isLoading ? (
             <p className={styles.texto}>Carregando os kits…</p>
@@ -130,6 +111,20 @@ export default function KitLanding() {
           ) : (
             <p className={styles.texto}>Novos kits chegando. Enquanto isso, veja a linha Case Alpha abaixo.</p>
           )}
+        </section>
+
+        <section className={styles.bloco} aria-label="Por que os Kits Alpha">
+          <p className={styles.eyebrow}>Por que é diferente</p>
+          <h2 className={styles.subtitulo}>Não é só a seda. <em>É o conjunto.</em></h2>
+          <div className={styles.beneficios}>
+            {BENEFICIOS.map((b) => (
+              <div key={b.titulo} className={styles.beneficio}>
+                <span className={styles.beneficioIcone} aria-hidden="true">{b.icone}</span>
+                <strong>{b.titulo}</strong>
+                <span>{b.texto}</span>
+              </div>
+            ))}
+          </div>
         </section>
 
         {kitsCase.length > 0 && (
@@ -145,12 +140,15 @@ export default function KitLanding() {
         )}
 
         <section className={styles.fecho}>
-          <h2 className={styles.subtitulo}>A Alpha Galerie é <em>muito mais</em>.</h2>
+          <p className={styles.eyebrow}>Edição limitada</p>
+          <h2 className={styles.subtitulo}>Quem entende, <em>já tem o seu</em>.</h2>
           <p className={styles.texto}>
-            Sedas, piteiras, tabacos, charutos, essências e headshop com curadoria, comprados 100%
-            online, com clube de pontos que vira desconto.
+            Os kits saem em lotes pequenos. Garanta o seu antes que acabe.
           </p>
-          <Link to="/" className={styles.ctaPrimario}>Conhecer a loja completa</Link>
+          <a href="#kits" className={styles.ctaPrimario}>Adquira o seu agora</a>
+          <p className={styles.linkLoja}>
+            <Link to="/">Ou conheça a loja completa →</Link>
+          </p>
         </section>
       </main>
 
