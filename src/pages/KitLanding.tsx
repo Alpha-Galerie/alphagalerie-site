@@ -56,7 +56,7 @@ export default function KitLanding() {
 
   const kitsDiaADia = kits.filter((k) => !ehKitCase(k));
   const kitsCase = kits.filter(ehKitCase);
-  const fotoCapa = kitsDiaADia[0]?.imagem_url ?? '/kits/kit-pay-pay-alpha.jpg';
+  const fotoCapa = kitsDiaADia[0]?.imagem_url ?? '/kits/kit-pay-pay-alpha-v2.jpg';
 
   useEffect(() => {
     const anterior = document.title;
