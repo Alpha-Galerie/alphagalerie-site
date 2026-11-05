@@ -17,7 +17,7 @@ SELECT 'PAY-PAY KIT ALPHA', 'ALPHA',
        E'Um kit pensado, desenvolvido e exclusivo para quem realmente entende.\n\nEste kit contém:\n• 2 sedas Pay-Pay Go Green Slim\n• 1 piteira Papelito Biodegradável Mega Longa\n\nTudo no Alpha Pocket, exclusivo Alpha Galerie.\n\nDesenvolvido como inovação no mercado, para atender uma carência real da cena: um kit com o básico que não pode faltar. Produtos de qualidade, protegidos e prontos para sair com você a qualquer momento.',
        (SELECT id FROM categorias WHERE nome = 'Headshop'),
        'Kits Exclusivos', 35.00, NULL, 35.00,
-       'https://www.alphagalerie.com/kits/kit-pay-pay-alpha-v2.jpg', 10, true, false, 0
+       'https://www.alphagalerie.com/kits/kit-pay-pay-alpha-v2.jpg', 3, true, false, 0
 WHERE NOT EXISTS (SELECT 1 FROM produtos WHERE nome = 'PAY-PAY KIT ALPHA');
 
 UPDATE produtos
