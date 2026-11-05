@@ -10,9 +10,9 @@ export function temFotoDeCenario(produto: { subcategoria?: string | null }): boo
 }
 
 /**
- * Linha "Kit Zip": kits do dia a dia que vão no zip Alpha (o mesmo que o
- * cliente reaproveita depois). Os demais kits são da linha Case Alpha.
+ * Linha Case Alpha: kits completos que vêm no case rígido. Os demais são os
+ * kits do dia a dia, que vêm no estojo exclusivo Alpha Galerie.
  */
-export function ehKitZip(produto: { nome: string }): boolean {
-  return /^KIT ZIP\b/i.test(produto.nome.trim());
+export function ehKitCase(produto: { nome: string }): boolean {
+  return /\bCASE\b/i.test(produto.nome);
 }

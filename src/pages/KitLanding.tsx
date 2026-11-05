@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useKits } from '../hooks/useKits';
 import { useVisita } from '../hooks/useVisita';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
-import { ehKitZip } from '../lib/kits';
+import { ehKitCase } from '../lib/kits';
 import type { Produto, Variacao } from '../types';
 import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
@@ -17,16 +17,33 @@ import styles from './KitLanding.module.css';
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
 
 const BENEFICIOS = [
-  { icone: '◎', titulo: 'Não molha', texto: 'Seda e piteira protegidas da água, do suor e da bebida.' },
-  { icone: '▭', titulo: 'Não amassa', texto: 'Tudo reto e organizado, do bolso à mochila.' },
-  { icone: '↻', titulo: 'O zip é seu', texto: 'Acabou o kit, o zip fica: documento, cartão, fone, o que quiser.' },
-  { icone: '☀', titulo: 'Vai junto', texto: 'Praia, clube, piscina, show, viagem. Pega e vai.' },
+  {
+    icone: '◇',
+    titulo: 'Pensado no conjunto',
+    texto: 'Seda, piteira e estojo escolhidos para funcionar juntos. O produto é o kit inteiro, não cada item solto.',
+  },
+  {
+    icone: '✦',
+    titulo: 'Exclusivo',
+    texto: 'Desenvolvido pela Alpha Galerie. Você não encontra esse kit em nenhuma outra loja.',
+  },
+  {
+    icone: '▭',
+    titulo: 'Tudo num lugar só',
+    texto: 'Esqueceu o case em casa? Tá no escritório, no rolê? Nada solto no bolso: a seda não amassa e a piteira não se perde.',
+  },
+  {
+    icone: '◎',
+    titulo: 'Todo mundo vai perguntar',
+    texto: '"Que kit é esse? Onde você comprou?" Bonito, organizado e com a nossa marca. É o kit que puxa conversa.',
+  },
 ];
 
 /**
  * alphagalerie.com/kit — página de entrada do QR Code que vai nos kits
- * vendidos em bares e pontos parceiros. Apresenta a linha Kit Zip (dia a dia),
- * oferece a recompra pelo site e leva para a linha Case Alpha e para a loja.
+ * vendidos em bares e pontos parceiros. Apresenta os kits do dia a dia (no
+ * estojo exclusivo Alpha), vende pelo site e leva para a linha Case Alpha e
+ * para a loja. Venda 100% online: o rodapé não mostra endereço da loja.
  */
 export default function KitLanding() {
   useVisita({ pagina: 'kit', origemPadrao: 'QR Kit' });
@@ -37,13 +54,13 @@ export default function KitLanding() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
-  const kitsZip = kits.filter(ehKitZip);
-  const kitsCase = kits.filter((k) => !ehKitZip(k));
-  const fotoCapa = kitsZip[0]?.imagem_url ?? '/kits/kit-zip-alpha-pay-pay.jpg';
+  const kitsDiaADia = kits.filter((k) => !ehKitCase(k));
+  const kitsCase = kits.filter(ehKitCase);
+  const fotoCapa = kitsDiaADia[0]?.imagem_url ?? '/kits/kit-pay-pay-alpha.jpg';
 
   useEffect(() => {
     const anterior = document.title;
-    document.title = 'Kit Zip Alpha — seu kit do dia a dia | ALPHA GALERIE';
+    document.title = 'Kits Alpha — pensados para quem entende | ALPHA GALERIE';
     return () => { document.title = anterior; };
   }, []);
 
@@ -73,23 +90,23 @@ export default function KitLanding() {
           <div className={styles.heroTexto}>
             <p className={styles.eyebrow}>✦ Exclusivo Alpha Galerie</p>
             <h1 className={styles.titulo}>
-              Seu kit do <em>dia a dia</em>, no zip.
+              Pensado, desenvolvido e exclusivo para quem <em>realmente entende</em>.
             </h1>
             <p className={styles.lead}>
-              Não é só a seda, não é só a piteira. É o kit pronto, organizado e protegido
-              num zip Alpha que fica com você depois.
+              Não é só a seda. Não é só a piteira. É o conjunto: cada item escolhido para
+              funcionar junto, guardado no estojo exclusivo Alpha Galerie.
             </p>
             <div className={styles.ctas}>
-              <a href="#kits-zip" className={styles.ctaPrimario}>Ver os kits</a>
+              <a href="#kits" className={styles.ctaPrimario}>Ver os kits</a>
               <Link to="/" className={styles.ctaSecundario}>Conhecer a loja</Link>
             </div>
           </div>
           <div className={styles.heroFoto}>
-            <img src={fotoCapa} alt="Kit Zip Alpha: sedas e piteira no zip transparente Alpha Galerie" />
+            <img src={fotoCapa} alt="Kit Alpha: sedas e piteira no estojo exclusivo Alpha Galerie" />
           </div>
         </section>
 
-        <section className={styles.beneficios} aria-label="Por que o kit no zip">
+        <section className={styles.beneficios} aria-label="Por que o Kit Alpha">
           {BENEFICIOS.map((b) => (
             <div key={b.titulo} className={styles.beneficio}>
               <span className={styles.beneficioIcone} aria-hidden="true">{b.icone}</span>
@@ -99,16 +116,16 @@ export default function KitLanding() {
           ))}
         </section>
 
-        <section id="kits-zip" className={styles.bloco}>
-          <p className={styles.eyebrow}>Linha Kit Zip</p>
-          <h2 className={styles.subtitulo}>Gostou? <em>Leva outro</em> pelo site.</h2>
+        <section id="kits" className={styles.bloco}>
+          <p className={styles.eyebrow}>Kits do dia a dia</p>
+          <h2 className={styles.subtitulo}>Gostou? <em>Garanta o seu</em> pelo site.</h2>
           <p className={styles.texto}>
-            Mais em conta do que comprar cada item separado. Entrega rápida ou retirada na loja.
+            Compra 100% online, em poucos cliques, e entrega no seu endereço.
           </p>
           {isLoading ? (
             <p className={styles.texto}>Carregando os kits…</p>
-          ) : kitsZip.length > 0 ? (
-            <div className={`products-grid-responsive ${styles.grid}`}>{renderCards(kitsZip)}</div>
+          ) : kitsDiaADia.length > 0 ? (
+            <div className={`products-grid-responsive ${styles.grid}`}>{renderCards(kitsDiaADia)}</div>
           ) : (
             <p className={styles.texto}>Novos kits chegando. Enquanto isso, veja a linha Case Alpha abaixo.</p>
           )}
@@ -117,10 +134,10 @@ export default function KitLanding() {
         {kitsCase.length > 0 && (
           <section className={`${styles.bloco} ${styles.blocoCase}`}>
             <p className={styles.eyebrow}>Linha Case Alpha</p>
-            <h2 className={styles.subtitulo}>Quer o <em>completo</em>?</h2>
+            <h2 className={styles.subtitulo}>Quer o <em>setup completo</em>?</h2>
             <p className={styles.texto}>
-              O Case Alpha vem com tudo: tabaco, sedas, piteira, tesoura e acessórios num case
-              rígido. Para quem quer o setup inteiro.
+              O Case Alpha leva o mesmo cuidado a outro nível: tabaco, sedas, piteira, tesoura e
+              acessórios num case rígido, montado peça por peça.
             </p>
             <div className={`products-grid-responsive ${styles.grid}`}>{renderCards(kitsCase)}</div>
           </section>
@@ -129,14 +146,14 @@ export default function KitLanding() {
         <section className={styles.fecho}>
           <h2 className={styles.subtitulo}>A Alpha Galerie é <em>muito mais</em>.</h2>
           <p className={styles.texto}>
-            Sedas, piteiras, tabacos, charutos, essências e headshop selecionados, com clube de
-            pontos que vira desconto.
+            Sedas, piteiras, tabacos, charutos, essências e headshop com curadoria, comprados 100%
+            online, com clube de pontos que vira desconto.
           </p>
           <Link to="/" className={styles.ctaPrimario}>Conhecer a loja completa</Link>
         </section>
       </main>
 
-      <Footer />
+      <Footer semEndereco />
 
       <VariacoesModal
         produto={variacoesTarget}

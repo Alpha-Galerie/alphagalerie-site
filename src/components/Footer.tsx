@@ -15,7 +15,13 @@ const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
 const CURRENT_YEAR = new Date().getFullYear();
 const APP_VERSION = __BUILD_ID__;
 
-const Footer: FC = () => {
+interface FooterProps {
+  /** Esconde endereço e horário da loja física: páginas de venda 100% online
+   *  (ex.: /kit) não levam o cliente para a loja. */
+  semEndereco?: boolean;
+}
+
+const Footer: FC<FooterProps> = ({ semEndereco = false }) => {
   // Endereço, telefone, horário e Instagram vêm da retaguarda. Precisam bater
   // exatamente com o perfil do Google: é esse cruzamento (NAP) que sustenta a
   // busca local, e antes o rodapé dizia "São Paulo — SP" enquanto o perfil
@@ -99,6 +105,7 @@ const Footer: FC = () => {
           </ul>
         </div>
 
+        {!semEndereco && (
         <div>
           <p className={styles.colTitle}>Onde estamos</p>
           <address className={styles.endereco}>
@@ -119,6 +126,7 @@ const Footer: FC = () => {
             ))}
           </ul>
         </div>
+        )}
       </div>
 
       <div className={styles.copyright}>

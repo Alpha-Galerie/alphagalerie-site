@@ -36,9 +36,8 @@ export default function KitsSection() {
             </h2>
           </div>
           <p className={styles.sub}>
-            Do <strong>Kit Zip</strong> do dia a dia, que vai no zip Alpha e não molha nem amassa,
-            ao <strong>Case Alpha</strong> completo. <strong>Sai bem mais em conta do que comprar
-            cada item separado.</strong>
+            Pensados e desenvolvidos para quem realmente entende: do kit do dia a dia, no estojo
+            exclusivo Alpha, ao <strong>Case Alpha</strong> completo. <strong>Só aqui.</strong>
           </p>
         </div>
 
