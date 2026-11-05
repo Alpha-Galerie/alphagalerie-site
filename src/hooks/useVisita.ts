@@ -13,16 +13,16 @@ function detectarDispositivo(): string {
 
 /** De onde a pessoa veio: campanha (utm_source), site que linkou, ou acesso
  *  direto. Guarda só a origem, nunca a URL inteira. */
-function detectarOrigem(): string {
+function detectarOrigem(origemPadrao?: string): string {
   try {
     const utm = new URLSearchParams(window.location.search).get('utm_source');
     if (utm) return utm.trim().slice(0, 40);
 
     const ref = document.referrer;
-    if (!ref) return 'Direto';
+    if (!ref) return origemPadrao ?? 'Direto';
 
     const host = new URL(ref).hostname.replace(/^www\./, '');
-    if (host === window.location.hostname) return 'Direto';
+    if (host === window.location.hostname) return origemPadrao ?? 'Direto';
 
     const conhecidos: Record<string, string> = {
       'instagram.com': 'Instagram',
@@ -43,7 +43,14 @@ function detectarOrigem(): string {
   }
 }
 
-export function useVisita() {
+/**
+ * Registra a visita uma vez por sessão.
+ * `pagina` separa no painel a home de páginas de entrada (ex.: 'kit', o QR
+ * Code dos pontos de venda); `origemPadrao` substitui "Direto" quando a pessoa
+ * chega sem referrer, que é o caso de quem escaneia um QR Code.
+ */
+export function useVisita(opcoes: { pagina?: string; origemPadrao?: string } = {}) {
+  const { pagina = 'home', origemPadrao } = opcoes;
   useEffect(() => {
     if (sessionStorage.getItem('ag_visited')) return;
     sessionStorage.setItem('ag_visited', '1');
@@ -51,7 +58,7 @@ export function useVisita() {
     // Capturado antes do await: uma navegação interna durante a consulta de
     // geolocalização faria o referrer virar a própria loja.
     const dispositivo = detectarDispositivo();
-    const origem = detectarOrigem();
+    const origem = detectarOrigem(origemPadrao);
 
     (async () => {
       let cidade: string | null = null;
@@ -76,7 +83,7 @@ export function useVisita() {
       try {
         await supabase.from('visitas_site').insert({
           data: new Date().toISOString().slice(0, 10),
-          pagina: 'home',
+          pagina,
           ts: new Date().toISOString(),
           cidade,
           estado,
@@ -87,5 +94,5 @@ export function useVisita() {
         });
       } catch { /* table may not exist yet — ignore */ }
     })();
-  }, []);
+  }, [pagina, origemPadrao]);
 }

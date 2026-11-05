@@ -75,6 +75,7 @@
 
 .description {
   margin: 0;
+  white-space: pre-line;
   color: rgba(244, 244, 244, 0.72);
   line-height: 1.7;
   font-family: 'Inter', sans-serif;

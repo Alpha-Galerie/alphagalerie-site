@@ -36,8 +36,8 @@ export default function KitsSection() {
             </h2>
           </div>
           <p className={styles.sub}>
-            Montados na loja, prontos para todos os bolsos. <strong>Sai bem mais em conta do que
-            comprar cada item separado</strong> — do kit básico ao case completo.
+            Pensados e desenvolvidos para quem realmente entende: do kit do dia a dia, no Alpha
+            Pocket, ao <strong>Case Alpha</strong> completo. <strong>Só aqui.</strong>
           </p>
         </div>
 

@@ -8,3 +8,11 @@ export const KITS_SUBCATEGORIA = 'Kits Exclusivos';
 export function temFotoDeCenario(produto: { subcategoria?: string | null }): boolean {
   return produto.subcategoria === KITS_SUBCATEGORIA;
 }
+
+/**
+ * Linha Case Alpha: kits completos que vêm no case rígido. Os demais são os
+ * kits do dia a dia, que vêm no Alpha Pocket (embalagem exclusiva).
+ */
+export function ehKitCase(produto: { nome: string }): boolean {
+  return /\bCASE\b/i.test(produto.nome);
+}
