@@ -36,11 +36,18 @@ function wrapperDaFoto(p: Produto) {
 }
 
 describe('ProductCard — foto de cenário', () => {
-  it('kit ocupa o card inteiro', () => {
+  it('Kit Case Alpha (foto de cenário) ocupa o card inteiro', () => {
     const el = wrapperDaFoto(
-      produto({ nome: 'KIT ESSENCIAL ALPHA', subcategoria: 'Kits Exclusivos', imagem_url: '/kits/kit-essencial-v2.jpg' })
+      produto({ nome: 'KIT CASE ALPHA ACREMA', subcategoria: 'Kits Exclusivos', imagem_url: '/kits/kit-case-acrema-v3.jpg' })
     );
     expect(el.className).toMatch(/fotoCheia/);
+  });
+
+  it('kit do Alpha Pocket (foto de estúdio, fundo branco) aparece inteiro, sem corte', () => {
+    const el = wrapperDaFoto(
+      produto({ nome: 'PAY-PAY KIT ALPHA', subcategoria: 'Kits Exclusivos', imagem_url: '/kits/kit-pay-pay-alpha-v2.jpg' })
+    );
+    expect(el.className).not.toMatch(/fotoCheia/);
   });
 
   it('produto comum continua com a moldura de foto recortada', () => {

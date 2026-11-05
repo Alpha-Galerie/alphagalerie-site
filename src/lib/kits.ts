@@ -3,10 +3,12 @@ export const KITS_SUBCATEGORIA = 'Kits Exclusivos';
 
 /**
  * Foto de cenário (kit fotografado com fundo) preenche o card inteiro, sem a
- * moldura branca das fotos de produto recortado.
+ * moldura branca das fotos de produto recortado. Só os Kits Case Alpha têm
+ * foto de cenário: os kits do Alpha Pocket são fotos de estúdio em fundo
+ * branco e entram inteiros (sem corte) como qualquer produto.
  */
-export function temFotoDeCenario(produto: { subcategoria?: string | null }): boolean {
-  return produto.subcategoria === KITS_SUBCATEGORIA;
+export function temFotoDeCenario(produto: { nome: string; subcategoria?: string | null }): boolean {
+  return produto.subcategoria === KITS_SUBCATEGORIA && ehKitCase(produto);
 }
 
 /**
