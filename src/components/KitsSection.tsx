@@ -36,8 +36,9 @@ export default function KitsSection() {
             </h2>
           </div>
           <p className={styles.sub}>
-            Montados na loja, prontos para todos os bolsos. <strong>Sai bem mais em conta do que
-            comprar cada item separado</strong> — do kit básico ao case completo.
+            Do <strong>Kit Zip</strong> do dia a dia, que vai no zip Alpha e não molha nem amassa,
+            ao <strong>Case Alpha</strong> completo. <strong>Sai bem mais em conta do que comprar
+            cada item separado.</strong>
           </p>
         </div>
 

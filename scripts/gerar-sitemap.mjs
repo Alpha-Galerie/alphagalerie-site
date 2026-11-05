@@ -185,6 +185,7 @@ async function main() {
   const urls = [
     { loc: `${SITE}/`, changefreq: 'daily', priority: '1.0', lastmod: hoje },
     { loc: `${SITE}/alpha-club`, changefreq: 'monthly', priority: '0.5', lastmod: hoje },
+    { loc: `${SITE}/kit`, changefreq: 'weekly', priority: '0.6', lastmod: hoje },
   ];
 
   // Categorias viram links de vitrine filtrada, que já é uma rota válida.

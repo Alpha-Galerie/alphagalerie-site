@@ -8,3 +8,11 @@ export const KITS_SUBCATEGORIA = 'Kits Exclusivos';
 export function temFotoDeCenario(produto: { subcategoria?: string | null }): boolean {
   return produto.subcategoria === KITS_SUBCATEGORIA;
 }
+
+/**
+ * Linha "Kit Zip": kits do dia a dia que vão no zip Alpha (o mesmo que o
+ * cliente reaproveita depois). Os demais kits são da linha Case Alpha.
+ */
+export function ehKitZip(produto: { nome: string }): boolean {
+  return /^KIT ZIP\b/i.test(produto.nome.trim());
+}
