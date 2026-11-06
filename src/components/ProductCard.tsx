@@ -47,6 +47,8 @@ const ProductCard: FC<ProductCardProps> = ({
   // Kit mostra um preço só (o do Pix): a diferença do cartão aparece no
   // checkout, quando o cliente escolhe a forma de pagamento.
   const precoUnico = produto.subcategoria === KITS_SUBCATEGORIA;
+  // Kits saem em lotes pequenos: estoque baixo aparece no card.
+  const ultimas = precoUnico && !esgotado && produto.estoque !== null && produto.estoque <= 3;
 
   const handleCta = () => {
     if (esgotado) return;
@@ -90,6 +92,11 @@ const ProductCard: FC<ProductCardProps> = ({
           )}
           {esgotado && (
             <span className={`${styles.badge} ${styles.badgeEsgotado}`}>Esgotado</span>
+          )}
+          {ultimas && (
+            <span className={`${styles.badge} ${styles.badgeUltimas}`}>
+              {produto.estoque === 1 ? 'Última unidade' : `Últimas ${produto.estoque}`}
+            </span>
           )}
         </div>
         </div>

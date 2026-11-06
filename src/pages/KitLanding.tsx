@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useKits } from '../hooks/useKits';
 import { useVisita } from '../hooks/useVisita';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
-import { ehKitCase } from '../lib/kits';
+import { FILTROS_KIT, ehKitCase, kitNoFiltro, type FiltroKit } from '../lib/kits';
 import type { Produto, Variacao } from '../types';
 import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
@@ -13,6 +13,17 @@ import AddedToCartToast from '../components/AddedToCartToast';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import Footer from '../components/Footer';
 import styles from './KitLanding.module.css';
+
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
+const LINK_PARCEIRO = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+  'Olá! Tenho um ponto de venda e quero revender os Kits Alpha.'
+)}`;
+
+/** Faixa de presente só na temporada de Black Friday e Natal (nov e dez até o dia 25). */
+function temporadaDePresente(hoje = new Date()): boolean {
+  const mes = hoje.getMonth();
+  return mes === 10 || (mes === 11 && hoje.getDate() <= 25);
+}
 
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
 
@@ -54,7 +65,9 @@ export default function KitLanding() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
+  const [filtro, setFiltro] = useState<FiltroKit>('todos');
   const kitsDiaADia = kits.filter((k) => !ehKitCase(k));
+  const kitsFiltrados = kitsDiaADia.filter((k) => kitNoFiltro(k, filtro));
   const kitsCase = kits.filter(ehKitCase);
 
   useEffect(() => {
@@ -129,10 +142,33 @@ export default function KitLanding() {
           <p className={styles.texto}>
             Escolha o seu. <strong className={styles.destaque}>Compre no site e receba em casa.</strong>
           </p>
+          {temporadaDePresente() && (
+            <p className={styles.presente}>
+              ✦ <strong>Presente pronto:</strong> o kit já vai na embalagem exclusiva Alpha Galerie.
+              É só entregar.
+            </p>
+          )}
+          {kitsDiaADia.length > 0 && (
+            <div className={styles.filtros} role="group" aria-label="Filtrar kits">
+              {FILTROS_KIT.map((f) => (
+                <button
+                  key={f.id}
+                  type="button"
+                  className={filtro === f.id ? `${styles.filtro} ${styles.filtroAtivo}` : styles.filtro}
+                  aria-pressed={filtro === f.id}
+                  onClick={() => setFiltro(f.id)}
+                >
+                  {f.rotulo}
+                </button>
+              ))}
+            </div>
+          )}
           {isLoading ? (
             <p className={styles.texto}>Carregando os kits…</p>
+          ) : kitsFiltrados.length > 0 ? (
+            <div className={`products-grid-responsive ${styles.grid}`}>{renderCards(kitsFiltrados)}</div>
           ) : kitsDiaADia.length > 0 ? (
-            <div className={`products-grid-responsive ${styles.grid}`}>{renderCards(kitsDiaADia)}</div>
+            <p className={styles.texto}>Nenhum kit nesse filtro agora.</p>
           ) : (
             <p className={styles.texto}>Novos kits chegando. Enquanto isso, veja a linha Case Alpha abaixo.</p>
           )}
@@ -162,6 +198,17 @@ export default function KitLanding() {
             <div className={`products-grid-responsive ${styles.grid}`}>{renderCards(kitsCase)}</div>
           </section>
         )}
+
+        <section className={`${styles.bloco} ${styles.parceiro}`} aria-label="Seja um ponto Alpha">
+          <h2 className={styles.subtitulo}>Seja um <em>ponto Alpha</em>.</h2>
+          <p className={styles.texto}>
+            Tem um bar, adega, tabacaria ou mercadinho de condomínio? Revenda os Kits Alpha: chegam
+            prontos, embalados e fáceis de expor. Condições especiais para revenda.
+          </p>
+          <a href={LINK_PARCEIRO} target="_blank" rel="noopener noreferrer" className={styles.ctaSecundarioOuro}>
+            Quero revender
+          </a>
+        </section>
 
         <section className={styles.fecho}>
           <h2 className={styles.subtitulo}>Quem entende, <em>já tem o seu</em>.</h2>
