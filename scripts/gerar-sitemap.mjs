@@ -18,7 +18,9 @@ import 'dotenv/config';
 
 const RAIZ = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SAIDA = resolve(RAIZ, 'public/sitemap.xml');
-const SITE = process.env.VITE_SITE_URL || 'https://alphagalerie.com';
+// alphagalerie.com redireciona para o www: o sitemap lista o endereço final,
+// senão o Search Console acusa "página com redirecionamento" em todas as URLs.
+const SITE = (process.env.VITE_SITE_URL || 'https://www.alphagalerie.com').replace(/\/$/, '');
 
 const url = process.env.VITE_SUPABASE_URL;
 const key = process.env.VITE_SUPABASE_ANON_KEY;
@@ -185,17 +187,19 @@ async function main() {
   const urls = [
     { loc: `${SITE}/`, changefreq: 'daily', priority: '1.0', lastmod: hoje },
     { loc: `${SITE}/alpha-club`, changefreq: 'monthly', priority: '0.5', lastmod: hoje },
-    { loc: `${SITE}/kit`, changefreq: 'weekly', priority: '0.6', lastmod: hoje },
+    { loc: `${SITE}/kit`, changefreq: 'weekly', priority: '0.9', lastmod: hoje },
   ];
 
-  // Categorias viram links de vitrine filtrada, que já é uma rota válida.
+  // Categorias viram links de vitrine filtrada. A home filtra por slug (ou
+  // nome) — com o id, o link abria a vitrine inteira, sem filtro.
   const { data: categorias, error: errCat } = await sb
     .from('categorias').select('id,nome,slug,ativo,oculto').order('ordem');
   if (errCat) console.warn('[sitemap] categorias:', errCat.message);
   (categorias || [])
     .filter((c) => c.ativo !== false && c.oculto !== true)
     .forEach((c) => {
-      urls.push({ loc: `${SITE}/?cat=${c.id}`, changefreq: 'weekly', priority: '0.8', lastmod: hoje });
+      const cat = encodeURIComponent(c.slug || c.nome);
+      urls.push({ loc: `${SITE}/?cat=${cat}`, changefreq: 'weekly', priority: '0.8', lastmod: hoje });
     });
 
   // Produtos: paginado por id (keyset). O PostgREST corta em 1000 linhas por

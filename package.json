@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "sitemap": "node scripts/gerar-sitemap.mjs",
-    "prebuild": "node scripts/gerar-sitemap.mjs"
+    "prebuild": "node scripts/gerar-sitemap.mjs",
+    "postbuild": "node scripts/gerar-paginas.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",

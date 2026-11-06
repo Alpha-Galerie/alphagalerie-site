@@ -47,3 +47,28 @@ describe('kitNoFiltro', () => {
     expect(kitNoFiltro(yerbinha, 'completos')).toBe(false);
   });
 });
+
+import { nomeDoKitEmTitulo, seoDoKit } from './kits';
+
+describe('seoDoKit', () => {
+  it('título com o tipo do kit e descrição com os itens', () => {
+    const seo = seoDoKit({
+      nome: 'ALPHA BIC KIT ALPHA',
+      subcategoria: 'Kits Exclusivos',
+      descricao: 'X\n• 1 seda Alpha Hemp Brasil Slim Brown\n• 1 piteira Alpha\n• 1 isqueiro BIC grande\n\nY',
+    });
+    expect(seo.titulo).toBe('Alpha Bic Kit Alpha — kit de seda, piteira e isqueiro | Alpha Galerie');
+    expect(seo.descricao).toContain('1 seda Alpha Hemp Brasil Slim Brown, 1 piteira Alpha e 1 isqueiro BIC grande');
+  });
+
+  it('kit com tabaco e kit de case', () => {
+    expect(seoDoKit({ nome: 'HASH KIT ALPHA', subcategoria: 'Kits Exclusivos', descricao: '• 1 tabaco Hash 25g' }).titulo)
+      .toContain('kit com tabaco, seda e piteira');
+    expect(seoDoKit({ nome: 'KIT CASE ALPHA ACREMA', subcategoria: 'Kits Exclusivos', descricao: '• 1 Case Alpha 2.0' }).titulo)
+      .toContain('kit com case');
+  });
+
+  it('nome em título respeita hífen', () => {
+    expect(nomeDoKitEmTitulo('ACREMA PAY-PAY KIT ALPHA')).toBe('Acrema Pay-Pay Kit Alpha');
+  });
+});

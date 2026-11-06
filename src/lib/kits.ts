@@ -68,3 +68,43 @@ export function kitNoFiltro(
   if (filtro === 'tabaco') return itens.includes('tabaco');
   return /tesoura|dichavador|triturador/.test(itens);
 }
+
+/** "PAY-PAY KIT ALPHA" -> "Pay-Pay Kit Alpha". */
+export function nomeDoKitEmTitulo(nome: string): string {
+  return nome
+    .trim()
+    .toLowerCase()
+    .replace(/(^|[\s-])(\p{L})/gu, (_m, sep: string, letra: string) => sep + letra.toUpperCase());
+}
+
+/**
+ * Título e descrição de busca de um kit. Quem procura no Google digita
+ * "kit seda piteira", "kit com isqueiro", "kit tabacaria": o título leva o
+ * tipo do kit e a descrição lista o que vem dentro.
+ *
+ * Mantenha igual a `seoDoKit` em scripts/gerar-paginas.mjs, que gera o HTML
+ * já pronto no build.
+ */
+export function seoDoKit(produto: {
+  nome: string;
+  subcategoria?: string | null;
+  descricao?: string | null;
+}): { titulo: string; descricao: string } {
+  const itens = itensDoKit(produto);
+  const texto = itens.join(' ').toLowerCase();
+  const tipo = ehKitCase(produto)
+    ? 'kit com case, tabaco e acessórios'
+    : texto.includes('tabaco')
+      ? 'kit com tabaco, seda e piteira'
+      : /isqueiro|bic/.test(texto)
+        ? 'kit de seda, piteira e isqueiro'
+        : 'kit de seda e piteira';
+  const lista =
+    itens.length > 1 ? `${itens.slice(0, -1).join(', ')} e ${itens[itens.length - 1]}` : (itens[0] ?? '');
+  return {
+    titulo: `${nomeDoKitEmTitulo(produto.nome)} — ${tipo} | Alpha Galerie`,
+    descricao: lista
+      ? `Kit exclusivo Alpha Galerie: ${lista}. ${ehKitCase(produto) ? 'No case rígido Alpha' : 'Na embalagem exclusiva'}, só no site. Compre online e receba em casa.`
+      : `${nomeDoKitEmTitulo(produto.nome)}: kit exclusivo Alpha Galerie, só no site. Compre online e receba em casa.`,
+  };
+}

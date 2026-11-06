@@ -62,6 +62,15 @@
   border-color: rgba(201, 169, 97, 0.28);
 }
 
+.verTodos {
+  display: inline-block;
+  margin-top: 10px;
+  color: #c9a961;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201, 169, 97, 0.5);
+}
+
 .grupo {
   margin: 40px 0 18px;
   font-family: 'Cormorant Garamond', serif;

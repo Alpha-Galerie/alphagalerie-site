@@ -4,6 +4,16 @@ import { useKits } from '../hooks/useKits';
 import { useVisita } from '../hooks/useVisita';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
 import { FILTROS_KIT, ehKitCase, kitNoFiltro, type FiltroKit } from '../lib/kits';
+import { buildProductPath } from '../lib/productPath';
+import { formatCurrency } from '../lib/format';
+import {
+  OG_IMAGEM_KITS,
+  SITE_URL,
+  aplicarSeo,
+  definirJsonLd,
+  restaurarSeoPadrao,
+  resumirDescricao,
+} from '../lib/seo';
 import type { Produto, Variacao } from '../types';
 import Header from '../components/Header';
 import ProductCard from '../components/ProductCard';
@@ -21,6 +31,15 @@ function temporadaDePresente(hoje = new Date()): boolean {
 }
 
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
+
+// O que o cliente vive hoje, sem o kit. Cada dor tem resposta nos benefícios.
+const DORES = [
+  'Chegar no rolê e perceber que a seda ficou em casa.',
+  'Seda amassada no bolso, rasgando na hora de usar.',
+  'A piteira que sumiu no fundo da mochila.',
+  'Sair atrás de banca ou camelô para comprar o básico.',
+  'Cada item comprado num lugar, tudo solto e desorganizado.',
+];
 
 const BENEFICIOS = [
   {
@@ -65,10 +84,44 @@ export default function KitLanding() {
   const kitsFiltrados = kitsDiaADia.filter((k) => kitNoFiltro(k, filtro));
   const kitsCase = kits.filter(ehKitCase);
 
+  // Menor preço entre os kits do dia a dia disponíveis: vira "a partir de".
+  const precosDisponiveis = kitsDiaADia
+    .filter((k) => (k.estoque ?? 0) > 0)
+    .map((k) => Number(k.preco_pix ?? k.preco))
+    .filter((v) => v > 0);
+  const aPartirDe = precosDisponiveis.length > 0 ? Math.min(...precosDisponiveis) : null;
+  const precoChamada = aPartirDe !== null ? formatCurrency(aPartirDe).replace(',00', '') : null;
+
+  // Título, descrição, canonical e prévia de compartilhamento da /kit (o build
+  // grava o mesmo no HTML; aqui fica igual depois que a página carrega).
   useEffect(() => {
-    const anterior = document.title;
-    document.title = 'Kits exclusivos Alpha — adquira o seu | ALPHA GALERIE';
-    return () => { document.title = anterior; };
+    aplicarSeo({
+      titulo: 'Kits de seda, piteira e isqueiro exclusivos | Alpha Galerie',
+      descricao: resumirDescricao(
+        `Kits Alpha exclusivos${precoChamada ? ` a partir de ${precoChamada}` : ''}: seda, piteira, isqueiro e tabaco na embalagem exclusiva Alpha Galerie. Só no site. Compre online e receba em casa.`
+      ),
+      url: `${SITE_URL}/kit`,
+      imagem: OG_IMAGEM_KITS,
+      tipo: 'website',
+    });
+    if (kits.length > 0) {
+      definirJsonLd('ld-kits', {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: 'Kits Alpha',
+        itemListElement: kits.map((k, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          url: `${SITE_URL}${buildProductPath(k)}`,
+          name: k.nome,
+        })),
+      });
+    }
+  }, [kits, precoChamada]);
+
+  useEffect(() => () => {
+    restaurarSeoPadrao();
+    definirJsonLd('ld-kits', null);
   }, []);
 
   function handleSelectVariacao(produto: Produto, variacao: Variacao) {
@@ -119,6 +172,11 @@ export default function KitLanding() {
             <a href="#kits" className={`${styles.ctaPrimario} ${styles.ctaBrilho} ${styles.entra} ${styles.entra4}`}>
               Escolha o seu kit
             </a>
+            {precoChamada && (
+              <p className={`${styles.aPartir} ${styles.entra} ${styles.entra4}`}>
+                Kits a partir de <strong>{precoChamada}</strong> · receba em casa
+              </p>
+            )}
           </div>
 
           <div className={styles.faixa} aria-hidden="true">
@@ -169,9 +227,21 @@ export default function KitLanding() {
           )}
         </section>
 
-        <section className={styles.bloco} aria-label="Por que os Kits Alpha">
-          <h2 className={styles.subtitulo}>Um kit que <em>te entende</em>.</h2>
-          <p className={styles.texto}>Desenvolvido para atender a sua necessidade.</p>
+        <section className={`${styles.bloco} ${styles.pas}`} aria-label="Por que os Kits Alpha">
+          <div className={styles.dores}>
+            <h2 className={styles.subtitulo}>Você já <em>passou por isso</em>?</h2>
+            <ul className={styles.listaDores}>
+              {DORES.map((dor) => (
+                <li key={dor}>
+                  <span className={styles.dorIcone} aria-hidden="true">✕</span>
+                  {dor}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <h2 className={styles.subtitulo}>Com o Kit Alpha, <em>isso acabou</em>.</h2>
+          <p className={styles.texto}>Um kit que te entende, desenvolvido para atender a sua necessidade.</p>
           <div className={styles.beneficios}>
             {BENEFICIOS.map((b) => (
               <div key={b.titulo} className={styles.beneficio}>
@@ -181,6 +251,7 @@ export default function KitLanding() {
               </div>
             ))}
           </div>
+          <a href="#kits" className={`${styles.ctaPrimario} ${styles.ctaPas}`}>Quero o meu kit</a>
         </section>
 
         {kitsCase.length > 0 && (
@@ -206,6 +277,7 @@ export default function KitLanding() {
         <section className={styles.fecho}>
           <h2 className={styles.subtitulo}>Quem entende, <em>já tem o seu</em>.</h2>
           <p className={styles.texto}>
+            {precoChamada ? <>Kits a partir de <strong className={styles.destaque}>{precoChamada}</strong>. </> : null}
             Estoque limitado. Garanta o seu antes que acabe.
           </p>
           <a href="#kits" className={styles.ctaPrimario}>Adquira o seu agora</a>

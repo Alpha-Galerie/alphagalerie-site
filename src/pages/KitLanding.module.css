@@ -397,6 +397,60 @@
   text-decoration: none;
 }
 
+/* "Kits a partir de R$ X" logo abaixo do botão do topo */
+.aPartir {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: rgba(244, 244, 244, 0.75);
+}
+
+.aPartir strong {
+  color: var(--gold, #c9a961);
+  font-size: 16px;
+}
+
+/* Dores → solução */
+.dores {
+  margin: 0 0 40px;
+  padding: 26px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.listaDores {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.listaDores li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: rgba(244, 244, 244, 0.72);
+}
+
+.dorIcone {
+  flex: 0 0 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(214, 90, 70, 0.16);
+  color: #e0806e;
+  font-size: 12px;
+  margin-top: 1px;
+}
+
+.ctaPas {
+  margin-top: 28px;
+}
+
 /* Filtros rápidos dos kits */
 .filtros {
   display: flex;
