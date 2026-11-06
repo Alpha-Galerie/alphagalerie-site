@@ -291,6 +291,12 @@ export default function ProductPage() {
 
               {produto.descricao && <p className={styles.description}>{produto.descricao}</p>}
 
+              {produto.subcategoria === 'Kits Exclusivos' && (
+                <p className={styles.soNoSite}>
+                  ✦ Exclusivo: só no site da Alpha Galerie. Não vendemos em marketplace nem em outras lojas.
+                </p>
+              )}
+
               <div className={styles.priceContainer}>
                 {(() => {
                   const preco = getPrecoInfo(produto);

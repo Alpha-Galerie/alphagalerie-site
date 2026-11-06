@@ -12,7 +12,6 @@ async function fetchKits(): Promise<Produto[]> {
     .select(COLS)
     .eq('ativo', true)
     .eq('subcategoria', KITS_SUBCATEGORIA)
-    .gt('estoque', 0)
     .order('destaque_ordem', { ascending: true })
     .order('id', { ascending: true });
 
@@ -22,7 +21,11 @@ async function fetchKits(): Promise<Produto[]> {
     Omit<Produto, '_variacoes'> & { variacoes?: Variacao[] }
   >;
 
-  return produtos.map((p) => ({
+  // Kits esgotados continuam na vitrine (com "Me avise quando voltar"), no
+  // fim da lista, para medir a procura e não perder quem chegar depois.
+  const disponiveis = produtos.filter((p) => (p.estoque ?? 0) > 0);
+  const esgotados = produtos.filter((p) => (p.estoque ?? 0) <= 0);
+  return [...disponiveis, ...esgotados].map((p) => ({
     ...p,
     _variacoes: (p.variacoes ?? [])
       .filter((v) => v.ativo)
