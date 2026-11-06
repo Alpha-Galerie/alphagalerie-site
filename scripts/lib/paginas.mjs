@@ -51,22 +51,45 @@ function nomeEmTitulo(nome) {
     .replace(/(^|[\s-])(\p{L})/gu, (_m, sep, letra) => sep + letra.toUpperCase());
 }
 
+const PRIORIDADE_NO_TITULO = {
+  case: 0, seda: 1, sedas: 1, piteira: 2, piteiras: 2,
+  dichavador: 3, triturador: 3, tesoura: 4, isqueiro: 5,
+};
+
+export function nomeCurtoDoItem(item) {
+  const m = item.trim().match(/^(\d+)\s+(.+)$/);
+  const qtd = m ? Number(m[1]) : 1;
+  const palavras = (m ? m[2] : item.trim()).split(/\s+/);
+  const tipo = palavras[0]?.toLowerCase() ?? '';
+  const prioridade = PRIORIDADE_NO_TITULO[tipo];
+  if (prioridade === undefined) return null;
+  if (tipo === 'case') return { rotulo: palavras.join(' '), prioridade };
+  let marca = palavras[1] ?? '';
+  if (palavras[2] === 'Hemp') marca += ' Hemp';
+  const rotuloTipo = palavras[0].charAt(0).toUpperCase() + palavras[0].slice(1);
+  return { rotulo: `${qtd > 1 ? `${qtd} ` : ''}${rotuloTipo}${marca ? ` ${marca}` : ''}`, prioridade };
+}
+
 export function seoDoKit(p) {
   const itens = itensDoKit(p);
-  const texto = itens.join(' ').toLowerCase();
-  const tipo = ehKitCase(p)
-    ? 'kit com case, tabaco e acessórios'
-    : texto.includes('tabaco')
-      ? 'kit com tabaco, seda e piteira'
-      : /isqueiro|bic/.test(texto)
-        ? 'kit de seda, piteira e isqueiro'
-        : 'kit de seda e piteira';
-  const lista = itens.length > 1 ? `${itens.slice(0, -1).join(', ')} e ${itens[itens.length - 1]}` : (itens[0] ?? '');
+  const nome = nomeEmTitulo(p.nome);
+  const curtos = itens
+    .map((item, i) => ({ curto: nomeCurtoDoItem(item), i }))
+    .filter((c) => c.curto !== null)
+    .sort((a, b) => a.curto.prioridade - b.curto.prioridade || a.i - b.i)
+    .slice(0, 4)
+    .map((c) => c.curto.rotulo);
+  const textos = itens.map((item, i) => {
+    const semUm = item.replace(/^1\s+/, '');
+    return i === 0 ? semUm.charAt(0).toUpperCase() + semUm.slice(1) : semUm;
+  });
+  const lista = textos.length > 1 ? `${textos.slice(0, -1).join(', ')} e ${textos[textos.length - 1]}` : (textos[0] ?? '');
+  const onde = ehKitCase(p) ? 'no case rígido Alpha' : 'na embalagem exclusiva';
   return {
-    titulo: `${nomeEmTitulo(p.nome)} — ${tipo} | Alpha Galerie`,
+    titulo: curtos.length > 0 ? `${curtos.join(' + ')} | ${nome}` : `${nome} | Alpha Galerie`,
     descricao: lista
-      ? `Kit exclusivo Alpha Galerie: ${lista}. ${ehKitCase(p) ? 'No case rígido Alpha' : 'Na embalagem exclusiva'}, só no site. Compre online e receba em casa.`
-      : `${nomeEmTitulo(p.nome)}: kit exclusivo Alpha Galerie, só no site. Compre online e receba em casa.`,
+      ? `${lista}: kit exclusivo Alpha Galerie, ${onde}. Compre no site e receba em casa.`
+      : `${nome}: kit exclusivo Alpha Galerie. Compre no site e receba em casa.`,
   };
 }
 
@@ -149,9 +172,9 @@ export function gerarPaginas({ base, produtos, SITE }) {
   const menor = disponiveis.length
     ? Math.min(...disponiveis.map((k) => Number(k.preco_pix ?? k.preco)))
     : null;
-  const descricaoKits = `Kits Alpha exclusivos${menor ? ` a partir de ${moeda(menor)}` : ''}: seda, piteira, isqueiro e tabaco na embalagem exclusiva Alpha Galerie. Só no site. Compre online e receba em casa.`;
+  const descricaoKits = `Seda, piteira, isqueiro, tesoura e dichavador em kits exclusivos Alpha Galerie${menor ? ` a partir de ${moeda(menor)}` : ''}. Na embalagem exclusiva, só no site: compre online e receba em casa.`;
   arquivos.push(['/kit', montar(base, {
-    titulo: 'Kits de seda, piteira e isqueiro exclusivos | Alpha Galerie',
+    titulo: 'Seda, piteira, isqueiro e tesoura em kits exclusivos | Alpha Galerie',
     descricao: resumir(descricaoKits),
     url: `${SITE}/kit`,
     imagem: `${SITE}/og-kits.jpg`,

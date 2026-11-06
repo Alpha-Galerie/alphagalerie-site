@@ -48,24 +48,37 @@ describe('kitNoFiltro', () => {
   });
 });
 
-import { nomeDoKitEmTitulo, seoDoKit } from './kits';
+import { nomeCurtoDoItem, nomeDoKitEmTitulo, seoDoKit } from './kits';
 
 describe('seoDoKit', () => {
-  it('título com o tipo do kit e descrição com os itens', () => {
+  it('título começa pelo que se busca (seda, piteira...) e termina no nome do kit', () => {
     const seo = seoDoKit({
       nome: 'ALPHA BIC KIT ALPHA',
       subcategoria: 'Kits Exclusivos',
       descricao: 'X\n• 1 seda Alpha Hemp Brasil Slim Brown\n• 1 piteira Alpha\n• 1 isqueiro BIC grande\n\nY',
     });
-    expect(seo.titulo).toBe('Alpha Bic Kit Alpha — kit de seda, piteira e isqueiro | Alpha Galerie');
-    expect(seo.descricao).toContain('1 seda Alpha Hemp Brasil Slim Brown, 1 piteira Alpha e 1 isqueiro BIC grande');
+    expect(seo.titulo).toBe('Seda Alpha Hemp + Piteira Alpha + Isqueiro BIC | Alpha Bic Kit Alpha');
+    expect(seo.descricao).toBe(
+      'Seda Alpha Hemp Brasil Slim Brown, piteira Alpha e isqueiro BIC grande: kit exclusivo Alpha Galerie, na embalagem exclusiva. Compre no site e receba em casa.'
+    );
   });
 
-  it('kit com tabaco e kit de case', () => {
-    expect(seoDoKit({ nome: 'HASH KIT ALPHA', subcategoria: 'Kits Exclusivos', descricao: '• 1 tabaco Hash 25g' }).titulo)
-      .toContain('kit com tabaco, seda e piteira');
-    expect(seoDoKit({ nome: 'KIT CASE ALPHA ACREMA', subcategoria: 'Kits Exclusivos', descricao: '• 1 Case Alpha 2.0' }).titulo)
-      .toContain('kit com case');
+  it('tabaco fica fora do título; seda, piteira e tesoura entram primeiro', () => {
+    const seo = seoDoKit({
+      nome: 'HASH KIT ALPHA',
+      subcategoria: 'Kits Exclusivos',
+      descricao:
+        '• 1 tabaco Hash 25g\n• 1 seda Squadafum King Size Slim\n• 1 seda Alpha Hemp Brasil Slim Brown\n• 1 piteira Alpha\n• 1 isqueiro BIC grande\n• 1 tesoura dobrável prata',
+    });
+    expect(seo.titulo).toBe('Seda Squadafum + Seda Alpha Hemp + Piteira Alpha + Tesoura dobrável | Hash Kit Alpha');
+    expect(seo.descricao.startsWith('Tabaco Hash 25g, seda Squadafum')).toBe(true);
+  });
+
+  it('nomes curtos dos itens', () => {
+    expect(nomeCurtoDoItem('2 sedas Pay-Pay Go Green Slim')?.rotulo).toBe('2 Sedas Pay-Pay');
+    expect(nomeCurtoDoItem('1 dichavador Papelito de acrílico')?.rotulo).toBe('Dichavador Papelito');
+    expect(nomeCurtoDoItem('1 Case Alpha 2.0')?.rotulo).toBe('Case Alpha 2.0');
+    expect(nomeCurtoDoItem('1 tabaco Acrema Blend 20g')).toBeNull();
   });
 
   it('nome em título respeita hífen', () => {
