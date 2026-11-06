@@ -22,65 +22,88 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "TobaccoShop",
-    "@id": "https://www.alphagalerie.com/#loja",
-    "name": "Alpha Galerie",
-    "description": "Tabacaria e headshop no Centro Comercial Alphaville, em Barueri: seda, piteira, tabaco, narguilé, carvão, charutaria e acessórios.",
-    "url": "https://www.alphagalerie.com/",
-    "telephone": "+5511942920076",
-    "image": "https://www.alphagalerie.com/og-default.jpg",
-    "logo": "https://www.alphagalerie.com/logo.png",
-    "priceRange": "$$",
-    "currenciesAccepted": "BRL",
-    "paymentAccepted": "Pix, Cartão de crédito, Cartão de débito, Dinheiro",
-    "address": {
-      "@type": "PostalAddress",
-      "streetAddress": "Calçada Flôr de Lótus, 15 — Centro Comercial Alphaville",
-      "addressLocality": "Barueri",
-      "addressRegion": "SP",
-      "postalCode": "06453-000",
-      "addressCountry": "BR"
+{
+  "@context": "https://schema.org",
+  "@type": "OnlineStore",
+  "@id": "https://www.alphagalerie.com/#loja",
+  "name": "Alpha Galerie",
+  "description": "Tabacaria e headshop de Alphaville desde 2014, agora 100% online, com entrega em Alphaville, Barueri e região: seda, piteira, tabaco, narguilé, charutaria e acessórios.",
+  "url": "https://www.alphagalerie.com/",
+  "telephone": "+5511942920076",
+  "image": "https://www.alphagalerie.com/og-default.jpg",
+  "logo": "https://www.alphagalerie.com/logo.png",
+  "currenciesAccepted": "BRL",
+  "areaServed": [
+    {
+      "@type": "City",
+      "name": "Barueri"
     },
-    "hasMap": "https://www.google.com/maps/search/?api=1&query=Alpha+Galerie%2C+Cal%C3%A7ada+Fl%C3%B4r+de+L%C3%B3tus%2C+15%2C+Alphaville%2C+Barueri%2C+SP",
-    "openingHoursSpecification": [
+    {
+      "@type": "City",
+      "name": "Santana de Parnaíba"
+    },
+    {
+      "@type": "City",
+      "name": "Osasco"
+    },
+    {
+      "@type": "City",
+      "name": "Carapicuíba"
+    },
+    {
+      "@type": "City",
+      "name": "Jandira"
+    },
+    {
+      "@type": "City",
+      "name": "Itapevi"
+    },
+    {
+      "@type": "City",
+      "name": "Cotia"
+    },
+    {
+      "@type": "City",
+      "name": "São Paulo"
+    }
+  ],
+  "knowsAbout": [
+    "seda",
+    "piteira",
+    "tabaco",
+    "narguilé",
+    "arguile",
+    "carvão",
+    "charuto",
+    "headshop"
+  ],
+  "sameAs": [
+    "https://www.instagram.com/alpha.galerie"
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Catálogo Alpha Galerie",
+    "itemListElement": [
       {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-        "opens": "11:00",
-        "closes": "21:00"
+        "@type": "OfferCatalog",
+        "name": "Headshop — seda, piteira, acessórios"
       },
       {
-        "@type": "OpeningHoursSpecification",
-        "dayOfWeek": "Sunday",
-        "opens": "14:00",
-        "closes": "19:00"
+        "@type": "OfferCatalog",
+        "name": "Narguilé e carvão"
+      },
+      {
+        "@type": "OfferCatalog",
+        "name": "Charutaria"
+      },
+      {
+        "@type": "OfferCatalog",
+        "name": "Tabacaria"
       }
-    ],
-    "areaServed": [
-      { "@type": "City", "name": "Barueri" },
-      { "@type": "City", "name": "Santana de Parnaíba" },
-      { "@type": "City", "name": "Osasco" },
-      { "@type": "City", "name": "Carapicuíba" },
-      { "@type": "City", "name": "Jandira" },
-      { "@type": "City", "name": "Itapevi" },
-      { "@type": "City", "name": "Cotia" },
-      { "@type": "City", "name": "São Paulo" }
-    ],
-    "knowsAbout": ["seda", "piteira", "tabaco", "narguilé", "arguile", "carvão", "charuto", "headshop"],
-    "sameAs": ["https://www.instagram.com/alpha.galerie"],
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "Catálogo Alpha Galerie",
-      "itemListElement": [
-        { "@type": "OfferCatalog", "name": "Headshop — seda, piteira, acessórios" },
-        { "@type": "OfferCatalog", "name": "Narguilé e carvão" },
-        { "@type": "OfferCatalog", "name": "Charutaria" },
-        { "@type": "OfferCatalog", "name": "Tabacaria" }
-      ]
-    }
-  }
+    ]
+  },
+  "paymentAccepted": "Pix, Cartão de crédito"
+}
   </script>
   <script type="application/ld+json">
   {

@@ -2,11 +2,8 @@ import type { FC } from 'react';
 import InstagramIcon from './InstagramIcon';
 import {
   useLoja,
-  enderecoLinha,
   telefoneLink,
   instagramUrl,
-  mapaUrl,
-  horarios,
 } from '../hooks/useLoja';
 import styles from './Footer.module.css';
 
@@ -21,7 +18,9 @@ interface FooterProps {
   semEndereco?: boolean;
 }
 
-const Footer: FC<FooterProps> = ({ semEndereco = false }) => {
+// A loja física fechou: o atendimento é só pelo site, então o rodapé não
+// mostra endereço nem horário de balcão (semEndereco ficou sem efeito).
+const Footer: FC<FooterProps> = () => {
   // Endereço, telefone, horário e Instagram vêm da retaguarda. Precisam bater
   // exatamente com o perfil do Google: é esse cruzamento (NAP) que sustenta a
   // busca local, e antes o rodapé dizia "São Paulo — SP" enquanto o perfil
@@ -105,28 +104,12 @@ const Footer: FC<FooterProps> = ({ semEndereco = false }) => {
           </ul>
         </div>
 
-        {!semEndereco && (
         <div>
-          <p className={styles.colTitle}>Onde estamos</p>
-          <address className={styles.endereco}>
-            <a href={mapaUrl(loja)} target="_blank" rel="noopener noreferrer">
-              {loja.complemento && (
-                <>
-                  {loja.complemento}
-                  <br />
-                </>
-              )}
-              {enderecoLinha(loja)}
-            </a>
-          </address>
-          <p className={styles.colTitle} style={{ marginTop: '1.25rem' }}>Horário</p>
-          <ul className={styles.contactList}>
-            {horarios(loja).map((h) => (
-              <li key={h.dias}>{h.dias} · {h.horas}</li>
-            ))}
-          </ul>
+          <p className={styles.colTitle}>Atendimento</p>
+          <p className={styles.endereco}>
+            Loja 100% online. Entregamos em Alphaville, Barueri, Santana de Parnaíba e região.
+          </p>
         </div>
-        )}
       </div>
 
       <div className={styles.copyright}>
