@@ -16,8 +16,8 @@ export const OG_IMAGEM_PADRAO = `${SITE_URL}/og-default.jpg`;
 export const OG_IMAGEM_KITS = `${SITE_URL}/og-kits.jpg`;
 
 export const SEO_PADRAO = {
-  titulo: 'Tabacaria em Alphaville | Alpha Galerie — Seda, Tabaco e Headshop',
-  descricao: 'Tabacaria e headshop no Centro Comercial Alphaville, em Barueri, desde 2014: seda, piteira, tabaco, narguilé e kits exclusivos. Compre no site e receba em casa.',
+  titulo: 'Tabacaria em Alphaville | Alpha Galerie — Loja online com entrega',
+  descricao: 'Tabacaria e headshop de Alphaville desde 2014, agora 100% online: seda, piteira, tabaco, narguilé e kits exclusivos, com entrega em Alphaville, Barueri e região.',
   ogTitulo: 'ALPHA GALERIE — Alphaville',
   ogDescricao: 'Headshop · Charutaria · Arguile · Lifestyle · Alphaville/Barueri',
 };

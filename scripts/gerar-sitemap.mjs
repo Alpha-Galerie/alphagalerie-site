@@ -115,7 +115,7 @@ async function aplicarDadosDaLoja(sb) {
   const blocos = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
   // A loja é TobaccoShop (tipo de Store do schema.org que o Google entende
   // como "tabacaria"); Store continua aceito para não quebrar HTML antigo.
-  const alvo = blocos.find((m) => /"@type":\s*"(TobaccoShop|Store)"/.test(m[1]));
+  const alvo = blocos.find((m) => /"@type":\s*"(OnlineStore|TobaccoShop|Store)"/.test(m[1]));
   if (!alvo) { console.warn('[loja] bloco Store não encontrado — schema mantido.'); return; }
 
   let loja;
@@ -126,15 +126,13 @@ async function aplicarDadosDaLoja(sb) {
     return;
   }
 
-  if (!loja.address || typeof loja.address !== 'object') {
-    loja.address = { '@type': 'PostalAddress', addressCountry: 'BR' };
-  }
-
-  const rua = [cfg.loja_endereco, cfg.loja_complemento].filter(Boolean).join(' — ');
-  if (rua) loja.address.streetAddress = rua;
-  if (cfg.loja_cidade) loja.address.addressLocality = cfg.loja_cidade;
-  if (cfg.loja_uf) loja.address.addressRegion = cfg.loja_uf;
-  if (cfg.loja_cep) loja.address.postalCode = cfg.loja_cep;
+  // A loja física fechou (atendimento só pelo site): o schema não declara
+  // endereço, mapa nem horário de balcão — declarar um endereço onde não há
+  // loja contradiz o Google e confunde quem procura.
+  loja['@type'] = 'OnlineStore';
+  delete loja.address;
+  delete loja.hasMap;
+  delete loja.openingHoursSpecification;
 
   // O schema exige E.164; o dono digita "(11) 94292-0076".
   const digitos = (cfg.loja_telefone || '').replace(/\D/g, '');
@@ -143,26 +141,6 @@ async function aplicarDadosDaLoja(sb) {
   if (cfg.loja_instagram) {
     loja.sameAs = [`https://www.instagram.com/${cfg.loja_instagram.replace(/^@/, '')}`];
   }
-
-  const busca = ['Alpha Galerie', cfg.loja_endereco, cfg.loja_bairro, cfg.loja_cidade, cfg.loja_uf, cfg.loja_cep]
-    .filter(Boolean).join(', ');
-  if (busca) loja.hasMap = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(busca)}`;
-
-  // Horário vazio quer dizer fechado, e dia fechado simplesmente não entra —
-  // declarar "opens" sem "closes" produz schema inválido.
-  const faixa = (dias, abre, fecha) =>
-    /^\d{1,2}:\d{2}$/.test(abre || '') && /^\d{1,2}:\d{2}$/.test(fecha || '')
-      ? [{ '@type': 'OpeningHoursSpecification', dayOfWeek: dias, opens: abre, closes: fecha }]
-      : [];
-
-  const horarios = [
-    ...faixa(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-      cfg.loja_hora_semana_abre, cfg.loja_hora_semana_fecha),
-    ...faixa('Sunday', cfg.loja_hora_domingo_abre, cfg.loja_hora_domingo_fecha),
-  ];
-  // Sem nenhum horário válido, é melhor manter o que já estava do que publicar
-  // uma loja que, para o Google, não abre nunca.
-  if (horarios.length > 0) loja.openingHoursSpecification = horarios;
 
   // "</script>" dentro de um valor encerraria a tag antes da hora. Escapar o
   // "<" resolve e o JSON continua equivalente.
