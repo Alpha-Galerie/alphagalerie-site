@@ -437,22 +437,6 @@
   background: linear-gradient(160deg, rgba(201, 169, 97, 0.08), transparent 60%);
 }
 
-.ctaSecundarioOuro {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 48px;
-  padding: 0 26px;
-  border: 1px solid var(--gold, #c9a961);
-  color: var(--gold, #c9a961);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border-radius: 2px;
-}
-
 @media (max-width: 860px) {
 
   .beneficios {

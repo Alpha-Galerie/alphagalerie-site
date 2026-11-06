@@ -14,11 +14,6 @@ import FloatingWhatsApp from '../components/FloatingWhatsApp';
 import Footer from '../components/Footer';
 import styles from './KitLanding.module.css';
 
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
-const LINK_PARCEIRO = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-  'Olá! Tenho um ponto de venda e quero revender os Kits Alpha.'
-)}`;
-
 /** Faixa de presente só na temporada de Black Friday e Natal (nov e dez até o dia 25). */
 function temporadaDePresente(hoje = new Date()): boolean {
   const mes = hoje.getMonth();
@@ -199,15 +194,13 @@ export default function KitLanding() {
           </section>
         )}
 
-        <section className={`${styles.bloco} ${styles.parceiro}`} aria-label="Seja um ponto Alpha">
-          <h2 className={styles.subtitulo}>Seja um <em>ponto Alpha</em>.</h2>
+        <section className={`${styles.bloco} ${styles.parceiro}`} aria-label="Só no site da Alpha Galerie">
+          <h2 className={styles.subtitulo}>Só existe <em>aqui</em>.</h2>
           <p className={styles.texto}>
-            Tem um bar, adega, tabacaria ou mercadinho de condomínio? Revenda os Kits Alpha: chegam
-            prontos, embalados e fáceis de expor. Condições especiais para revenda.
+            Os Kits Alpha não estão em marketplace nem em nenhuma outra loja. São desenvolvidos,
+            montados e vendidos apenas pela Alpha Galerie, em lotes pequenos. Para ter o seu, só
+            pelo nosso site.
           </p>
-          <a href={LINK_PARCEIRO} target="_blank" rel="noopener noreferrer" className={styles.ctaSecundarioOuro}>
-            Quero revender
-          </a>
         </section>
 
         <section className={styles.fecho}>
