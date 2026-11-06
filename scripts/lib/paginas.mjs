@@ -27,7 +27,8 @@ function resumir(texto) {
 }
 
 function absoluta(u, SITE) {
-  if (!u) return `${SITE}/og-default.jpg`;
+  // Foto embutida (data:) não serve de prévia: usa a imagem padrão.
+  if (!u || u.startsWith('data:')) return `${SITE}/og-default.jpg`;
   if (/^https?:\/\//.test(u)) return u;
   return `${SITE}${u.startsWith('/') ? '' : '/'}${u}`;
 }

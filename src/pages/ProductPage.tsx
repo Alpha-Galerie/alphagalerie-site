@@ -31,6 +31,8 @@ import {
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
 
 function toAbsoluteUrl(url: string): string {
+  // Foto embutida (data:) não serve de prévia nem de imagem no JSON-LD.
+  if (url.startsWith('data:')) return OG_IMAGEM_PADRAO;
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 }

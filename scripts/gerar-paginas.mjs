@@ -36,22 +36,52 @@ function gravar(caminho, html) {
   writeFileSync(resolve(dir, 'index.html'), html, 'utf8');
 }
 
+/**
+ * Busca os produtos ativos em partes leves. A coluna imagem_url de alguns
+ * produtos guarda a foto inteira em base64 (dezenas de MB no total): pedir
+ * essa coluna para todos estourava o tempo do banco. Por isso a foto vem numa
+ * consulta separada, só das que são endereço (http...); as embutidas usam a
+ * imagem padrão na prévia.
+ */
 async function buscarProdutos(sb) {
-  const cols = 'id,nome,marca,descricao,preco,preco_pix,preco_promocional,imagem_url,estoque,subcategoria,ativo,destaque_ordem,categorias!produtos_categoria_id_fkey(nome)';
+  const cols = 'id,nome,marca,descricao,preco,preco_pix,preco_promocional,estoque,subcategoria,ativo,destaque_ordem,categoria_id';
   const todos = [];
   let ultimoId = 0;
-  for (let volta = 0; volta < 200; volta++) {
+  for (let volta = 0; volta < 400; volta++) {
     const { data, error } = await sb.from('produtos').select(cols)
-      .eq('ativo', true).gt('id', ultimoId).order('id', { ascending: true }).limit(1000);
-    if (error) throw new Error(error.message);
+      .eq('ativo', true).gt('id', ultimoId).order('id', { ascending: true }).limit(500);
+    if (error) throw new Error(`produtos: ${error.message}`);
     if (!data || data.length === 0) break;
     const maior = data[data.length - 1].id;
     if (maior <= ultimoId) break;
     todos.push(...data);
     ultimoId = maior;
-    if (data.length < 1000) break;
+    if (data.length < 500) break;
   }
-  return todos;
+
+  const fotos = new Map();
+  ultimoId = 0;
+  for (let volta = 0; volta < 400; volta++) {
+    const { data, error } = await sb.from('produtos').select('id,imagem_url')
+      .eq('ativo', true).like('imagem_url', 'http%').gt('id', ultimoId)
+      .order('id', { ascending: true }).limit(500);
+    if (error) throw new Error(`fotos: ${error.message}`);
+    if (!data || data.length === 0) break;
+    const maior = data[data.length - 1].id;
+    if (maior <= ultimoId) break;
+    data.forEach((r) => fotos.set(r.id, r.imagem_url));
+    ultimoId = maior;
+    if (data.length < 500) break;
+  }
+
+  const { data: cats } = await sb.from('categorias').select('id,nome');
+  const nomeCat = new Map((cats || []).map((c) => [c.id, c.nome]));
+
+  return todos.map((p) => ({
+    ...p,
+    imagem_url: fotos.get(p.id) ?? null,
+    categorias: nomeCat.has(p.categoria_id) ? { nome: nomeCat.get(p.categoria_id) } : null,
+  }));
 }
 
 async function main() {
