@@ -130,11 +130,12 @@ async function aplicarDadosDaLoja(sb) {
     loja.address = { '@type': 'PostalAddress', addressCountry: 'BR' };
   }
 
-  const rua = [cfg.loja_endereco, cfg.loja_complemento].filter(Boolean).join(' — ');
-  if (rua) loja.address.streetAddress = rua;
+  // Sem endereço de rua nem CEP: o atendimento é online, com entrega na região
+  // de Alphaville. O schema diz só o bairro/cidade.
+  delete loja.address.streetAddress;
+  delete loja.address.postalCode;
   if (cfg.loja_cidade) loja.address.addressLocality = cfg.loja_cidade;
   if (cfg.loja_uf) loja.address.addressRegion = cfg.loja_uf;
-  if (cfg.loja_cep) loja.address.postalCode = cfg.loja_cep;
 
   // O schema exige E.164; o dono digita "(11) 94292-0076".
   const digitos = (cfg.loja_telefone || '').replace(/\D/g, '');
@@ -144,7 +145,7 @@ async function aplicarDadosDaLoja(sb) {
     loja.sameAs = [`https://www.instagram.com/${cfg.loja_instagram.replace(/^@/, '')}`];
   }
 
-  const busca = ['Alpha Galerie', cfg.loja_endereco, cfg.loja_bairro, cfg.loja_cidade, cfg.loja_uf, cfg.loja_cep]
+  const busca = [cfg.loja_bairro || 'Alphaville', cfg.loja_cidade, cfg.loja_uf]
     .filter(Boolean).join(', ');
   if (busca) loja.hasMap = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(busca)}`;
 

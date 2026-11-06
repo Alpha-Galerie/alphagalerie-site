@@ -2,10 +2,8 @@ import type { FC } from 'react';
 import InstagramIcon from './InstagramIcon';
 import {
   useLoja,
-  enderecoLinha,
   telefoneLink,
   instagramUrl,
-  mapaUrl,
   horarios,
 } from '../hooks/useLoja';
 import styles from './Footer.module.css';
@@ -109,17 +107,19 @@ const Footer: FC<FooterProps> = ({ semEndereco = false }) => {
         <div>
           <p className={styles.colTitle}>Onde estamos</p>
           <address className={styles.endereco}>
-            <a href={mapaUrl(loja)} target="_blank" rel="noopener noreferrer">
-              {loja.complemento && (
-                <>
-                  {loja.complemento}
-                  <br />
-                </>
-              )}
-              {enderecoLinha(loja)}
-            </a>
+            Alphaville · Barueri, SP
+            <br />
+            <span className={styles.semRetirada}>Atendimento online, com entrega na região. Sem retirada no local.</span>
           </address>
-          <p className={styles.colTitle} style={{ marginTop: '1.25rem' }}>Horário</p>
+          {/* Mapa só da região (sem endereço): mostra que a loja é de Alphaville. */}
+          <iframe
+            className={styles.mapa}
+            title="Mapa de Alphaville, Barueri"
+            src="https://www.google.com/maps?q=Alphaville,+Barueri+-+SP&z=13&output=embed"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+          <p className={styles.colTitle} style={{ marginTop: '1.25rem' }}>Horário de atendimento</p>
           <ul className={styles.contactList}>
             {horarios(loja).map((h) => (
               <li key={h.dias}>{h.dias} · {h.horas}</li>
