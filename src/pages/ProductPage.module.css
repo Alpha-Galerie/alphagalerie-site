@@ -73,6 +73,16 @@
   line-height: 1.2;
 }
 
+.soNoSite {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(201, 169, 97, 0.45);
+  background: rgba(201, 169, 97, 0.08);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #e8d3a0;
+}
+
 .description {
   margin: 0;
   white-space: pre-line;

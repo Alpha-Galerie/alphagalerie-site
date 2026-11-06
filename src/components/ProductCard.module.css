@@ -456,3 +456,12 @@
 .product.kitCard .productPrice {
   margin-top: auto;
 }
+
+/* Kit esgotado: só a foto fica apagada; o "Me avise" continua bem visível. */
+.product.kitCard.esgotado {
+  opacity: 1;
+}
+
+.product.kitCard.esgotado .imageWrapper {
+  opacity: 0.55;
+}

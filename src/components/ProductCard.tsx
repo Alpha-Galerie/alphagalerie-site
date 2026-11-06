@@ -5,6 +5,7 @@ import { formatCurrency } from '../lib/format';
 import { getPrecoInfo } from '../lib/preco';
 import { buildProductPath } from '../lib/productPath';
 import { KITS_SUBCATEGORIA, itensDoKit, temFotoDeCenario } from '../lib/kits';
+import AviseKit from './AviseKit';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
@@ -143,6 +144,9 @@ const ProductCard: FC<ProductCardProps> = ({
           <p className={styles.priceCartao}>ou {formatCurrency(preco.precoVenda)} no cartão</p>
         )}
 
+        {esgotado && precoUnico ? (
+          <AviseKit kit={produto} />
+        ) : (
         <button
           type="button"
           className={styles.productCta}
@@ -158,6 +162,7 @@ const ProductCard: FC<ProductCardProps> = ({
         >
           {temVariacoes ? 'Selecionar' : 'Adicionar'}
         </button>
+        )}
       </div>
     </article>
   );
