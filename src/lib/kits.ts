@@ -77,12 +77,47 @@ export function nomeDoKitEmTitulo(nome: string): string {
     .replace(/(^|[\s-])(\p{L})/gu, (_m, sep: string, letra: string) => sep + letra.toUpperCase());
 }
 
+// Tipos de item que as pessoas buscam, na ordem em que entram no título.
+// Tabaco e acessórios de pouca busca ficam só na descrição.
+const PRIORIDADE_NO_TITULO: Record<string, number> = {
+  case: 0,
+  seda: 1,
+  sedas: 1,
+  piteira: 2,
+  piteiras: 2,
+  dichavador: 3,
+  triturador: 3,
+  tesoura: 4,
+  isqueiro: 5,
+};
+
 /**
- * Título e descrição de busca de um kit. Quem procura no Google digita
- * "kit seda piteira", "kit com isqueiro", "kit tabacaria": o título leva o
- * tipo do kit e a descrição lista o que vem dentro.
+ * Nome curto de um item do kit para o título de busca:
+ * "1 seda Alpha Hemp Brasil Slim Brown" -> "Seda Alpha Hemp",
+ * "2 sedas Pay-Pay Go Green Slim" -> "2 Sedas Pay-Pay". Tabaco e itens fora
+ * da lista de prioridade devolvem null.
+ */
+export function nomeCurtoDoItem(item: string): { rotulo: string; prioridade: number } | null {
+  const m = item.trim().match(/^(\d+)\s+(.+)$/);
+  const qtd = m ? Number(m[1]) : 1;
+  const palavras = (m ? m[2] : item.trim()).split(/\s+/);
+  const tipo = palavras[0]?.toLowerCase() ?? '';
+  const prioridade = PRIORIDADE_NO_TITULO[tipo];
+  if (prioridade === undefined) return null;
+  if (tipo === 'case') return { rotulo: palavras.join(' '), prioridade };
+  let marca = palavras[1] ?? '';
+  if (palavras[2] === 'Hemp') marca += ' Hemp';
+  const rotuloTipo = palavras[0].charAt(0).toUpperCase() + palavras[0].slice(1);
+  return { rotulo: `${qtd > 1 ? `${qtd} ` : ''}${rotuloTipo}${marca ? ` ${marca}` : ''}`, prioridade };
+}
+
+/**
+ * Título e descrição de busca de um kit. O título começa pelo que as pessoas
+ * digitam no Google (seda, piteira, dichavador, tesoura, isqueiro, com a
+ * marca): quem procura "seda Alpha Hemp" ou "piteira Papelito" cai no kit.
+ * O tabaco fica só na descrição.
  *
- * Mantenha igual a `seoDoKit` em scripts/gerar-paginas.mjs, que gera o HTML
+ * Mantenha igual a `seoDoKit` em scripts/lib/paginas.mjs, que gera o HTML
  * já pronto no build.
  */
 export function seoDoKit(produto: {
@@ -91,20 +126,26 @@ export function seoDoKit(produto: {
   descricao?: string | null;
 }): { titulo: string; descricao: string } {
   const itens = itensDoKit(produto);
-  const texto = itens.join(' ').toLowerCase();
-  const tipo = ehKitCase(produto)
-    ? 'kit com case, tabaco e acessórios'
-    : texto.includes('tabaco')
-      ? 'kit com tabaco, seda e piteira'
-      : /isqueiro|bic/.test(texto)
-        ? 'kit de seda, piteira e isqueiro'
-        : 'kit de seda e piteira';
+  const nome = nomeDoKitEmTitulo(produto.nome);
+  const curtos = itens
+    .map((item, i) => ({ curto: nomeCurtoDoItem(item), i }))
+    .filter((c): c is { curto: { rotulo: string; prioridade: number }; i: number } => c.curto !== null)
+    .sort((a, b) => a.curto.prioridade - b.curto.prioridade || a.i - b.i)
+    .slice(0, 4)
+    .map((c) => c.curto.rotulo);
+
+  const textos = itens.map((item, i) => {
+    const semUm = item.replace(/^1\s+/, '');
+    return i === 0 ? semUm.charAt(0).toUpperCase() + semUm.slice(1) : semUm;
+  });
   const lista =
-    itens.length > 1 ? `${itens.slice(0, -1).join(', ')} e ${itens[itens.length - 1]}` : (itens[0] ?? '');
+    textos.length > 1 ? `${textos.slice(0, -1).join(', ')} e ${textos[textos.length - 1]}` : (textos[0] ?? '');
+  const onde = ehKitCase(produto) ? 'no case rígido Alpha' : 'na embalagem exclusiva';
+
   return {
-    titulo: `${nomeDoKitEmTitulo(produto.nome)} — ${tipo} | Alpha Galerie`,
+    titulo: curtos.length > 0 ? `${curtos.join(' + ')} | ${nome}` : `${nome} | Alpha Galerie`,
     descricao: lista
-      ? `Kit exclusivo Alpha Galerie: ${lista}. ${ehKitCase(produto) ? 'No case rígido Alpha' : 'Na embalagem exclusiva'}, só no site. Compre online e receba em casa.`
-      : `${nomeDoKitEmTitulo(produto.nome)}: kit exclusivo Alpha Galerie, só no site. Compre online e receba em casa.`,
+      ? `${lista}: kit exclusivo Alpha Galerie, ${onde}. Compre no site e receba em casa.`
+      : `${nome}: kit exclusivo Alpha Galerie. Compre no site e receba em casa.`,
   };
 }

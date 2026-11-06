@@ -96,9 +96,9 @@ export default function KitLanding() {
   // grava o mesmo no HTML; aqui fica igual depois que a página carrega).
   useEffect(() => {
     aplicarSeo({
-      titulo: 'Kits de seda, piteira e isqueiro exclusivos | Alpha Galerie',
+      titulo: 'Seda, piteira, isqueiro e tesoura em kits exclusivos | Alpha Galerie',
       descricao: resumirDescricao(
-        `Kits Alpha exclusivos${precoChamada ? ` a partir de ${precoChamada}` : ''}: seda, piteira, isqueiro e tabaco na embalagem exclusiva Alpha Galerie. Só no site. Compre online e receba em casa.`
+        `Seda, piteira, isqueiro, tesoura e dichavador em kits exclusivos Alpha Galerie${precoChamada ? ` a partir de ${precoChamada}` : ''}. Na embalagem exclusiva, só no site: compre online e receba em casa.`
       ),
       url: `${SITE_URL}/kit`,
       imagem: OG_IMAGEM_KITS,
@@ -191,6 +191,7 @@ export default function KitLanding() {
         </section>
 
         <section id="kits" className={styles.bloco}>
+          <p className={styles.eyebrow}>Seda · Piteira · Isqueiro · Tesoura · Dichavador</p>
           <h2 className={styles.subtitulo}>Kits Alpha <em>exclusivos</em>.</h2>
           <p className={styles.texto}>
             Escolha o seu. <strong className={styles.destaque}>Compre no site e receba em casa.</strong>
