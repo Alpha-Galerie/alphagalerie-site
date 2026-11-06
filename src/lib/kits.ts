@@ -43,3 +43,28 @@ export function itensDoKit(produto: { subcategoria?: string | null; descricao?: 
     .filter(Boolean)
     .map((i) => i.charAt(0).toUpperCase() + i.slice(1));
 }
+
+export type FiltroKit = 'todos' | 'ate35' | 'tabaco' | 'completos';
+
+export const FILTROS_KIT: { id: FiltroKit; rotulo: string }[] = [
+  { id: 'todos', rotulo: 'Todos' },
+  { id: 'ate35', rotulo: 'Até R$ 35' },
+  { id: 'tabaco', rotulo: 'Com tabaco' },
+  { id: 'completos', rotulo: 'Completos' },
+];
+
+/**
+ * Filtros rápidos da página /kit. "Completos" são os kits com tesoura ou
+ * dichavador; "Com tabaco" lê os itens do kit; "Até R$ 35" usa o preço do Pix,
+ * que é o que o card mostra.
+ */
+export function kitNoFiltro(
+  produto: { nome: string; subcategoria?: string | null; descricao?: string | null; preco: number; preco_pix?: number | null },
+  filtro: FiltroKit
+): boolean {
+  if (filtro === 'todos') return true;
+  if (filtro === 'ate35') return Number(produto.preco_pix ?? produto.preco) <= 35;
+  const itens = itensDoKit(produto).join(' ').toLowerCase();
+  if (filtro === 'tabaco') return itens.includes('tabaco');
+  return /tesoura|dichavador|triturador/.test(itens);
+}

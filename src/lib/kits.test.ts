@@ -24,3 +24,26 @@ describe('itensDoKit', () => {
     expect(itensDoKit({ subcategoria: 'Seda', descricao: '• algo' })).toEqual([]);
   });
 });
+
+import { kitNoFiltro } from './kits';
+
+describe('kitNoFiltro', () => {
+  const kit = (descricao: string, preco_pix: number) => ({
+    nome: 'X KIT ALPHA', subcategoria: 'Kits Exclusivos', descricao, preco: preco_pix + 2, preco_pix,
+  });
+  const basico = kit('• 1 seda Alpha Hemp\n• 1 piteira Alpha', 17);
+  const hash = kit('• 1 tabaco Hash 25g\n• 1 tesoura dobrável prata', 115);
+  const yerbinha = kit('• 1 tabaco Yerbinha 15g\n• 1 piteira Alpha', 62);
+
+  it('Até R$ 35 usa o preço do Pix', () => {
+    expect(kitNoFiltro(basico, 'ate35')).toBe(true);
+    expect(kitNoFiltro(yerbinha, 'ate35')).toBe(false);
+  });
+
+  it('Com tabaco e Completos leem os itens do kit', () => {
+    expect(kitNoFiltro(yerbinha, 'tabaco')).toBe(true);
+    expect(kitNoFiltro(basico, 'tabaco')).toBe(false);
+    expect(kitNoFiltro(hash, 'completos')).toBe(true);
+    expect(kitNoFiltro(yerbinha, 'completos')).toBe(false);
+  });
+});

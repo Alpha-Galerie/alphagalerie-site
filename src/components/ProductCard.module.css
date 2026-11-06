@@ -107,6 +107,11 @@
   outline-offset: -1px;
 }
 
+.badgeUltimas {
+  background-color: #c9a961;
+  color: #0a0a0a;
+}
+
 .badgeEsgotado {
   background-color: #444;
   color: #aaa;
