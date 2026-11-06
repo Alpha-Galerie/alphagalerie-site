@@ -17,44 +17,22 @@ import { useToastStore } from '../store/toast';
 import type { Produto, Variacao } from '../types';
 import styles from './ProductPage.module.css';
 import { registrarInteresse } from '../lib/interesse';
+import { KITS_SUBCATEGORIA, seoDoKit } from '../lib/kits';
+import {
+  OG_IMAGEM_PADRAO,
+  SEO_PADRAO,
+  SITE_URL,
+  aplicarSeo,
+  definirJsonLd,
+  restaurarSeoPadrao,
+  resumirDescricao,
+} from '../lib/seo';
 
 const CheckoutModal = lazy(() => import('../components/checkout/CheckoutModal'));
 
-const DEFAULT_TITLE = 'ALPHA GALERIE — Headshop, Charutaria, Arguile · Alphaville';
-const DEFAULT_DESCRIPTION = 'Mais de 10 anos sendo a referencia em headshop, charutaria, arguile e lifestyle em Alphaville.';
-const DEFAULT_OG_TITLE = 'ALPHA GALERIE — Alphaville';
-const DEFAULT_OG_DESCRIPTION = 'Headshop · Charutaria · Arguile · Lifestyle · Alphaville/Barueri';
-const DEFAULT_OG_IMAGE = 'https://alphagalerie.com/og-default.jpg';
-
-function upsertMeta(attr: 'name' | 'property', key: string, content: string) {
-  let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);
-  if (!el) {
-    el = document.createElement('meta');
-    el.setAttribute(attr, key);
-    document.head.appendChild(el);
-  }
-  el.setAttribute('content', content);
-}
-
-function upsertCanonical(href: string) {
-  let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
-  if (!canonical) {
-    canonical = document.createElement('link');
-    canonical.setAttribute('rel', 'canonical');
-    document.head.appendChild(canonical);
-  }
-  canonical.setAttribute('href', href);
-}
-
 function toAbsoluteUrl(url: string): string {
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
-  return `${globalThis.location.origin}${url.startsWith('/') ? '' : '/'}${url}`;
-}
-
-function trimDescription(text: string): string {
-  const cleaned = text.replace(/\s+/g, ' ').trim();
-  if (cleaned.length <= 160) return cleaned;
-  return `${cleaned.slice(0, 157)}...`;
+  return `${SITE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
 /** Preço que a pessoa realmente vai pagar: o promocional quando ele existe
@@ -69,16 +47,11 @@ function precoVigente(p: Produto): number {
 /**
  * Publica o JSON-LD de Produto na página. É o que permite ao Google mostrar
  * preço e disponibilidade direto no resultado da busca, em vez de só um link.
+ * O id é o mesmo do bloco que o build já grava no HTML: este substitui aquele
+ * com o preço e o estoque do momento.
  */
 function upsertProdutoJsonLd(dados: Record<string, unknown> | null) {
-  const ID = 'ld-produto';
-  document.getElementById(ID)?.remove();
-  if (!dados) return;
-  const el = document.createElement('script');
-  el.id = ID;
-  el.type = 'application/ld+json';
-  el.textContent = JSON.stringify(dados);
-  document.head.appendChild(el);
+  definirJsonLd('ld-produto', dados);
 }
 
 export default function ProductPage() {
@@ -102,27 +75,19 @@ export default function ProductPage() {
 
   useEffect(() => {
     if (produto) {
-      const pageUrl = `${globalThis.location.origin}${buildProductPath(produto)}`;
-      const imageUrl = produto.imagem_url ? toAbsoluteUrl(produto.imagem_url) : DEFAULT_OG_IMAGE;
-      const title = `${produto.nome} | ALPHA GALERIE`;
-      const description = trimDescription(
-        produto.descricao && produto.descricao.trim().length > 0
-          ? produto.descricao
-          : `${produto.nome} ${produto.marca ? `da ${produto.marca}` : ''} na Alpha Galerie.`
+      const pageUrl = `${SITE_URL}${buildProductPath(produto)}`;
+      const imageUrl = produto.imagem_url ? toAbsoluteUrl(produto.imagem_url) : OG_IMAGEM_PADRAO;
+      const ehKit = produto.subcategoria === KITS_SUBCATEGORIA;
+      const seoKit = ehKit ? seoDoKit(produto) : null;
+      const title = seoKit?.titulo ?? `${produto.nome} | ALPHA GALERIE`;
+      const description = resumirDescricao(
+        seoKit?.descricao ??
+          (produto.descricao && produto.descricao.trim().length > 0
+            ? produto.descricao
+            : `${produto.nome} ${produto.marca ? `da ${produto.marca}` : ''} na Alpha Galerie.`)
       );
 
-      document.title = title;
-      upsertCanonical(pageUrl);
-      upsertMeta('name', 'description', description);
-      upsertMeta('property', 'og:type', 'product');
-      upsertMeta('property', 'og:title', title);
-      upsertMeta('property', 'og:description', description);
-      upsertMeta('property', 'og:image', imageUrl);
-      upsertMeta('property', 'og:url', pageUrl);
-      upsertMeta('name', 'twitter:card', 'summary_large_image');
-      upsertMeta('name', 'twitter:title', title);
-      upsertMeta('name', 'twitter:description', description);
-      upsertMeta('name', 'twitter:image', imageUrl);
+      aplicarSeo({ titulo: title, descricao: description, url: pageUrl, imagem: imageUrl, tipo: 'product' });
 
       const emEstoque = (produto.estoque ?? 0) > 0;
       upsertProdutoJsonLd({
@@ -142,7 +107,7 @@ export default function ProductPage() {
           availability: emEstoque
             ? 'https://schema.org/InStock'
             : 'https://schema.org/OutOfStock',
-          seller: { '@type': 'Store', name: 'Alpha Galerie', '@id': 'https://alphagalerie.com/#loja' },
+          seller: { '@type': 'Store', name: 'Alpha Galerie', '@id': `${SITE_URL}/#loja` },
         },
       });
       return;
@@ -158,29 +123,14 @@ export default function ProductPage() {
       return;
     }
 
-    document.title = DEFAULT_TITLE;
+    document.title = SEO_PADRAO.titulo;
   }, [produto, isLoading, isError]);
 
   // Sem isto o JSON-LD do último produto continuaria na home depois de
   // navegar para trás, descrevendo a página errada para o buscador.
   useEffect(() => () => upsertProdutoJsonLd(null), []);
 
-  useEffect(() => {
-    return () => {
-      document.title = DEFAULT_TITLE;
-      upsertCanonical('https://alphagalerie.com');
-      upsertMeta('name', 'description', DEFAULT_DESCRIPTION);
-      upsertMeta('property', 'og:type', 'website');
-      upsertMeta('property', 'og:title', DEFAULT_OG_TITLE);
-      upsertMeta('property', 'og:description', DEFAULT_OG_DESCRIPTION);
-      upsertMeta('property', 'og:image', DEFAULT_OG_IMAGE);
-      upsertMeta('property', 'og:url', 'https://alphagalerie.com');
-      upsertMeta('name', 'twitter:card', 'summary_large_image');
-      upsertMeta('name', 'twitter:title', DEFAULT_OG_TITLE);
-      upsertMeta('name', 'twitter:description', DEFAULT_OG_DESCRIPTION);
-      upsertMeta('name', 'twitter:image', DEFAULT_OG_IMAGE);
-    };
-  }, []);
+  useEffect(() => () => restaurarSeoPadrao(), []);
 
   async function handleShare() {
     if (!produto) return;

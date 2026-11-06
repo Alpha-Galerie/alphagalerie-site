@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useKits } from '../hooks/useKits';
 import { ehKitCase } from '../lib/kits';
 import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
@@ -55,6 +56,8 @@ export default function KitsSection() {
           </div>
           <p className={styles.sub}>
             Pensados e desenvolvidos para quem realmente entende: do kit do dia a dia ao <strong>Case Alpha</strong> completo. <strong>Só no site da Alpha Galerie</strong>: não vendemos em marketplace nem em outras lojas.
+            <br />
+            <Link to="/kit" className={styles.verTodos}>Ver todos os kits →</Link>
           </p>
         </div>
 
