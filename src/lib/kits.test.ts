@@ -71,7 +71,8 @@ describe('seoDoKit', () => {
         '• 1 tabaco Hash 25g\n• 1 seda Squadafum King Size Slim\n• 1 seda Alpha Hemp Brasil Slim Brown\n• 1 piteira Alpha\n• 1 isqueiro BIC grande\n• 1 tesoura dobrável prata',
     });
     expect(seo.titulo).toBe('Seda Squadafum + Seda Alpha Hemp + Piteira Alpha + Tesoura dobrável | Hash Kit Alpha');
-    expect(seo.descricao.startsWith('Tabaco Hash 25g, seda Squadafum')).toBe(true);
+    expect(seo.descricao.startsWith('Seda Squadafum King Size Slim, seda Alpha Hemp')).toBe(true);
+    expect(seo.descricao).toContain('isqueiro BIC grande e tabaco Hash 25g:');
   });
 
   it('nomes curtos dos itens', () => {

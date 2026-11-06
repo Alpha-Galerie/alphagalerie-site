@@ -79,7 +79,12 @@ export function seoDoKit(p) {
     .sort((a, b) => a.curto.prioridade - b.curto.prioridade || a.i - b.i)
     .slice(0, 4)
     .map((c) => c.curto.rotulo);
-  const textos = itens.map((item, i) => {
+  // Descrição na mesma ordem do título: o que se busca primeiro, tabaco no fim.
+  const ordenados = itens
+    .map((item, i) => ({ item, i, prioridade: nomeCurtoDoItem(item)?.prioridade ?? 9 }))
+    .sort((a, b) => a.prioridade - b.prioridade || a.i - b.i)
+    .map((x) => x.item);
+  const textos = ordenados.map((item, i) => {
     const semUm = item.replace(/^1\s+/, '');
     return i === 0 ? semUm.charAt(0).toUpperCase() + semUm.slice(1) : semUm;
   });
