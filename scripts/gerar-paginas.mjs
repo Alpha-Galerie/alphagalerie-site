@@ -59,20 +59,34 @@ async function buscarProdutos(sb) {
     if (data.length < 500) break;
   }
 
+  // Fotos dos kits primeiro: poucas linhas, filtradas pela subcategoria, e
+  // são as páginas que mais importam.
   const fotos = new Map();
-  ultimoId = 0;
-  for (let volta = 0; volta < 400; volta++) {
-    const { data, error } = await sb.from('produtos').select('id,imagem_url')
-      .eq('ativo', true).like('imagem_url', 'http%').gt('id', ultimoId)
-      .order('id', { ascending: true }).limit(500);
-    if (error) throw new Error(`fotos: ${error.message}`);
-    if (!data || data.length === 0) break;
-    const maior = data[data.length - 1].id;
-    if (maior <= ultimoId) break;
+  const { data: fotosKits, error: errKits } = await sb.from('produtos')
+    .select('id,imagem_url').eq('ativo', true).eq('subcategoria', 'Kits Exclusivos');
+  if (errKits) console.warn('[paginas] fotos dos kits:', errKits.message);
+  (fotosKits || []).forEach((r) => {
+    if (typeof r.imagem_url === 'string' && r.imagem_url.startsWith('http')) fotos.set(r.id, r.imagem_url);
+  });
+
+  // Demais fotos em grupos de 8 produtos, pelo id. O filtro "começa com
+  // http" precisa abrir as fotos embutidas do grupo, e elas se concentram em
+  // alguns trechos do catálogo: um lote grande ali estoura o tempo do banco.
+  // Grupo que falhar duas vezes fica sem foto (imagem padrão) e a busca segue.
+  const ids = todos.map((p) => p.id).filter((id) => !fotos.has(id));
+  let gruposSemFoto = 0;
+  for (let i = 0; i < ids.length; i += 8) {
+    const grupo = ids.slice(i, i + 8);
+    let data = null;
+    for (let tentativa = 0; tentativa < 2 && !data; tentativa++) {
+      const r = await sb.from('produtos').select('id,imagem_url')
+        .in('id', grupo).like('imagem_url', 'http%');
+      if (!r.error) data = r.data || [];
+    }
+    if (!data) { gruposSemFoto++; continue; }
     data.forEach((r) => fotos.set(r.id, r.imagem_url));
-    ultimoId = maior;
-    if (data.length < 500) break;
   }
+  if (gruposSemFoto > 0) console.warn(`[paginas] ${gruposSemFoto} grupo(s) de fotos não responderam — usam a imagem padrão.`);
 
   const { data: cats } = await sb.from('categorias').select('id,nome');
   const nomeCat = new Map((cats || []).map((c) => [c.id, c.nome]));
