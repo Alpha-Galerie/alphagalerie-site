@@ -113,7 +113,9 @@ async function aplicarDadosDaLoja(sb) {
 
   // Acha o bloco ld+json que descreve a loja, sem depender da ordem deles.
   const blocos = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
-  const alvo = blocos.find((m) => m[1].includes('"@type": "Store"') || m[1].includes('"@type":"Store"'));
+  // A loja é TobaccoShop (tipo de Store do schema.org que o Google entende
+  // como "tabacaria"); Store continua aceito para não quebrar HTML antigo.
+  const alvo = blocos.find((m) => /"@type":\s*"(TobaccoShop|Store)"/.test(m[1]));
   if (!alvo) { console.warn('[loja] bloco Store não encontrado — schema mantido.'); return; }
 
   let loja;
