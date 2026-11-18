@@ -10,8 +10,7 @@ const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER as string;
 const WA_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=Ol%C3%A1!%20Tenho%20uma%20d%C3%BAvida%20sobre%20o%20prazo%20de%20entrega.`;
 
 // Entrega Programada (Pex): desde R$ 15 na capital e Grande SP, grátis acima de R$ 200.
-// Fora da Pex: envio nacional com frete fixo (FRETE_NACIONAL).
-const PONTOS = ['Capital e Grande SP · desde R$ 15', 'Grátis acima de R$ 200', 'Campinas e região em 2 dias', 'Todo o Brasil · frete fixo R$ 20'];
+const PONTOS = ['Capital e Grande SP · desde R$ 15', 'Grátis acima de R$ 200', 'Campinas e região em 2 dias'];
 
 // O que mais se busca no site. Um toque já busca na vitrine.
 const ATALHOS = [

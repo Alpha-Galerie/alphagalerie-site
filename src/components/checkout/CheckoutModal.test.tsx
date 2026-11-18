@@ -318,21 +318,14 @@ describe('CheckoutModal: Entrega Programada (Pex)', () => {
     expect(await confirmar()).toMatchObject({ total: 200, entrega: 'programada' });
   });
 
-  it('fora da Pex e do motoboy: envio para todo o Brasil com frete fixo', async () => {
+  it('fora da Pex e do motoboy: frete a combinar', async () => {
     render(<CheckoutModal onClose={vi.fn()} />);
     fillRequiredFields();
     fireEvent.change(screen.getByLabelText(/CEP/i), { target: { value: '14010-000' } });
 
     expect(screen.queryByText(/Entrega Programada/)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Frete a combinar/)).not.toBeInTheDocument();
-    expect(screen.getAllByText(/todo o Brasil/).length).toBeGreaterThan(0);
-    // Frete fixo não entra no "faltam R$ X para frete grátis".
-    expect(screen.queryByText(/Faltam/)).not.toBeInTheDocument();
-    expect(await confirmar()).toMatchObject({
-      total: 120,
-      entrega: 'nacional',
-      observacoes: expect.stringMatching(/ENVIO NACIONAL/),
-    });
+    expect(screen.getAllByText(/a combinar/).length).toBeGreaterThan(0);
+    expect(await confirmar()).toMatchObject({ total: 100, entrega: 'delivery' });
   });
 });
 

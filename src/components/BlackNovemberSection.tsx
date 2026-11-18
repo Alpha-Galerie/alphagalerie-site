@@ -1,7 +1,7 @@
 import { useClubeRegras } from '../hooks/useClube';
 import { percentualDeVolta } from '../lib/clube';
 import { CAMPANHA, campanhaNoAr } from '../lib/campanha';
-import { FRETE_NACIONAL, PEX_CORTE_TEXTO } from '../lib/frete';
+import { FRETE_BENEFICIO_A_PARTIR, PEX_CORTE_TEXTO } from '../lib/frete';
 import styles from './BlackNovemberSection.module.css';
 
 // Faixa da campanha logo abaixo do topo: o que o cliente ganha comprando na
@@ -14,7 +14,7 @@ export default function BlackNovemberSection() {
 
   const beneficios = [
     volta && { destaque: `${volta}%`, texto: 'de volta em pontos no Alpha Club' },
-    { destaque: `R$ ${FRETE_NACIONAL}`, texto: 'frete fixo para todo o Brasil' },
+    { destaque: 'R$ 15', texto: `frete fixo em SP e região · grátis acima de R$ ${FRETE_BENEFICIO_A_PARTIR}` },
     { destaque: 'Hoje', texto: `pediu até ${PEX_CORTE_TEXTO}, chega hoje na Grande SP` },
   ].filter(Boolean) as { destaque: string; texto: string }[];
 
