@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useCartStore } from '../../store/cart';
 import { useCheckout } from '../../hooks/useCheckout';
 import { loadMercadoPago } from '../../lib/mercadopago';
-import { calcularEntregaProgramada, calcularEnvioNacional, calcularFrete, FRETE_BENEFICIO_A_PARTIR, freteComBeneficio, PEX_CORTE_TEXTO } from '../../lib/frete';
+import { calcularEntregaProgramada, calcularFrete, FRETE_BENEFICIO_A_PARTIR, freteComBeneficio, PEX_CORTE_TEXTO } from '../../lib/frete';
 import type { FreteResult } from '../../lib/frete';
 import type { Pedido } from '../../types';
 import PixPayment from './PixPayment';
@@ -152,11 +152,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const programada = calcularEntregaProgramada(cep);
   const temMotoboy = freteMotoboy.valor > 0;
   const usaProgramada = programada !== null && (modalidade === 'programada' || !temMotoboy);
-  // Fora da Pex e do motoboy: envio para todo o Brasil com frete fixo.
-  const nacional = programada === null && !temMotoboy ? calcularEnvioNacional(cep) : null;
-  const usaNacional = nacional !== null;
-  const modalidadeEntrega = usaProgramada ? 'programada' : usaNacional ? 'nacional' : 'motoboy';
-  const frete: FreteResult = usaProgramada ? programada : (nacional ?? freteMotoboy);
+  const frete: FreteResult = usaProgramada ? programada : freteMotoboy;
 
   // Cartão paga o preço de venda (a taxa do Mercado Pago sai dele); Pix paga
   // o preço Pix de cada produto. Não há desconto de Pix por cima.
@@ -173,9 +169,9 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   })();
   // Acima de R$ 200 em produtos: Entrega Programada grátis, motoboy pela metade.
   const subtotalBeneficio = subtotal - descontoCupom;
-  const precoEntrega = (valor: number, m: 'programada' | 'motoboy' | 'nacional') =>
+  const precoEntrega = (valor: number, m: 'programada' | 'motoboy') =>
     cupomAtivo?.tipo === 'frete' ? 0 : freteComBeneficio(valor, m, subtotalBeneficio);
-  const freteValor = precoEntrega(frete.valor, modalidadeEntrega);
+  const freteValor = precoEntrega(frete.valor, usaProgramada ? 'programada' : 'motoboy');
   const descontoFrete = cupomAtivo?.tipo === 'frete' ? 0 : frete.valor - freteValor;
   const faltaParaBeneficio = FRETE_BENEFICIO_A_PARTIR - subtotalBeneficio;
   const totalSemPontos = Math.max(0, subtotal - descontoCupom + freteValor);
@@ -371,9 +367,8 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     // A loja vê nas observações que o pedido vai na coleta da Pex, e qual.
     // Recalcula na hora do envio: a tela pode ter aberto antes das 12h.
     const pex = usaProgramada ? calcularEntregaProgramada(cep) : null;
-    const obsEntrega = pex?.observacao ?? (usaNacional ? nacional.observacao : '');
-    const obsPedido = obsEntrega
-      ? [obsEntrega, observacoes.trim()].filter(Boolean).join(' | ')
+    const obsPedido = pex
+      ? [pex.observacao, observacoes.trim()].filter(Boolean).join(' | ')
       : observacoes;
 
     const dadosPedido: Pedido = {
@@ -384,7 +379,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
       bairro: bairro || undefined,
       cidade: cidade || undefined,
       complemento: complemento || undefined,
-      pagamento, entrega: usaProgramada ? 'programada' : usaNacional ? 'nacional' : 'delivery',
+      pagamento, entrega: usaProgramada ? 'programada' : 'delivery',
       observacoes: obsPedido || undefined,
       total, status: 'pendente', itens: itensCobrados,
     };
@@ -629,14 +624,6 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                     </span>
                     <span className={styles.freteValor}>{fmt(freteValor)}</span>
                   </div>
-                ) : nacional ? (
-                  <div className={styles.freteBox}>
-                    <span className={styles.freteLabel}>
-                      {nacional.label}
-                      <small className={styles.fretePrazo}>{nacional.prazo}</small>
-                    </span>
-                    <span className={styles.freteValor}>{fmt(freteValor)}</span>
-                  </div>
                 ) : frete.label && (
                   <div className={`${styles.freteBox} ${frete.valor === 0 ? styles.freteCombinar : ''}`}>
                     <span className={styles.freteLabel}>{frete.label}</span>
@@ -645,7 +632,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                     )}
                   </div>
                 )}
-                {frete.valor > 0 && !usaNacional && cupomAtivo?.tipo !== 'frete' && faltaParaBeneficio > 0 && (
+                {frete.valor > 0 && cupomAtivo?.tipo !== 'frete' && faltaParaBeneficio > 0 && (
                   <p className={styles.freteDica}>
                     Faltam <strong>{fmt(faltaParaBeneficio)}</strong> para a Entrega Programada sair grátis
                     {temMotoboy ? ' e o motoboy pela metade' : ''}.

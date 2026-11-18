@@ -39,29 +39,7 @@ export function calcularFrete(cep: string, bairro = ''): FreteResult {
     return { valor: 30, label: 'Motoboy · Região próxima' };
   }
   // Outras regiões — a combinar
-  return { valor: 0, label: 'Frete a combinar · Consulte-nos' };
-}
-
-// ── Envio nacional ─────────────────────────────────────────────────────────
-// Fora da Pex e do motoboy, o pedido vai pelo correio/transportadora com
-// frete fixo: o cliente sabe o custo na hora e a loja banca a diferença
-// quando o envio sai mais caro. Antes era "a combinar" e a venda travava.
-export const FRETE_NACIONAL = 20;
-
-export interface EnvioNacional extends FreteResult {
-  prazo: string;
-  observacao: string;
-}
-
-/** null = CEP incompleto. Vale para qualquer CEP; o checkout só usa fora da Pex e do motoboy. */
-export function calcularEnvioNacional(cep: string): EnvioNacional | null {
-  if (cepNumero(cep) === null) return null;
-  return {
-    valor: FRETE_NACIONAL,
-    label: 'Envio para todo o Brasil · frete fixo',
-    prazo: 'Postagem em até 2 dias úteis · rastreio pelo WhatsApp',
-    observacao: 'ENVIO NACIONAL: postar e mandar o rastreio no WhatsApp',
-  };
+  return { valor: 0, label: 'Outras regiões · frete a combinar no WhatsApp' };
 }
 
 // ── Entrega Programada (Pex) ────────────────────────────────────────────────
@@ -161,9 +139,8 @@ const PEX_REGIOES: FaixaPex[] = [
 // de Uber, então a loja paga metade e não ele inteiro.
 export const FRETE_BENEFICIO_A_PARTIR = 200;
 
-export function freteComBeneficio(valor: number, modalidade: 'programada' | 'motoboy' | 'nacional', subtotal: number): number {
-  // O envio nacional é fixo: a loja já banca a diferença para regiões longe.
-  if (modalidade === 'nacional' || subtotal < FRETE_BENEFICIO_A_PARTIR) return valor;
+export function freteComBeneficio(valor: number, modalidade: 'programada' | 'motoboy', subtotal: number): number {
+  if (subtotal < FRETE_BENEFICIO_A_PARTIR) return valor;
   return modalidade === 'programada' ? 0 : Math.round((valor / 2) * 100) / 100;
 }
 

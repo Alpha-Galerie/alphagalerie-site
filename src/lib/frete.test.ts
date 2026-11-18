@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calcularEntregaProgramada, calcularEnvioNacional, calcularFrete, FRETE_NACIONAL, freteComBeneficio } from './frete';
+import { calcularEntregaProgramada, calcularFrete, freteComBeneficio } from './frete';
 
 describe('calcularFrete', () => {
   it('returns zero and empty label for empty CEP', () => {
@@ -201,25 +201,6 @@ describe('Pex além da região do motoboy (tabela completa)', () => {
     // Coleta sex. 25/09 → pula sábado e domingo → seg. 28 (D+1) → ter. 29 (D+2).
     expect(r.prazo).toBe('Chega terça-feira (29/09)');
     expect(calcularEntregaProgramada('13183-500', sextaManha)!.regiao).toBe('Hortolândia');
-  });
-});
-
-describe('calcularEnvioNacional', () => {
-  it('CEP incompleto não calcula', () => {
-    expect(calcularEnvioNacional('')).toBeNull();
-    expect(calcularEnvioNacional('8001')).toBeNull();
-  });
-
-  it('qualquer CEP do Brasil sai pelo frete fixo', () => {
-    for (const cep of ['80010-010', '20040-002', '69005-000']) {
-      const r = calcularEnvioNacional(cep);
-      expect(r?.valor).toBe(FRETE_NACIONAL);
-      expect(r?.label).toMatch(/todo o Brasil/);
-    }
-  });
-
-  it('o frete fixo não muda acima de R$ 200', () => {
-    expect(freteComBeneficio(FRETE_NACIONAL, 'nacional', 500)).toBe(FRETE_NACIONAL);
   });
 });
 
