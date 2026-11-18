@@ -138,3 +138,121 @@
     font-size: 20px;
   }
 }
+
+.contagem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+
+.contagemRotulo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-right: 4px;
+}
+
+.contagemBloco {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  min-width: 46px;
+  padding: 6px 7px;
+  background: #1a1710;
+  border: 1px solid var(--gold-soft);
+}
+
+.contagemBloco strong {
+  font-family: 'Inter', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--gold);
+}
+
+.contagemBloco small {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.ofertas {
+  max-width: var(--maxw);
+  margin: 36px auto 0;
+}
+
+.ofertasHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px 20px;
+  margin-bottom: 18px;
+}
+
+.ofertasTitulo {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text);
+  margin: 0;
+}
+
+.ofertasTitulo span {
+  color: #e8574a;
+}
+
+.ofertasSub {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: rgba(244, 244, 244, 0.7);
+  margin: 0;
+}
+
+/* Celular: carrossel de lado, para a campanha não virar uma lista enorme. */
+.ofertasGrid {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  margin: 0 -16px;
+  padding: 0 16px 4px;
+}
+
+.ofertasGrid::-webkit-scrollbar {
+  display: none;
+}
+
+.ofertaItem {
+  flex: 0 0 68%;
+  max-width: 260px;
+  scroll-snap-align: start;
+}
+
+@media (min-width: 761px) {
+  .ofertasGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ofertaItem {
+    max-width: none;
+  }
+}
+
+@media (max-width: 400px) {
+  .contagemRotulo {
+    flex-basis: 100%;
+  }
+}
