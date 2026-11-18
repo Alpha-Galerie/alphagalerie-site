@@ -13,6 +13,8 @@ import DestaquesSection from '../components/DestaquesSection';
 import KitsSection from '../components/KitsSection';
 import ClubeSection from '../components/ClubeSection';
 import BlackNovemberSection from '../components/BlackNovemberSection';
+import MontaKit from '../components/MontaKit';
+import MontaKitBotao from '../components/MontaKitBotao';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
@@ -154,6 +156,8 @@ export default function Home() {
       <ProductModal produtoId={produtoId} onClose={closeProductModal} />
 
       <FloatingWhatsApp />
+      <MontaKitBotao flutuante />
+      <MontaKit />
       <AddedToCartToast onOpenCart={() => setCartOpen(true)} />
 
       {popupOpen && (

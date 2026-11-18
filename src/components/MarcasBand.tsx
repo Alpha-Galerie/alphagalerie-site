@@ -1,20 +1,5 @@
+import { MARCAS } from '../lib/marcas';
 import styles from './MarcasBand.module.css';
-
-// Basta soltar o arquivo do logo em src/assets/marcas/ que ele entra aqui sozinho.
-// Use PNG com fundo transparente — a faixa é escura, logo com fundo chapado fica feio.
-const ARQUIVOS = import.meta.glob('../assets/marcas/*.{png,webp,svg}', {
-  eager: true,
-  import: 'default',
-}) as Record<string, string>;
-
-function nomeDaMarca(caminho: string): string {
-  const arquivo = caminho.split('/').pop() ?? '';
-  return arquivo.replace(/\.\w+$/, '').replace(/[-_]+/g, ' ').trim();
-}
-
-const MARCAS = Object.entries(ARQUIVOS)
-  .map(([caminho, src]) => ({ nome: nomeDaMarca(caminho), src }))
-  .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
 
 export default function MarcasBand() {
   if (MARCAS.length === 0) return null;
@@ -30,14 +15,15 @@ export default function MarcasBand() {
 
       <div className={styles.assinatura}>
         {MARCAS.map((marca) => (
-          <img
-            key={marca.nome}
-            className={styles.logo}
-            src={marca.src}
-            alt={marca.nome}
-            loading="lazy"
-            decoding="async"
-          />
+          <a key={marca.nome} href={marca.href} className={styles.link} aria-label={`Ver produtos ${marca.nome}`}>
+            <img
+              className={styles.logo}
+              src={marca.src}
+              alt={marca.nome}
+              loading="lazy"
+              decoding="async"
+            />
+          </a>
         ))}
       </div>
     </section>
