@@ -5,6 +5,7 @@ import { formatCurrency } from '../lib/format';
 import { getPrecoInfo } from '../lib/preco';
 import { buildProductPath } from '../lib/productPath';
 import { KITS_SUBCATEGORIA, itensDoKit, temFotoDeCenario } from '../lib/kits';
+import { ETIQUETA_RELAMPAGO } from '../lib/campanha';
 import AviseKit from './AviseKit';
 import styles from './ProductCard.module.css';
 
@@ -48,8 +49,10 @@ const ProductCard: FC<ProductCardProps> = ({
   // Kit mostra um preço só (o do Pix): a diferença do cartão aparece no
   // checkout, quando o cliente escolhe a forma de pagamento.
   const precoUnico = produto.subcategoria === KITS_SUBCATEGORIA;
-  // Kits saem em lotes pequenos: estoque baixo aparece no card.
-  const ultimas = precoUnico && !esgotado && produto.estoque !== null && produto.estoque <= 3;
+  // Kits saem em lotes pequenos e as ofertas relâmpago não têm reposição:
+  // nos dois casos o estoque baixo aparece no card.
+  const pecaContada = precoUnico || produto.etiqueta === ETIQUETA_RELAMPAGO;
+  const ultimas = pecaContada && !esgotado && produto.estoque !== null && produto.estoque <= 3;
 
   const handleCta = () => {
     if (esgotado) return;

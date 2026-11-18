@@ -1,4 +1,8 @@
 import { useClubeRegras } from '../hooks/useClube';
+import { useOfertasRelampago } from '../hooks/useOfertasRelampago';
+import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
+import ProductCard from './ProductCard';
+import Contagem from './Contagem';
 import { percentualDeVolta } from '../lib/clube';
 import { CAMPANHA, campanhaNoAr } from '../lib/campanha';
 import { FRETE_BENEFICIO_A_PARTIR, PEX_CORTE_TEXTO } from '../lib/frete';
@@ -8,7 +12,10 @@ import styles from './BlackNovemberSection.module.css';
 // Alpha, em vez de "tudo mais barato". Some sozinha depois do fim.
 export default function BlackNovemberSection() {
   const clube = useClubeRegras();
-  if (!campanhaNoAr()) return null;
+  const noAr = campanhaNoAr();
+  const { data: ofertas = [] } = useOfertasRelampago(noAr);
+  const { adicionar } = useCarrinhoActions();
+  if (!noAr) return null;
 
   const volta = clube?.ativo ? percentualDeVolta(clube).toLocaleString('pt-BR') : null;
 
@@ -26,11 +33,16 @@ export default function BlackNovemberSection() {
           <h2 className={styles.title} id="black-titulo">
             BLACK <span>NOVEMBER</span> ALPHA
           </h2>
+          <Contagem />
           <p className={styles.sub}>
             Mesmo produto, mais vantagem: cashback, frete fixo e entrega no mesmo dia.
           </p>
           <div className={styles.ctas}>
-            <a href="#kits" className={styles.cta}>Ver os kits</a>
+            {ofertas.length > 0 ? (
+              <a href="#ofertas-relampago" className={styles.cta}>Ver as ofertas</a>
+            ) : (
+              <a href="#kits" className={styles.cta}>Ver os kits</a>
+            )}
             {volta && (
               <a href="#clube" className={styles.ctaGhost}>Entrar no Alpha Club</a>
             )}
@@ -46,6 +58,25 @@ export default function BlackNovemberSection() {
           ))}
         </ul>
       </div>
+
+      {/* Peças com etiqueta "Esgotando": poucas unidades, não voltam. */}
+      {ofertas.length > 0 && (
+        <div className={styles.ofertas} id="ofertas-relampago">
+          <div className={styles.ofertasHead}>
+            <h3 className={styles.ofertasTitulo}>
+              Ofertas relâmpago · <span>esgotando</span>
+            </h3>
+            <p className={styles.ofertasSub}>Últimas peças, sem reposição. Acabou, saiu do site.</p>
+          </div>
+          <div className={styles.ofertasGrid}>
+            {ofertas.map((p) => (
+              <div key={p.id} className={styles.ofertaItem}>
+              <ProductCard key={p.id} produto={p} onAddToCart={adicionar} onOpenVariacoes={adicionar} hideDestaqueBadge />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
