@@ -12,6 +12,7 @@ import ProductGrid from '../components/ProductGrid';
 import DestaquesSection from '../components/DestaquesSection';
 import KitsSection from '../components/KitsSection';
 import ClubeSection from '../components/ClubeSection';
+import BlackNovemberSection from '../components/BlackNovemberSection';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
@@ -98,6 +99,8 @@ export default function Home() {
       <Header onOpenCart={() => setCartOpen(true)} />
 
       <HeroSection />
+
+      <BlackNovemberSection />
 
       <ClubeSection />
 

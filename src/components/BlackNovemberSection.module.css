@@ -1,0 +1,140 @@
+.section {
+  position: relative;
+  padding: 40px 24px;
+  margin-bottom: 48px;
+  background:
+    radial-gradient(ellipse at 85% 0%, rgba(201, 169, 97, 0.22) 0%, transparent 55%),
+    linear-gradient(180deg, #050505 0%, #0d0b07 100%);
+  border-top: 1px solid var(--gold-soft);
+  border-bottom: 1px solid var(--gold-soft);
+  overflow: hidden;
+}
+
+.inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: center;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #0a0a0a;
+  background: var(--gold);
+  padding: 5px 10px;
+  margin: 0 0 14px;
+}
+
+.title {
+  font-family: 'Inter', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5.5vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+.title span {
+  color: var(--gold);
+}
+
+.sub {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  color: rgba(244, 244, 244, 0.75);
+  margin: 0 0 22px;
+  max-width: 46ch;
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.cta,
+.ctaGhost {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 22px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--gold);
+  transition: background 0.2s, color 0.2s;
+}
+
+.cta {
+  background: var(--gold);
+  color: #0a0a0a;
+}
+
+.cta:hover {
+  background: #d9bb75;
+}
+
+.ctaGhost {
+  color: var(--gold);
+}
+
+.ctaGhost:hover {
+  background: rgba(201, 169, 97, 0.12);
+}
+
+.beneficios {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.beneficios li {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 14px 18px;
+  background: rgba(22, 22, 22, 0.85);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+}
+
+.beneficios strong {
+  flex: 0 0 auto;
+  min-width: 4.5ch;
+  font-family: 'Inter', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.beneficios span {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+}
+
+@media (max-width: 760px) {
+  .section {
+    padding: 32px 16px;
+  }
+
+  .inner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .beneficios strong {
+    font-size: 20px;
+  }
+}
