@@ -6,6 +6,7 @@ import { useCarrinhoActions } from '../hooks/useCarrinhoActions';
 import type { Produto, Variacao } from '../types';
 import ProductCard from './ProductCard';
 import VariacoesModal from './VariacoesModal';
+import MontaKitBotao from './MontaKitBotao';
 import styles from './KitsSection.module.css';
 
 /**
@@ -59,6 +60,9 @@ export default function KitsSection() {
             <br />
             <Link to="/kit" className={styles.verTodos}>Ver todos os kits →</Link>
           </p>
+          <div className={styles.assistente}>
+            <MontaKitBotao texto="Não sabe qual? Monte seu kit" />
+          </div>
         </div>
 
         {kitsDiaADia.length > 0 && (

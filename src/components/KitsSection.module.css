@@ -120,3 +120,11 @@
     padding: 0 16px;
   }
 }
+
+.head {
+  flex-wrap: wrap;
+}
+
+.assistente {
+  flex-basis: 100%;
+}

@@ -21,6 +21,8 @@ import VariacoesModal from '../components/VariacoesModal';
 import CartDrawer from '../components/CartDrawer';
 import AddedToCartToast from '../components/AddedToCartToast';
 import FloatingWhatsApp from '../components/FloatingWhatsApp';
+import MontaKit from '../components/MontaKit';
+import MontaKitBotao from '../components/MontaKitBotao';
 import Footer from '../components/Footer';
 import styles from './KitLanding.module.css';
 
@@ -312,6 +314,8 @@ export default function KitLanding() {
       )}
 
       <FloatingWhatsApp />
+      <MontaKitBotao flutuante />
+      <MontaKit />
       <AddedToCartToast onOpenCart={() => setCartOpen(true)} />
     </>
   );

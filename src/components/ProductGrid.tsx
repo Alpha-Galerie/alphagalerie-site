@@ -11,6 +11,8 @@ import { EVENTO_BUSCAR } from '../lib/busca';
 import type { Produto, Variacao } from '../types';
 import ProductCard from './ProductCard';
 import VariacoesModal from './VariacoesModal';
+import MarcaCabecalho from './MarcaCabecalho';
+import { marcaDaSubcategoria } from '../lib/marcas';
 
 interface ProductGridProps {
   categoryId: number | null;
@@ -270,6 +272,12 @@ export default function ProductGrid({
           </button>
         ))}
       </div>
+
+      {/* Vitrine de marca (ex.: Puff Life): logo e frase no topo. */}
+      {(() => {
+        const marca = marcaDaSubcategoria(activeSubcat);
+        return marca ? <MarcaCabecalho marca={marca} /> : null;
+      })()}
 
       {/* Filtro de subcategorias — só dentro de uma categoria, ordenado pelo
           que tem estoque, com a cauda recolhida atrás de "+ N mais". Em

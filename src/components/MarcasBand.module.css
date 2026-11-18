@@ -63,3 +63,9 @@
   .assinatura { gap: 34px; padding: 0 16px; }
   .logo { height: 44px; max-width: 145px; }
 }
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
