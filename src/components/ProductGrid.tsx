@@ -19,6 +19,9 @@ interface ProductGridProps {
   onCategoryChange: (id: number | null) => void;
   initialSearch?: string;
   initialSubcat?: string | null;
+  /** Avisa quando o cliente troca de categoria, subcategoria ou busca, para
+   *  a página levar a escolha ao endereço (link compartilhável). */
+  onFiltroChange?: (categoryId: number | null, subcategoria: string | null, busca?: string) => void;
 }
 
 const PAGE_SIZE = 24;
@@ -66,6 +69,7 @@ export default function ProductGrid({
   onCategoryChange,
   initialSearch = '',
   initialSubcat = null,
+  onFiltroChange,
 }: ProductGridProps) {
   const [searchInput, setSearchInput] = useState(initialSearch);
   const [search, setSearch] = useState(initialSearch);
@@ -115,6 +119,7 @@ export default function ProductGrid({
       if (debounceRef.current) clearTimeout(debounceRef.current);
       setActiveSubcat(null);
       setActiveMarca(null);
+      onFiltroChange?.(null, null, termo);
       if (categoryId !== null) {
         buscaPendenteRef.current = termo;
         onCategoryChange(null);
@@ -125,7 +130,7 @@ export default function ProductGrid({
     }
     window.addEventListener(EVENTO_BUSCAR, aoBuscar);
     return () => window.removeEventListener(EVENTO_BUSCAR, aoBuscar);
-  }, [categoryId, onCategoryChange]);
+  }, [categoryId, onCategoryChange, onFiltroChange]);
   useEffect(() => {
     // Trocar de subcategoria muda o conjunto de marcas. Manter a marca
     // anterior deixaria o cliente numa lista vazia sem entender por quê.
@@ -242,7 +247,7 @@ export default function ProductGrid({
       >
         <button
           type="button"
-          onClick={() => { onCategoryChange(null); setActiveSubcat(null); }}
+          onClick={() => { onCategoryChange(null); setActiveSubcat(null); onFiltroChange?.(null, null); }}
           style={{
             ...btnBase,
             border: `1px solid ${categoryId === null ? '#c9a961' : '#222'}`,
@@ -259,6 +264,7 @@ export default function ProductGrid({
             onClick={() => {
               onCategoryChange(cat.id);
               setActiveSubcat(null);
+              onFiltroChange?.(cat.id, null);
               registrarInteresse({ tipo: 'categoria', termo: cat.nome });
             }}
             style={{
@@ -291,7 +297,7 @@ export default function ProductGrid({
         >
           <button
             type="button"
-            onClick={() => setActiveSubcat(null)}
+            onClick={() => { setActiveSubcat(null); onFiltroChange?.(categoryId, null); }}
             style={{
               ...btnBase,
               padding: '8px 16px',
@@ -311,6 +317,7 @@ export default function ProductGrid({
                 type="button"
                 onClick={() => {
                   setActiveSubcat(s.nome);
+                  onFiltroChange?.(categoryId, s.nome);
                   // "Acessorios" sozinho não diz se é de arguile ou de charutaria.
                   const cat = categorias.find((c) => c.id === categoryId);
                   registrarInteresse({ tipo: 'subcategoria', termo: cat ? `${s.nome} (${cat.nome})` : s.nome });

@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { useVisita } from '../hooks/useVisita';
 import { useOfertaSaida } from '../hooks/useOfertaSaida';
 import { useAllCategories } from '../hooks/useAllCategories';
+import { paramsDaVitrine } from '../lib/busca';
 import RecuperacaoPopup from '../components/RecuperacaoPopup';
 import AnnouncementBar from '../components/AnnouncementBar';
 import HeroSection from '../components/HeroSection';
@@ -87,6 +88,16 @@ export default function Home() {
   const produtoIdParam = searchParams.get('p');
   const produtoId = produtoIdParam ? Number.parseInt(produtoIdParam, 10) : null;
 
+  // A escolha da vitrine vai para o endereço, sem criar entrada no
+  // histórico: quem copia o link do navegador manda a categoria certa.
+  function levarFiltroAoEndereco(id: number | null, subcategoria: string | null, busca?: string) {
+    const cat = allCategorias.find((c) => c.id === id);
+    setSearchParams(
+      (prev) => paramsDaVitrine(prev, { categoriaSlug: cat?.slug ?? null, subcategoria, busca }),
+      { replace: true },
+    );
+  }
+
   function closeProductModal() {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -130,6 +141,7 @@ export default function Home() {
           onCategoryChange={setCategoryId}
           initialSearch={initialSearch}
           initialSubcat={initialSubcat}
+          onFiltroChange={levarFiltroAoEndereco}
         />
       </main>
       <HempSection />
