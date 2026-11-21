@@ -255,3 +255,39 @@ describe('busca vinda do topo da home', () => {
     expect(screen.getByLabelText(/Buscar produtos/i)).toHaveValue('seda');
   });
 });
+
+// O dono manda o link da categoria pelo WhatsApp. A vitrine avisa cada troca
+// para a página levar a escolha ao endereço.
+describe('link compartilhável da vitrine', () => {
+  it('avisa a categoria escolhida, sem subcategoria', () => {
+    const onFiltroChange = vi.fn();
+    render(<ProductGrid categoryId={null} onCategoryChange={vi.fn()} onFiltroChange={onFiltroChange} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Arguile' }));
+    expect(onFiltroChange).toHaveBeenLastCalledWith(3, null);
+  });
+
+  it('avisa a subcategoria escolhida e a volta para "Todas"', () => {
+    subcatsDoHook = SUBCATS_HEADSHOP;
+    const onFiltroChange = vi.fn();
+    render(<ProductGrid categoryId={1} onCategoryChange={vi.fn()} onFiltroChange={onFiltroChange} />);
+    const barra = screen.getByRole('group', { name: /subcategoria/i });
+    fireEvent.click(within(barra).getByRole('button', { name: /^Tabaco/ }));
+    expect(onFiltroChange).toHaveBeenLastCalledWith(1, 'Tabaco');
+    fireEvent.click(within(barra).getByRole('button', { name: 'Todas' }));
+    expect(onFiltroChange).toHaveBeenLastCalledWith(1, null);
+  });
+
+  it('"Todos" limpa categoria e subcategoria', () => {
+    const onFiltroChange = vi.fn();
+    render(<ProductGrid categoryId={3} onCategoryChange={vi.fn()} onFiltroChange={onFiltroChange} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Todos' }));
+    expect(onFiltroChange).toHaveBeenLastCalledWith(null, null);
+  });
+
+  it('busca vinda do topo leva o termo', () => {
+    const onFiltroChange = vi.fn();
+    render(<ProductGrid categoryId={3} onCategoryChange={vi.fn()} onFiltroChange={onFiltroChange} />);
+    act(() => buscarNaVitrine('ziggy'));
+    expect(onFiltroChange).toHaveBeenLastCalledWith(null, null, 'ziggy');
+  });
+});
