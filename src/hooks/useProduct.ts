@@ -5,7 +5,7 @@ import type { Produto, Variacao } from '../types';
 async function fetchProduto(id: number): Promise<Produto> {
   const { data, error } = await supabase
     .from('produtos')
-    .select('*, categorias!produtos_categoria_id_fkey(*), variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,criado_em)')
+    .select('*, categorias!produtos_categoria_id_fkey(*), variacoes(id,produto_id,nome,preco,estoque,ordem,ativo,imagem_url,criado_em)')
     .eq('id', id)
     .single();
 

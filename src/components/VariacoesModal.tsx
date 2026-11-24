@@ -49,6 +49,7 @@ export default function VariacoesModal({ produto, onClose, onSelect }: Variacoes
   if (!produto) return null;
 
   const variacoes = produto._variacoes ?? [];
+  const comFoto = variacoes.some((v) => v.imagem_url);
 
   return (
     <>
@@ -56,7 +57,9 @@ export default function VariacoesModal({ produto, onClose, onSelect }: Variacoes
       <div
         style={{
           position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
-          zIndex: 300, animation: 'fadeIn 0.2s ease',
+          // Acima do ProductModal (350/351): aberto por cima dele, a lista
+          // ficava atrás e o toque no sabor fechava tudo sem adicionar.
+          zIndex: 360, animation: 'fadeIn 0.2s ease',
         }}
         onPointerDown={onClose}
         aria-hidden="true"
@@ -78,7 +81,7 @@ export default function VariacoesModal({ produto, onClose, onSelect }: Variacoes
           border: '1px solid rgba(201,169,97,0.2)',
           borderRadius: 4,
           display: 'flex', flexDirection: 'column',
-          zIndex: 301,
+          zIndex: 361,
           overflow: 'hidden',
         }}
       >
@@ -134,6 +137,17 @@ export default function VariacoesModal({ produto, onClose, onSelect }: Variacoes
                         gap: '0.75rem',
                       }}
                     >
+                      {comFoto && (
+                        <img
+                          src={v.imagem_url || produto.imagem_url || undefined}
+                          alt=""
+                          width={48}
+                          height={48}
+                          loading="lazy"
+                          decoding="async"
+                          style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 2, flex: 'none', background: '#fff' }}
+                        />
+                      )}
                       <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', color: '#f4f4f4', textAlign: 'left', flex: 1 }}>
                         {v.nome}
                       </span>

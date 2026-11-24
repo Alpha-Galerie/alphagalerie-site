@@ -190,7 +190,7 @@ export default function ProductPage() {
       marca: produtoSelecionado.marca,
       categoria: produtoSelecionado.categorias?.nome ?? '',
       preco: getPrecoInfo(produtoSelecionado, variacao).precoFinal,
-      imagem: produtoSelecionado.imagem_url,
+      imagem: variacao.imagem_url || produtoSelecionado.imagem_url,
       estoque: variacao.estoque,
       qtd: 1,
     });

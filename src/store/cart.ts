@@ -63,7 +63,7 @@ export const useCartStore = create<CartState>()(
             promocional: precoInfo.emPromocao,
             preco: precoInfo.precoVenda,
             precoPix: precoInfo.precoPix ?? undefined,
-            imagem: produto.imagem_url,
+            imagem: variacao?.imagem_url || produto.imagem_url,
             estoque: variacao !== undefined ? variacao.estoque : produto.estoque,
             qtd: 1,
           };

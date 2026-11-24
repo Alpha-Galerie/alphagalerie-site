@@ -37,7 +37,7 @@ export function useCarrinhoActions() {
       marca: produto.marca,
       categoria: produto.categorias?.nome ?? '',
       preco: getPrecoInfo(produto, variacao).precoFinal,
-      imagem: produto.imagem_url,
+      imagem: variacao.imagem_url || produto.imagem_url,
       estoque: variacao.estoque,
       qtd: 1,
     });
