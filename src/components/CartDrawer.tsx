@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useCartStore } from '../store/cart';
 import { formatCurrency } from '../lib/format';
+import { precoNoPagamento } from '../lib/preco';
 import { formatarPontos, pontosGanhos, valorDosPontos } from '../lib/clube';
 import { useClubeRegras } from '../hooks/useClube';
 import Sugestoes from './Sugestoes';
@@ -29,7 +30,10 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
   const totalPix = selectTotalPix();
   const temPrecoPix = totalPix < total;
   const clube = useClubeRegras();
-  const pontos = clube?.ativo ? pontosGanhos(totalPix, clube) : 0;
+  const pixEmPromocao = items
+    .filter((i) => i.promocional)
+    .reduce((acc, i) => acc + precoNoPagamento(i, 'pix') * i.qtd, 0);
+  const pontos = clube?.ativo ? pontosGanhos(totalPix, clube, pixEmPromocao) : 0;
 
   useEffect(() => {
     if (!isOpen) return;

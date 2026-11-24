@@ -198,7 +198,10 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
   const total = Math.max(0, totalSemPontos - pontosUsados.desconto);
   const primeiraCompra = clubeNoAr && clubeSaldo !== null && !clubeSaldo.participante;
   const bonusBoasVindas = primeiraCompra && clube ? clube.bonusBoasVindas : 0;
-  const pontosGanho = clubeNoAr && clube ? pontosGanhos(total - freteValor, clube) : 0;
+  const valorEmPromocao = itensCobrados
+    .filter((i) => i.promocional)
+    .reduce((acc, i) => acc + i.preco * i.qtd, 0);
+  const pontosGanho = clubeNoAr && clube ? pontosGanhos(total - freteValor, clube, valorEmPromocao) : 0;
   const displayTotal = submittedTotal ?? total;
 
   useEffect(() => {
@@ -413,7 +416,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
     setTxid(`AG${Date.now()}`);
     setSubmittedTotal(totalFinal);
     setPontosGanhoFinal(
-      clubeNoAr && clube ? pontosGanhos(totalFinal - freteValor, clube) + bonusBoasVindas : 0
+      clubeNoAr && clube ? pontosGanhos(totalFinal - freteValor, clube, valorEmPromocao) + bonusBoasVindas : 0
     );
 
     if (pagamento === 'pix') {
