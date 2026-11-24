@@ -53,6 +53,16 @@ describe('Alpha Club', () => {
     expect(pontosGanhos(-5, REGRAS)).toBe(0);
   });
 
+  it('item em promoção pontua com a taxa de promoção', () => {
+    const regras = { ...REGRAS, pontosPorReal: 1.5, pontosPorRealPromocao: 0.2 };
+    // R$ 100 no total, R$ 70 em promoção: 30 × 1,5 + 70 × 0,2 = 59
+    expect(pontosGanhos(100, regras, 70)).toBe(59);
+    // promoção nunca passa do total
+    expect(pontosGanhos(50, regras, 70)).toBe(10);
+    // banco antigo, sem a taxa: tudo na taxa normal
+    expect(pontosGanhos(100, { ...REGRAS, pontosPorReal: 1.5 }, 70)).toBe(150);
+  });
+
   it('no checkout: até 10% dos produtos fora de promoção, limitado ao saldo', () => {
     // Exemplo do regulamento: saldo de R$ 10, carrinho de R$ 120 → R$ 10.
     expect(pontosParaUsar(100, 120, REGRAS)).toEqual({ pontos: 100, desconto: 10 });

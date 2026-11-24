@@ -12,6 +12,11 @@ export interface ClubeRegras {
   nome: string;
   /** Pontos por R$ 1 pago em produtos. */
   pontosPorReal: number;
+  /**
+   * Pontos por R$ 1 pago em produto em promoção: taxa simbólica, só para puxar
+   * a recompra. Ausente (banco antigo) = mesma taxa dos outros produtos.
+   */
+  pontosPorRealPromocao?: number;
   /** Quanto vale 1 ponto em reais (0,10 → 100 pontos = R$ 10). */
   valorPonto: number;
   validadeDias: number;
@@ -64,10 +69,12 @@ export function whatsappValido(valor: string): boolean {
 }
 
 /** Pontos que um pedido rende. `valorProdutos` = total pago − frete. */
-export function pontosGanhos(valorProdutos: number, regras: ClubeRegras): number {
+export function pontosGanhos(valorProdutos: number, regras: ClubeRegras, valorEmPromocao = 0): number {
   if (valorProdutos <= 0) return 0;
+  const promo = Math.min(Math.max(valorEmPromocao, 0), valorProdutos);
+  const taxaPromo = regras.pontosPorRealPromocao ?? regras.pontosPorReal;
   // Soma de float (19,9 × 3) pode dar 59,6999…; o centavo resolve antes do floor.
-  return Math.floor(arredondar(valorProdutos * regras.pontosPorReal));
+  return Math.floor(arredondar((valorProdutos - promo) * regras.pontosPorReal + promo * taxaPromo));
 }
 
 export function valorDosPontos(pontos: number, regras: ClubeRegras): number {
@@ -161,6 +168,8 @@ function lerRegras(row: Record<string, unknown>): ClubeRegras {
     bonusBoasVindas: Number(row.bonus_boas_vindas) || 0,
     bonusAniversario: Number(row.bonus_aniversario) || 0,
     bonusIndicacao: Number(row.bonus_indicacao) || 0,
+    pontosPorRealPromocao:
+      row.pontos_por_real_promocao == null ? undefined : Number(row.pontos_por_real_promocao) || 0,
   };
 }
 
