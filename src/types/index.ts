@@ -15,6 +15,8 @@ export interface Variacao {
   estoque: number;
   ordem: number;
   ativo: boolean;
+  /** Foto da variação (o frasco do sabor); sem ela vale a do produto. */
+  imagem_url?: string | null;
 }
 
 export interface Produto {

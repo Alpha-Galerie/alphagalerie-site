@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { marcarQueJaComprou } from './useOfertaSaida';
 import type { Pedido, ItemCarrinho } from '../types';
+import { nomeDoItem } from '../lib/nomeDoItem';
 
 interface SubmitResult {
   success: boolean;
@@ -82,7 +83,7 @@ export function useCheckout() {
       // Prepare items array for RPC call (migration 20260508120000 required)
       const linhas = itens.map((item) => ({
         produto_id: item.id,
-        produto_nome: item.nome,
+        produto_nome: nomeDoItem(item),
         produto_codigo: item.codigo ?? null,
         quantidade: item.qtd,
         preco_unitario: item.preco,

@@ -13,6 +13,7 @@ import { precoNoPagamento } from '../../lib/preco';
 import styles from './CheckoutModal.module.css';
 import { supabase } from '../../lib/supabase';
 import { checkoutProvider } from '../../lib/checkout';
+import { nomeDoItem } from '../../lib/nomeDoItem';
 import { useClubeRegras, useClubeSaldo } from '../../hooks/useClube';
 import {
   aniversarioValido,
@@ -424,7 +425,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
         setCardProcessing(true);
         const pedido_id = String(result.pedido?.id ?? pedidoId ?? '');
         const checkoutItems = itensCobrados.map(i => ({
-            title: i.nome,
+            title: nomeDoItem(i),
             quantity: i.qtd,
             unit_price: i.preco,
           }));
@@ -725,7 +726,7 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
                   <p className={styles.summaryTitle}>Resumo do pedido</p>
                   {itensCobrados.map((item) => (
                     <div key={item.cartKey} className={styles.summaryLine}>
-                      <span>{item.nome}{item.qtd > 1 ? ` ×${item.qtd}` : ''}</span>
+                      <span>{nomeDoItem(item)}{item.qtd > 1 ? ` ×${item.qtd}` : ''}</span>
                       <strong>{fmt(item.preco * item.qtd)}</strong>
                     </div>
                   ))}
