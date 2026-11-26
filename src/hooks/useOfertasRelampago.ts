@@ -19,7 +19,7 @@ async function fetchOfertas(): Promise<Produto[]> {
     .gt('estoque', 0)
     .order('estoque', { ascending: true })
     .order('preco_pix', { ascending: true })
-    .limit(8);
+    .limit(24);
   if (error) throw new Error(error.message);
   return ((data ?? []) as unknown as Produto[]).map((p) => ({ ...p, _variacoes: [] }));
 }
