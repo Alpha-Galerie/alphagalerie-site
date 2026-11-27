@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useCartStore } from '../store/cart';
 import { formatCurrency } from '../lib/format';
-import { precoNoPagamento } from '../lib/preco';
+import { leve2Ativo, precoNoPagamento } from '../lib/preco';
 import { formatarPontos, pontosGanhos, valorDosPontos } from '../lib/clube';
 import { useClubeRegras } from '../hooks/useClube';
 import Sugestoes from './Sugestoes';
@@ -30,9 +30,13 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
   const totalPix = selectTotalPix();
   const temPrecoPix = totalPix < total;
   const clube = useClubeRegras();
+  // "Leve 2": com uma só unidade no carrinho, avisa quanto sai levando mais uma.
+  const itensLeve2 = items.filter((i) => i.precoPixLeve2 != null);
+  const faltaUmLeve2 = itensLeve2.reduce((acc, i) => acc + i.qtd, 0) === 1;
+  const precoLeve2 = itensLeve2[0]?.precoPixLeve2 ?? 0;
   const pixEmPromocao = items
     .filter((i) => i.promocional)
-    .reduce((acc, i) => acc + precoNoPagamento(i, 'pix') * i.qtd, 0);
+    .reduce((acc, i) => acc + precoNoPagamento(i, 'pix', leve2Ativo(items)) * i.qtd, 0);
   const pontos = clube?.ativo ? pontosGanhos(totalPix, clube, pixEmPromocao) : 0;
 
   useEffect(() => {
@@ -201,6 +205,11 @@ export default function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDraw
               <span className={styles.totalLabel}>{temPrecoPix ? 'No Pix' : 'Total'}</span>
               <span className={styles.totalValue}>{formatCurrency(temPrecoPix ? totalPix : total)}</span>
             </div>
+            {faltaUmLeve2 && (
+              <p className={styles.cashback}>
+                Leve mais 1 e pague {formatCurrency(precoLeve2)} cada no Pix.
+              </p>
+            )}
             {clube?.ativo && pontos > 0 && (
               <p className={styles.cashback}>
                 Esta compra rende <strong>{formatarPontos(pontos)}</strong> no {clube.nome}

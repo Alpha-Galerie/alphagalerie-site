@@ -25,6 +25,8 @@ export interface Produto {
   marca: string;
   preco: number;
   preco_pix: number | null;
+  /** Pix por unidade levando 2 ou mais (somando os produtos que têm este preço). */
+  preco_pix_leve2?: number | null;
   /** Preço promocional ("por"). Quando menor que `preco`, o produto entra em promoção. */
   preco_promocional: number | null;
   /** Selo livre exibido no card (ex.: "Últimas peças"). */
@@ -62,6 +64,8 @@ export interface ItemCarrinho {
    * dessa regra — aí vale `preco` nas duas formas de pagamento.
    */
   precoPix?: number;
+  /** Pix por unidade quando o carrinho tem 2+ unidades com este preço. */
+  precoPixLeve2?: number;
   imagem: string | null;
   estoque: number | null;
   qtd: number;
