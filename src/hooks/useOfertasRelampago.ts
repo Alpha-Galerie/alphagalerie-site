@@ -4,7 +4,7 @@ import { ETIQUETA_RELAMPAGO } from '../lib/campanha';
 import type { Produto } from '../types';
 
 const COLS =
-  'id,nome,marca,preco,preco_pix,preco_promocional,etiqueta,categoria_id,subcategoria,estoque,ativo,destaque,destaque_ordem,imagem_url,descricao,categorias!produtos_categoria_id_fkey(*)';
+  'id,nome,marca,preco,preco_pix,preco_pix_leve2,preco_promocional,etiqueta,categoria_id,subcategoria,estoque,ativo,destaque,destaque_ordem,imagem_url,descricao,categorias!produtos_categoria_id_fkey(*)';
 
 /**
  * Peças da vitrine relâmpago: etiqueta "Esgotando" na retaguarda e com

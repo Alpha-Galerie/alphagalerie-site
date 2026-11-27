@@ -68,10 +68,22 @@ export function getPrecoInfo(
  * cadastrado na retaguarda — e só ele, sem outro desconto por cima.
  */
 export function precoNoPagamento(
-  item: Pick<ItemCarrinho, 'preco' | 'precoPix'>,
-  pagamento: FormaPagamento
+  item: Pick<ItemCarrinho, 'preco' | 'precoPix' | 'precoPixLeve2'>,
+  pagamento: FormaPagamento,
+  leve2 = false
 ): number {
+  if (pagamento === 'pix' && leve2 && valido(item.precoPixLeve2) && item.precoPixLeve2 < item.preco) {
+    return item.precoPixLeve2;
+  }
   const pix = item.precoPix;
   if (pagamento === 'pix' && valido(pix) && pix < item.preco) return pix;
   return item.preco;
+}
+
+/**
+ * "Leve 2": com 2 ou mais unidades de produtos que têm preço Pix de leve 2
+ * (somando sabores e produtos diferentes), todas elas saem por esse preço.
+ */
+export function leve2Ativo(items: Pick<ItemCarrinho, 'precoPixLeve2' | 'qtd'>[]): boolean {
+  return items.reduce((acc, i) => acc + (valido(i.precoPixLeve2) ? i.qtd : 0), 0) >= 2;
 }

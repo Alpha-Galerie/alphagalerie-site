@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getPrecoInfo, precoNoPagamento } from './preco';
+import { getPrecoInfo, leve2Ativo, precoNoPagamento } from './preco';
 
 const base = { preco: 100, preco_pix: null, preco_promocional: null };
 
@@ -71,5 +71,28 @@ describe('precoNoPagamento', () => {
     expect(precoNoPagamento({ preco: 18 }, 'pix')).toBe(18);
     expect(precoNoPagamento({ preco: 18, precoPix: 18 }, 'pix')).toBe(18);
     expect(precoNoPagamento({ preco: 18, precoPix: 20 }, 'pix')).toBe(18);
+  });
+});
+
+describe('leve 2 no Pix', () => {
+  const juice = { preco: 70, precoPix: 50, precoPixLeve2: 40, qtd: 1 };
+  const salt = { preco: 70, precoPix: 50, precoPixLeve2: 40, qtd: 1 };
+  const coil = { preco: 70, precoPix: 50, qtd: 3 };
+
+  it('ativa com 2 unidades somando produtos diferentes', () => {
+    expect(leve2Ativo([juice])).toBe(false);
+    expect(leve2Ativo([juice, salt])).toBe(true);
+    expect(leve2Ativo([{ ...juice, qtd: 2 }])).toBe(true);
+  });
+
+  it('produto sem o preço de leve 2 não conta', () => {
+    expect(leve2Ativo([juice, coil])).toBe(false);
+  });
+
+  it('só vale no Pix', () => {
+    expect(precoNoPagamento(juice, 'pix', true)).toBe(40);
+    expect(precoNoPagamento(juice, 'pix', false)).toBe(50);
+    expect(precoNoPagamento(juice, 'cartao', true)).toBe(70);
+    expect(precoNoPagamento(coil, 'pix', true)).toBe(50);
   });
 });

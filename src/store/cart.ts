@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Produto, Variacao, ItemCarrinho } from '../types';
-import { getPrecoInfo, precoNoPagamento } from '../lib/preco';
+import { getPrecoInfo, leve2Ativo, precoNoPagamento } from '../lib/preco';
 
 function makeCartKey(prodId: number, variacaoId?: number): string {
   return variacaoId !== undefined ? `${prodId}::${variacaoId}` : `${prodId}`;
@@ -63,6 +63,10 @@ export const useCartStore = create<CartState>()(
             promocional: precoInfo.emPromocao,
             preco: precoInfo.precoVenda,
             precoPix: precoInfo.precoPix ?? undefined,
+            precoPixLeve2:
+              variacao?.preco == null && produto.preco_pix_leve2 != null && produto.preco_pix_leve2 > 0
+                ? Number(produto.preco_pix_leve2)
+                : undefined,
             imagem: variacao?.imagem_url || produto.imagem_url,
             estoque: variacao !== undefined ? variacao.estoque : produto.estoque,
             qtd: 1,
@@ -104,7 +108,9 @@ export const useCartStore = create<CartState>()(
       },
 
       selectTotalPix() {
-        return get().items.reduce((acc, i) => acc + precoNoPagamento(i, 'pix') * i.qtd, 0);
+        const items = get().items;
+        const leve2 = leve2Ativo(items);
+        return items.reduce((acc, i) => acc + precoNoPagamento(i, 'pix', leve2) * i.qtd, 0);
       },
     }),
     {

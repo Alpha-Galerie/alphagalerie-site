@@ -9,7 +9,7 @@ import type { Pedido } from '../../types';
 import PixPayment from './PixPayment';
 import CardPayment from './CardPayment';
 import { formatCurrency as fmt } from '../../lib/format';
-import { precoNoPagamento } from '../../lib/preco';
+import { leve2Ativo, precoNoPagamento } from '../../lib/preco';
 import styles from './CheckoutModal.module.css';
 import { supabase } from '../../lib/supabase';
 import { checkoutProvider } from '../../lib/checkout';
@@ -157,10 +157,11 @@ export default function CheckoutModal({ onClose }: CheckoutModalProps) {
 
   // Cartão paga o preço de venda (a taxa do Mercado Pago sai dele); Pix paga
   // o preço Pix de cada produto. Não há desconto de Pix por cima.
-  const itensCobrados = items.map((i) => ({ ...i, preco: precoNoPagamento(i, pagamento) }));
+  const leve2 = leve2Ativo(items);
+  const itensCobrados = items.map((i) => ({ ...i, preco: precoNoPagamento(i, pagamento, leve2) }));
   const subtotal = itensCobrados.reduce((acc, i) => acc + i.preco * i.qtd, 0);
   const subtotalCartao = items.reduce((acc, i) => acc + precoNoPagamento(i, 'cartao') * i.qtd, 0);
-  const subtotalPix = items.reduce((acc, i) => acc + precoNoPagamento(i, 'pix') * i.qtd, 0);
+  const subtotalPix = items.reduce((acc, i) => acc + precoNoPagamento(i, 'pix', leve2) * i.qtd, 0);
   const economiaPix = Math.max(0, subtotalCartao - subtotalPix);
   const descontoCupom = (() => {
     if (!cupomAtivo) return 0;
